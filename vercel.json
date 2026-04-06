@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "name": "backzo",
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/(.*\\.(jpg|jpeg|png|gif|svg|css|js|ico|json))",
+      "dest": "/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/Untitled-1.html"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

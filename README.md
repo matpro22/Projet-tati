@@ -227,28 +227,37 @@ Modifiez les paramètres dans l'admin :
 
 ## 🚀 Déploiement
 
-### Frontend (HTML)
+### 🌐 Vercel (Recommandé) ⭐
 
-Le fichier `Untitled-1.html` peut être hébergé sur :
+**Frontend uniquement** (5 minutes) :
+1. Allez sur [vercel.com](https://vercel.com)
+2. Glissez-déposez votre dossier
+3. Cliquez sur "Deploy"
+4. ✅ C'est en ligne !
+
+**Frontend + Backend** (10 minutes) :
+1. Créez un repo GitHub
+2. Importez sur Vercel
+3. Configurez les variables d'environnement
+4. Déployez !
+
+📚 **Guide complet** : [DEPLOIEMENT_VERCEL.md](DEPLOIEMENT_VERCEL.md)  
+⚡ **Guide rapide** : [VERCEL_RAPIDE.md](VERCEL_RAPIDE.md)
+
+### Autres options
+
+**Frontend (HTML)** :
 - **Netlify** (gratuit) : Glissez-déposez le fichier
-- **Vercel** (gratuit) : `vercel --prod`
 - **GitHub Pages** (gratuit) : Push dans un repo
 - **N'importe quel hébergeur web**
 
-### Backend (Node.js)
-
-Le serveur peut être déployé sur :
+**Backend (Node.js)** :
 
 **Heroku** :
 ```bash
 heroku create backzo-api
 heroku config:set STRIPE_SECRET_KEY=sk_live_...
 git push heroku main
-```
-
-**Vercel** :
-```bash
-vercel
 ```
 
 **Railway** :
@@ -262,7 +271,7 @@ railway up
 
 N'oubliez pas de :
 1. Utiliser les clés Stripe **live** (`sk_live_...` et `pk_live_...`)
-2. Configurer HTTPS
+2. Configurer HTTPS (automatique sur Vercel)
 3. Mettre à jour `API_URL` dans le HTML avec l'URL de production
 
 ## 🐛 Dépannage
