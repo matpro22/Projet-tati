@@ -1589,7 +1589,13 @@ window.addEventListener('load',()=>{
 // ============================================================
 // INIT
 // ============================================================
-function initPage() {
+async function initPage() {
+  // Charger les paramètres depuis le backend en premier
+  await loadSettingsFromBackend();
+  
+  // Appliquer les paramètres (même si chargés depuis localStorage)
+  applySettings();
+  
   applyFontSize(state.fontSize);
   updateCartBadge();
   renderProducts('all');

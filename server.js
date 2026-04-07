@@ -1,6 +1,9 @@
 // ============================================================
-// BACKZO BACKEND - Node.js + Express + Stripe
+// BACKZO BACKEND - Node.js + Express + Stripe + MongoDB
 // ============================================================
+
+// Charger les variables d'environnement
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
