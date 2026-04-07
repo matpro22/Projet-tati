@@ -1628,6 +1628,9 @@ async function checkBackendHealth() {
       console.log('  - Status:', data.status);
       console.log('  - Stripe:', data.stripe ? 'Configuré' : 'Non configuré');
       
+      // Charger les paramètres depuis le backend
+      await loadSettingsFromBackend();
+      
       // Charger les produits depuis le backend si disponible
       if(state.adminAuth) {
         await loadProductsFromBackend();
@@ -2611,26 +2614,94 @@ async function updateOrderStatusOnBackend(orderId, newStatus) {
     showToast('Erreur lors de la mise à jour', true);
   }
 }
-function saveSettings() {
+
+// ============================================================
+// FONCTIONS PARAMÈTRES
+// ============================================================
+
+// Charger les paramètres depuis le backend
+async function loadSettingsFromBackend() {
+  if(!USE_BACKEND) return;
+  
+  try {
+    const response = await fetch(`${API_URL}/settings`);
+    if (!response.ok) throw new Error('Erreur chargement paramètres');
+    
+    const settings = await response.json();
+    
+    // Mettre à jour le state avec les paramètres du serveur
+    state.settings = settings;
+    
+    // Appliquer les paramètres
+    applySettings();
+    
+    console.log('✓ Paramètres chargés depuis le backend');
+    
+    return settings;
+  } catch (error) {
+    console.warn('Paramètres backend non disponibles, utilisation des paramètres locaux');
+    return null;
+  }
+}
+
+// Sauvegarder les paramètres sur le backend
+async function saveSettingsToBackend(settings) {
+  if(!USE_BACKEND) {
+    // Mode local - sauvegarder dans localStorage
+    localStorage.setItem('bz-settings', JSON.stringify(settings));
+    showToast('✓ Paramètres enregistrés localement');
+    return true;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/settings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings)
+    });
+    
+    if (!response.ok) throw new Error('Erreur sauvegarde paramètres');
+    
+    const result = await response.json();
+    
+    showToast('✓ Paramètres enregistrés pour tous les utilisateurs !');
+    
+    // Mettre à jour le state local
+    state.settings = result.settings;
+    
+    return true;
+  } catch (error) {
+    console.error('Erreur sauvegarde paramètres:', error);
+    showToast('Erreur lors de la sauvegarde', true);
+    return false;
+  }
+}
+
+async function saveSettings() {
   // Récupérer les valeurs
-  state.settings.siteName = document.getElementById('setName')?.value || 'BackZo';
-  state.settings.email = document.getElementById('setEmail')?.value || 'team@backzo.eu';
-  state.settings.phone = document.getElementById('setPhone')?.value || '';
-  state.settings.currency = document.getElementById('setCurrency')?.value || 'EUR';
-  state.settings.shipping = parseFloat(document.getElementById('setShip')?.value) || 5.90;
-  state.settings.freeShippingFrom = parseFloat(document.getElementById('setFreeShip')?.value) || 50;
-  state.settings.stripeKey = document.getElementById('setStripe')?.value || '';
-  state.settings.maintenance = document.getElementById('togMaintenance')?.checked || false;
-  state.settings.notifications = document.getElementById('togNotifications')?.checked || false;
-  state.settings.autoBackup = document.getElementById('togBackup')?.checked || false;
+  const newSettings = {
+    siteName: document.getElementById('setName')?.value || 'BackZo',
+    email: document.getElementById('setEmail')?.value || 'team@backzo.eu',
+    phone: document.getElementById('setPhone')?.value || '',
+    currency: document.getElementById('setCurrency')?.value || 'EUR',
+    shipping: parseFloat(document.getElementById('setShip')?.value) || 5.90,
+    freeShippingFrom: parseFloat(document.getElementById('setFreeShip')?.value) || 50,
+    stripeKey: document.getElementById('setStripe')?.value || '',
+    maintenance: document.getElementById('togMaintenance')?.checked || false,
+    notifications: document.getElementById('togNotifications')?.checked || false,
+    autoBackup: document.getElementById('togBackup')?.checked || false
+  };
   
-  // Sauvegarder dans localStorage
-  localStorage.setItem('bz-settings', JSON.stringify(state.settings));
+  // Sauvegarder sur le backend (ou localStorage si mode local)
+  const saved = await saveSettingsToBackend(newSettings);
   
-  // Appliquer les changements
-  applySettings();
-  
-  showToast('✓ Paramètres enregistrés et appliqués !');
+  if(saved) {
+    // Mettre à jour le state local
+    state.settings = newSettings;
+    
+    // Appliquer les changements
+    applySettings();
+  }
 }
 
 function applySettings() {

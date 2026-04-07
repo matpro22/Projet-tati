@@ -20,6 +20,7 @@ app.use(express.static('public'));
 const DB_PATH = path.join(__dirname, 'data');
 const ORDERS_FILE = path.join(DB_PATH, 'orders.json');
 const PRODUCTS_FILE = path.join(DB_PATH, 'products.json');
+const SETTINGS_FILE = path.join(DB_PATH, 'settings.json');
 
 // Créer le dossier data s'il n'existe pas
 async function initDB() {
@@ -76,6 +77,26 @@ async function initDB() {
         }
       ];
       await fs.writeFile(PRODUCTS_FILE, JSON.stringify(defaultProducts, null, 2));
+    }
+    
+    // Créer settings.json avec les paramètres par défaut
+    try {
+      await fs.access(SETTINGS_FILE);
+    } catch {
+      const defaultSettings = {
+        siteName: 'BackZo',
+        email: 'team@backzo.eu',
+        phone: '+33 6 00 00 00 00',
+        currency: 'EUR',
+        shipping: 5.90,
+        freeShippingFrom: 50,
+        stripeKey: 'pk_test_VOTRE_CLE_ICI',
+        maintenance: false,
+        notifications: true,
+        autoBackup: false,
+        updatedAt: new Date().toISOString()
+      };
+      await fs.writeFile(SETTINGS_FILE, JSON.stringify(defaultSettings, null, 2));
     }
     
     console.log('✓ Base de données initialisée');
@@ -388,6 +409,41 @@ app.patch('/api/orders/:id/status', async (req, res) => {
     });
     
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================
+// ROUTES PARAMÈTRES
+// ============================================================
+
+// Récupérer les paramètres
+app.get('/api/settings', async (req, res) => {
+  try {
+    const settings = await readJSON(SETTINGS_FILE);
+    res.json(settings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Sauvegarder les paramètres (admin)
+app.post('/api/settings', async (req, res) => {
+  try {
+    const settings = {
+      ...req.body,
+      updatedAt: new Date().toISOString()
+    };
+    
+    await writeJSON(SETTINGS_FILE, settings);
+    
+    res.json({
+      success: true,
+      settings: settings
+    });
+    
+  } catch (error) {
+    console.error('Erreur sauvegarde paramètres:', error);
     res.status(500).json({ error: error.message });
   }
 });
