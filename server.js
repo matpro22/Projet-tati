@@ -7,6 +7,7 @@ const cors = require('cors');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const fs = require('fs').promises;
 const path = require('path');
+const { MongoClient, ObjectId } = require('mongodb');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,113 +17,302 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Base de données simple (fichiers JSON)
+// ============================================================
+// CONFIGURATION BASE DE DONNÉES
+// ============================================================
+
+// MongoDB (si configuré) ou fichiers JSON (fallback)
+let mongoClient = null;
+let db = null;
+const USE_MONGODB = !!process.env.MONGODB_URI;
+
+// Chemins fichiers JSON (fallback)
 const DB_PATH = path.join(__dirname, 'data');
 const ORDERS_FILE = path.join(DB_PATH, 'orders.json');
 const PRODUCTS_FILE = path.join(DB_PATH, 'products.json');
 const SETTINGS_FILE = path.join(DB_PATH, 'settings.json');
 
-// Créer le dossier data s'il n'existe pas
-async function initDB() {
-  try {
-    await fs.mkdir(DB_PATH, { recursive: true });
-    
-    // Créer orders.json s'il n'existe pas
-    try {
-      await fs.access(ORDERS_FILE);
-    } catch {
-      await fs.writeFile(ORDERS_FILE, JSON.stringify([]));
-    }
-    
-    // Créer products.json avec des produits par défaut
-    try {
-      await fs.access(PRODUCTS_FILE);
-    } catch {
-      const defaultProducts = [
-        {
-          id: 'patch-s',
-          name: 'Flocage Amovible — Taille S',
-          price: 12,
-          category: 'particuliers',
-          desc: 'Patch 25×6 cm. Idéal pour maillots individuels.',
-          stock: 100,
-          active: true
-        },
-        {
-          id: 'patch-l',
-          name: 'Flocage Amovible — Taille L',
-          price: 14,
-          category: 'particuliers',
-          desc: 'Patch 27×7 cm. Format large pour plus de visibilité.',
-          stock: 100,
-          active: true
-        },
-        {
-          id: 'pack-club-10',
-          name: 'Pack Club — 10 patchs',
-          price: 110,
-          category: 'clubs',
-          desc: 'Pack de 10 patchs personnalisés pour votre équipe.',
-          stock: 50,
-          active: true
-        },
-        {
-          id: 'pack-club-20',
-          name: 'Pack Club — 20 patchs',
-          price: 200,
-          category: 'clubs',
-          desc: 'Pack de 20 patchs avec tarif dégressif.',
-          stock: 30,
-          active: true
-        }
-      ];
-      await fs.writeFile(PRODUCTS_FILE, JSON.stringify(defaultProducts, null, 2));
-    }
-    
-    // Créer settings.json avec les paramètres par défaut
-    try {
-      await fs.access(SETTINGS_FILE);
-    } catch {
-      const defaultSettings = {
-        siteName: 'BackZo',
-        email: 'team@backzo.eu',
-        phone: '+33 6 00 00 00 00',
-        currency: 'EUR',
-        shipping: 5.90,
-        freeShippingFrom: 50,
-        stripeKey: 'pk_test_VOTRE_CLE_ICI',
-        maintenance: false,
-        notifications: true,
-        autoBackup: false,
-        updatedAt: new Date().toISOString()
-      };
-      await fs.writeFile(SETTINGS_FILE, JSON.stringify(defaultSettings, null, 2));
-    }
-    
-    console.log('✓ Base de données initialisée');
-  } catch (error) {
-    console.error('Erreur initialisation DB:', error);
+// Connexion MongoDB
+async function connectMongoDB() {
+  if (!USE_MONGODB) {
+    console.log('ℹ️  MongoDB non configuré - Utilisation des fichiers JSON');
+    return false;
   }
-}
-
-// Fonctions helper pour lire/écrire les données
-async function readJSON(filePath) {
+  
   try {
-    const data = await fs.readFile(filePath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Erreur lecture fichier:', error);
-    return [];
-  }
-}
-
-async function writeJSON(filePath, data) {
-  try {
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2));
+    mongoClient = new MongoClient(process.env.MONGODB_URI);
+    await mongoClient.connect();
+    db = mongoClient.db('backzo');
+    console.log('✓ MongoDB connecté');
     return true;
   } catch (error) {
-    console.error('Erreur écriture fichier:', error);
+    console.error('✗ Erreur connexion MongoDB:', error.message);
+    console.log('ℹ️  Fallback vers fichiers JSON');
     return false;
+  }
+}
+
+// Initialiser la base de données
+async function initDB() {
+  // Connecter MongoDB si configuré
+  const mongoConnected = await connectMongoDB();
+  
+  if (mongoConnected) {
+    // Initialiser les collections MongoDB avec des données par défaut
+    try {
+      // Vérifier si les produits existent
+      const productsCount = await db.collection('products').countDocuments();
+      if (productsCount === 0) {
+        const defaultProducts = [
+          {
+            id: 'patch-s',
+            name: 'Flocage Amovible — Taille S',
+            price: 12,
+            category: 'particuliers',
+            desc: 'Patch 25×6 cm. Idéal pour maillots individuels.',
+            stock: 100,
+            active: true,
+            createdAt: new Date()
+          },
+          {
+            id: 'patch-l',
+            name: 'Flocage Amovible — Taille L',
+            price: 14,
+            category: 'particuliers',
+            desc: 'Patch 27×7 cm. Format large pour plus de visibilité.',
+            stock: 100,
+            active: true,
+            createdAt: new Date()
+          },
+          {
+            id: 'pack-club-10',
+            name: 'Pack Club — 10 patchs',
+            price: 110,
+            category: 'clubs',
+            desc: 'Pack de 10 patchs personnalisés pour votre équipe.',
+            stock: 50,
+            active: true,
+            createdAt: new Date()
+          },
+          {
+            id: 'pack-club-20',
+            name: 'Pack Club — 20 patchs',
+            price: 200,
+            category: 'clubs',
+            desc: 'Pack de 20 patchs avec tarif dégressif.',
+            stock: 30,
+            active: true,
+            createdAt: new Date()
+          }
+        ];
+        await db.collection('products').insertMany(defaultProducts);
+        console.log('✓ Produits par défaut créés dans MongoDB');
+      }
+      
+      // Vérifier si les paramètres existent
+      const settings = await db.collection('settings').findOne({ _id: 'global' });
+      if (!settings) {
+        const defaultSettings = {
+          _id: 'global',
+          siteName: 'BackZo',
+          email: 'team@backzo.eu',
+          phone: '+33 6 00 00 00 00',
+          currency: 'EUR',
+          shipping: 5.90,
+          freeShippingFrom: 50,
+          stripeKey: 'pk_test_VOTRE_CLE_ICI',
+          maintenance: false,
+          notifications: true,
+          autoBackup: false,
+          updatedAt: new Date()
+        };
+        await db.collection('settings').insertOne(defaultSettings);
+        console.log('✓ Paramètres par défaut créés dans MongoDB');
+      }
+      
+      console.log('✓ MongoDB initialisé');
+    } catch (error) {
+      console.error('Erreur initialisation MongoDB:', error);
+    }
+  } else {
+    // Fallback : Créer les fichiers JSON
+    try {
+      await fs.mkdir(DB_PATH, { recursive: true });
+      
+      // Créer orders.json s'il n'existe pas
+      try {
+        await fs.access(ORDERS_FILE);
+      } catch {
+        await fs.writeFile(ORDERS_FILE, JSON.stringify([]));
+      }
+      
+      // Créer products.json avec des produits par défaut
+      try {
+        await fs.access(PRODUCTS_FILE);
+      } catch {
+        const defaultProducts = [
+          {
+            id: 'patch-s',
+            name: 'Flocage Amovible — Taille S',
+            price: 12,
+            category: 'particuliers',
+            desc: 'Patch 25×6 cm. Idéal pour maillots individuels.',
+            stock: 100,
+            active: true
+          },
+          {
+            id: 'patch-l',
+            name: 'Flocage Amovible — Taille L',
+            price: 14,
+            category: 'particuliers',
+            desc: 'Patch 27×7 cm. Format large pour plus de visibilité.',
+            stock: 100,
+            active: true
+          },
+          {
+            id: 'pack-club-10',
+            name: 'Pack Club — 10 patchs',
+            price: 110,
+            category: 'clubs',
+            desc: 'Pack de 10 patchs personnalisés pour votre équipe.',
+            stock: 50,
+            active: true
+          },
+          {
+            id: 'pack-club-20',
+            name: 'Pack Club — 20 patchs',
+            price: 200,
+            category: 'clubs',
+            desc: 'Pack de 20 patchs avec tarif dégressif.',
+            stock: 30,
+            active: true
+          }
+        ];
+        await fs.writeFile(PRODUCTS_FILE, JSON.stringify(defaultProducts, null, 2));
+      }
+      
+      // Créer settings.json avec les paramètres par défaut
+      try {
+        await fs.access(SETTINGS_FILE);
+      } catch {
+        const defaultSettings = {
+          siteName: 'BackZo',
+          email: 'team@backzo.eu',
+          phone: '+33 6 00 00 00 00',
+          currency: 'EUR',
+          shipping: 5.90,
+          freeShippingFrom: 50,
+          stripeKey: 'pk_test_VOTRE_CLE_ICI',
+          maintenance: false,
+          notifications: true,
+          autoBackup: false,
+          updatedAt: new Date().toISOString()
+        };
+        await fs.writeFile(SETTINGS_FILE, JSON.stringify(defaultSettings, null, 2));
+      }
+      
+      console.log('✓ Fichiers JSON initialisés');
+    } catch (error) {
+      console.error('Erreur initialisation fichiers JSON:', error);
+    }
+  }
+}
+
+// ============================================================
+// FONCTIONS HELPER BASE DE DONNÉES
+// ============================================================
+
+// Lire depuis MongoDB ou fichier JSON
+async function readData(collection, filePath) {
+  if (USE_MONGODB && db) {
+    try {
+      return await db.collection(collection).find({}).toArray();
+    } catch (error) {
+      console.error(`Erreur lecture MongoDB ${collection}:`, error);
+      return [];
+    }
+  } else {
+    try {
+      const data = await fs.readFile(filePath, 'utf8');
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('Erreur lecture fichier:', error);
+      return [];
+    }
+  }
+}
+
+// Écrire dans MongoDB ou fichier JSON
+async function writeData(collection, filePath, data) {
+  if (USE_MONGODB && db) {
+    try {
+      // Supprimer tous les documents et insérer les nouveaux
+      await db.collection(collection).deleteMany({});
+      if (data.length > 0) {
+        await db.collection(collection).insertMany(data);
+      }
+      return true;
+    } catch (error) {
+      console.error(`Erreur écriture MongoDB ${collection}:`, error);
+      return false;
+    }
+  } else {
+    try {
+      await fs.writeFile(filePath, JSON.stringify(data, null, 2));
+      return true;
+    } catch (error) {
+      console.error('Erreur écriture fichier:', error);
+      return false;
+    }
+  }
+}
+
+// Lire les paramètres
+async function getSettings() {
+  if (USE_MONGODB && db) {
+    try {
+      const settings = await db.collection('settings').findOne({ _id: 'global' });
+      if (settings) {
+        delete settings._id; // Retirer l'_id MongoDB
+      }
+      return settings || {};
+    } catch (error) {
+      console.error('Erreur lecture paramètres MongoDB:', error);
+      return {};
+    }
+  } else {
+    try {
+      const data = await fs.readFile(SETTINGS_FILE, 'utf8');
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('Erreur lecture paramètres fichier:', error);
+      return {};
+    }
+  }
+}
+
+// Sauvegarder les paramètres
+async function saveSettings(settings) {
+  if (USE_MONGODB && db) {
+    try {
+      await db.collection('settings').updateOne(
+        { _id: 'global' },
+        { $set: { ...settings, updatedAt: new Date() } },
+        { upsert: true }
+      );
+      return true;
+    } catch (error) {
+      console.error('Erreur sauvegarde paramètres MongoDB:', error);
+      return false;
+    }
+  } else {
+    try {
+      await fs.writeFile(SETTINGS_FILE, JSON.stringify(settings, null, 2));
+      return true;
+    } catch (error) {
+      console.error('Erreur sauvegarde paramètres fichier:', error);
+      return false;
+    }
   }
 }
 
@@ -189,9 +379,9 @@ app.post('/api/confirm-payment', async (req, res) => {
     };
     
     // Sauvegarder la commande
-    const orders = await readJSON(ORDERS_FILE);
+    const orders = await readData('orders', ORDERS_FILE);
     orders.push(order);
-    await writeJSON(ORDERS_FILE, orders);
+    await writeData('orders', ORDERS_FILE, orders);
     
     // Envoyer un email de confirmation (optionnel - nécessite un service d'email)
     // await sendOrderConfirmationEmail(order);
@@ -248,7 +438,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 // Récupérer tous les produits
 app.get('/api/products', async (req, res) => {
   try {
-    const products = await readJSON(PRODUCTS_FILE);
+    const products = await readData('products', PRODUCTS_FILE);
     const activeProducts = products.filter(p => p.active !== false);
     res.json(activeProducts);
   } catch (error) {
@@ -259,7 +449,7 @@ app.get('/api/products', async (req, res) => {
 // Récupérer un produit par ID
 app.get('/api/products/:id', async (req, res) => {
   try {
-    const products = await readJSON(PRODUCTS_FILE);
+    const products = await readData('products', PRODUCTS_FILE);
     const product = products.find(p => p.id === req.params.id);
     
     if (!product) {
@@ -282,7 +472,7 @@ app.post('/api/products', async (req, res) => {
       return res.status(400).json({ error: 'Champs obligatoires manquants' });
     }
     
-    const products = await readJSON(PRODUCTS_FILE);
+    const products = await readData('products', PRODUCTS_FILE);
     
     const newProduct = {
       id: 'prod-' + Date.now(),
@@ -296,7 +486,7 @@ app.post('/api/products', async (req, res) => {
     };
     
     products.push(newProduct);
-    await writeJSON(PRODUCTS_FILE, products);
+    await writeData('products', PRODUCTS_FILE, products);
     
     res.json({
       success: true,
@@ -312,7 +502,7 @@ app.post('/api/products', async (req, res) => {
 // Modifier un produit (admin)
 app.put('/api/products/:id', async (req, res) => {
   try {
-    const products = await readJSON(PRODUCTS_FILE);
+    const products = await readData('products', PRODUCTS_FILE);
     const index = products.findIndex(p => p.id === req.params.id);
     
     if (index === -1) {
@@ -326,7 +516,7 @@ app.put('/api/products/:id', async (req, res) => {
       updatedAt: new Date().toISOString()
     };
     
-    await writeJSON(PRODUCTS_FILE, products);
+    await writeData('products', PRODUCTS_FILE, products);
     
     res.json({
       success: true,
@@ -341,14 +531,14 @@ app.put('/api/products/:id', async (req, res) => {
 // Supprimer un produit (admin)
 app.delete('/api/products/:id', async (req, res) => {
   try {
-    const products = await readJSON(PRODUCTS_FILE);
+    const products = await readData('products', PRODUCTS_FILE);
     const filteredProducts = products.filter(p => p.id !== req.params.id);
     
     if (products.length === filteredProducts.length) {
       return res.status(404).json({ error: 'Produit non trouvé' });
     }
     
-    await writeJSON(PRODUCTS_FILE, filteredProducts);
+    await writeData('products', PRODUCTS_FILE, filteredProducts);
     
     res.json({ success: true });
     
@@ -364,7 +554,7 @@ app.delete('/api/products/:id', async (req, res) => {
 // Récupérer toutes les commandes (admin)
 app.get('/api/orders', async (req, res) => {
   try {
-    const orders = await readJSON(ORDERS_FILE);
+    const orders = await readData('orders', ORDERS_FILE);
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -374,7 +564,7 @@ app.get('/api/orders', async (req, res) => {
 // Récupérer une commande par ID
 app.get('/api/orders/:id', async (req, res) => {
   try {
-    const orders = await readJSON(ORDERS_FILE);
+    const orders = await readData('orders', ORDERS_FILE);
     const order = orders.find(o => o.id === req.params.id);
     
     if (!order) {
@@ -391,7 +581,7 @@ app.get('/api/orders/:id', async (req, res) => {
 app.patch('/api/orders/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
-    const orders = await readJSON(ORDERS_FILE);
+    const orders = await readData('orders', ORDERS_FILE);
     const index = orders.findIndex(o => o.id === req.params.id);
     
     if (index === -1) {
@@ -401,7 +591,7 @@ app.patch('/api/orders/:id/status', async (req, res) => {
     orders[index].status = status;
     orders[index].updatedAt = new Date().toISOString();
     
-    await writeJSON(ORDERS_FILE, orders);
+    await writeData('orders', ORDERS_FILE, orders);
     
     res.json({
       success: true,
@@ -420,7 +610,7 @@ app.patch('/api/orders/:id/status', async (req, res) => {
 // Récupérer les paramètres
 app.get('/api/settings', async (req, res) => {
   try {
-    const settings = await readJSON(SETTINGS_FILE);
+    const settings = await getSettings();
     res.json(settings);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -435,7 +625,7 @@ app.post('/api/settings', async (req, res) => {
       updatedAt: new Date().toISOString()
     };
     
-    await writeJSON(SETTINGS_FILE, settings);
+    await saveSettings(settings);
     
     res.json({
       success: true,
@@ -457,15 +647,16 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok',
     timestamp: new Date().toISOString(),
-    stripe: !!process.env.STRIPE_SECRET_KEY
+    stripe: !!process.env.STRIPE_SECRET_KEY,
+    database: USE_MONGODB ? 'MongoDB' : 'JSON Files'
   });
 });
 
 // Stats pour le dashboard
 app.get('/api/stats', async (req, res) => {
   try {
-    const orders = await readJSON(ORDERS_FILE);
-    const products = await readJSON(PRODUCTS_FILE);
+    const orders = await readData('orders', ORDERS_FILE);
+    const products = await readData('products', PRODUCTS_FILE);
     
     const revenue = orders
       .filter(o => o.status !== 'cancelled')
@@ -498,6 +689,7 @@ initDB().then(() => {
     console.log('');
     console.log(`📍 Serveur : http://localhost:${PORT}`);
     console.log(`💳 Stripe : ${process.env.STRIPE_SECRET_KEY ? '✓ Configuré' : '✗ Non configuré'}`);
+    console.log(`💾 Base de données : ${USE_MONGODB ? '✓ MongoDB' : 'ℹ️  Fichiers JSON'}`);
     console.log('');
     console.log('📚 Endpoints disponibles :');
     console.log('   POST /api/create-payment-intent');
@@ -505,6 +697,8 @@ initDB().then(() => {
     console.log('   GET  /api/products');
     console.log('   POST /api/products');
     console.log('   GET  /api/orders');
+    console.log('   GET  /api/settings');
+    console.log('   POST /api/settings');
     console.log('   GET  /api/stats');
     console.log('');
   });
@@ -513,4 +707,13 @@ initDB().then(() => {
 // Gestion des erreurs non capturées
 process.on('unhandledRejection', (error) => {
   console.error('Erreur non gérée:', error);
+});
+
+// Fermer la connexion MongoDB proprement
+process.on('SIGINT', async () => {
+  if (mongoClient) {
+    await mongoClient.close();
+    console.log('\n✓ MongoDB déconnecté');
+  }
+  process.exit(0);
 });
