@@ -16,32 +16,35 @@ STRIPE_PUBLIC_KEY = [VOTRE_CLE_PUBLIQUE_ICI]
 MONGODB_URI = mongodb+srv://khenaffoumathias_db_user:aXi9eVoHyTuvr6Xs@cluster0.y4gvdra.mongodb.net/cluster0?retryWrites=true&w=majority
 ```
 
-⚠️ **Remplacez `[VOTRE_CLE_PUBLIQUE_ICI]`** par votre vraie clé publique Stripe (commence par `pk_test_`)
+⚠️ **IMPORTANT** : 
+- Remplacez `[VOTRE_CLE_PUBLIQUE_ICI]` par votre vraie clé publique Stripe (commence par `pk_test_`)
+- Récupérez votre clé publique sur https://dashboard.stripe.com/apikeys
 
 6. **Sélectionnez** "Production, Preview, Development" pour chaque variable
 7. **Cliquez** sur "Save" pour chaque variable
 
-### Étape 2 : Redéployer (1 min)
+### Étape 2 : Pousser les modifications (1 min)
 
-#### Option A : Via Git (si vous utilisez Git)
+Les fichiers ont été modifiés pour corriger :
+- ✅ URL API sans `:3000`
+- ✅ Route `/api/stripe-config` qui ne plante plus
+- ✅ Timeout MongoDB pour éviter les blocages
+
+**Poussez les modifications** :
 
 ```bash
 git add .
-git commit -m "Fix Vercel deployment"
+git commit -m "Fix API URL and Vercel deployment"
 git push
 ```
 
-#### Option B : Via le dashboard Vercel
-
-1. **Allez** dans l'onglet "Deployments"
-2. **Cliquez** sur les 3 points (...) à droite du dernier déploiement
-3. **Cliquez** sur "Redeploy"
-4. **Attendez** 1-2 minutes
+Vercel redéploiera automatiquement.
 
 ### Étape 3 : Vérifier (2 min)
 
-1. **Ouvrez** https://projet-tati.vercel.app/api/health
-2. **Vous devriez voir** :
+1. **Attendez** que le déploiement soit terminé (1-2 minutes)
+2. **Ouvrez** https://projet-tati.vercel.app/api/health
+3. **Vous devriez voir** :
    ```json
    {
      "status": "ok",
@@ -50,9 +53,17 @@ git push
    }
    ```
 
-3. **Ouvrez** https://projet-tati.vercel.app
-4. **Ouvrez** la console (F12)
-5. **Vous ne devriez plus voir** d'erreur 500
+4. **Ouvrez** https://projet-tati.vercel.app/api/stripe-config
+5. **Vous devriez voir** :
+   ```json
+   {
+     "publicKey": "pk_test_xxxxx..."
+   }
+   ```
+
+6. **Ouvrez** https://projet-tati.vercel.app
+7. **Ouvrez** la console (F12)
+8. **Vous ne devriez plus voir** d'erreur 500
 
 ## ✅ C'est fait !
 
