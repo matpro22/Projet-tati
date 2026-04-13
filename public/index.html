@@ -1514,6 +1514,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
         <div class="settings-section">
           <div class="settings-tit">Paiement — Stripe</div>
           <div><label class="bz-lbl" for="setStripe">Clé publique Stripe (pk_...)</label><input class="bz-inp" id="setStripe" type="text" value="pk_test_VOTRE_CLE_ICI" placeholder="pk_live_..."/></div>
+          <button class="bz-btn" onclick="testStripeConfig()" style="margin-top:.5rem;background:var(--blue)">🔍 Tester la configuration Stripe</button>
           <p style="font-size:.78rem;color:var(--gray);margin-top:.5rem">Obtenez votre clé sur <a href="https://dashboard.stripe.com" target="_blank" rel="noopener" style="color:var(--green)">dashboard.stripe.com</a></p>
         </div>
         <div class="settings-section">
@@ -2801,6 +2802,57 @@ async function updateOrderStatusOnBackend(orderId, newStatus) {
 // FONCTIONS PARAMÈTRES
 // ============================================================
 
+// Tester la configuration Stripe
+async function testStripeConfig() {
+  console.log('\n🔍 === TEST CONFIGURATION STRIPE ===\n');
+  
+  try {
+    // 1. Vérifier les paramètres locaux
+    console.log('1️⃣ Paramètres locaux (state.settings):');
+    console.log('   stripeKey:', state.settings.stripeKey || 'AUCUNE');
+    
+    // 2. Vérifier les paramètres sur le serveur
+    console.log('\n2️⃣ Paramètres sur le serveur:');
+    const settingsResponse = await fetch(`${API_URL}/settings`);
+    const serverSettings = await settingsResponse.json();
+    console.log('   stripeKey:', serverSettings.stripeKey || 'AUCUNE');
+    console.log('   Tous les champs:', Object.keys(serverSettings));
+    
+    // 3. Vérifier la route stripe-config
+    console.log('\n3️⃣ Route /api/stripe-config:');
+    const configResponse = await fetch(`${API_URL}/stripe-config`);
+    const config = await configResponse.json();
+    console.log('   publicKey:', config.publicKey || 'AUCUNE');
+    
+    // 4. Vérifier l'initialisation Stripe
+    console.log('\n4️⃣ État Stripe frontend:');
+    console.log('   stripe initialisé:', !!stripe);
+    console.log('   cardElement monté:', !!cardElement);
+    
+    // 5. Résumé
+    console.log('\n📊 RÉSUMÉ:');
+    if (config.publicKey && config.publicKey.startsWith('pk_')) {
+      console.log('✅ Clé Stripe configurée et valide');
+      showToast('✅ Configuration Stripe OK !');
+      
+      // Réinitialiser Stripe avec la nouvelle clé
+      if (!stripe) {
+        console.log('🔄 Réinitialisation de Stripe...');
+        await initStripe();
+      }
+    } else {
+      console.log('❌ Clé Stripe manquante ou invalide');
+      showToast('❌ Clé Stripe non configurée', true);
+    }
+    
+    console.log('\n=================================\n');
+    
+  } catch (error) {
+    console.error('❌ Erreur test Stripe:', error);
+    showToast('Erreur lors du test', true);
+  }
+}
+
 // Charger les paramètres depuis le backend
 async function loadSettingsFromBackend() {
   if(!USE_BACKEND) return;
@@ -2874,6 +2926,8 @@ async function saveSettings() {
     autoBackup: document.getElementById('togBackup')?.checked || false
   };
   
+  console.log('💾 Sauvegarde des paramètres:', { stripeKey: newSettings.stripeKey ? newSettings.stripeKey.substring(0, 20) + '...' : 'AUCUNE' });
+  
   // Sauvegarder sur le backend (ou localStorage si mode local)
   const saved = await saveSettingsToBackend(newSettings);
   
@@ -2883,6 +2937,12 @@ async function saveSettings() {
     
     // Appliquer les changements
     applySettings();
+    
+    // Réinitialiser Stripe si la clé a changé
+    if (newSettings.stripeKey && newSettings.stripeKey.startsWith('pk_')) {
+      console.log('🔄 Réinitialisation de Stripe avec la nouvelle clé...');
+      await initStripe();
+    }
   }
 }
 

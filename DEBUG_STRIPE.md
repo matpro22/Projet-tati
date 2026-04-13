@@ -1,7 +1,26 @@
-# 🔍 Guide de débogage Stripe
+# 🔍 Guide de débogage Stripe - MISE À JOUR
+
+## ✅ NOUVEAU : Outil de test intégré
+
+J'ai ajouté un bouton de test dans l'interface admin pour diagnostiquer rapidement les problèmes Stripe.
+
+### Comment l'utiliser :
+
+1. Connectez-vous à l'admin (bouton "Admin" en bas de page)
+2. Allez dans l'onglet "Paramètres"
+3. Cliquez sur le bouton "🔍 Tester la configuration Stripe"
+4. Ouvrez la console (F12) pour voir les résultats détaillés
+
+Le test vérifie automatiquement :
+- ✓ Les paramètres locaux (frontend)
+- ✓ Les paramètres sur le serveur (MongoDB)
+- ✓ La route `/api/stripe-config`
+- ✓ L'état d'initialisation de Stripe
+
+---
 
 ## Problème actuel
-Erreur "Erreur lors du paiement. Veuillez réessayer." lors de la tentative de paiement.
+Erreur "Clé Stripe non configurée" alors que la clé est configurée dans MongoDB ou Vercel.
 
 ## ✅ Modifications apportées
 
