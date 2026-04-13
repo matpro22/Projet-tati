@@ -16,6 +16,17 @@ const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Vérifier la configuration Stripe au démarrage
+if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.startsWith('sk_')) {
+  console.log('✓ Stripe initialisé avec clé secrète:', process.env.STRIPE_SECRET_KEY.substring(0, 20) + '...');
+} else {
+  console.error('❌ STRIPE_SECRET_KEY manquante ou invalide !');
+  console.log('⚠️  Les paiements ne fonctionneront pas sans cette clé.');
+}
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -360,9 +371,18 @@ app.post('/api/create-payment-intent', async (req, res) => {
   try {
     const { amount, currency, metadata } = req.body;
     
+    console.log('📝 Création PaymentIntent - Montant:', amount, currency || 'eur');
+    
     // Validation
     if (!amount || amount <= 0) {
+      console.error('❌ Montant invalide:', amount);
       return res.status(400).json({ error: 'Montant invalide' });
+    }
+    
+    // Vérifier que Stripe est initialisé
+    if (!stripe) {
+      console.error('❌ Stripe non initialisé - Clé secrète manquante');
+      return res.status(500).json({ error: 'Configuration Stripe manquante' });
     }
     
     // Créer le PaymentIntent
@@ -375,13 +395,15 @@ app.post('/api/create-payment-intent', async (req, res) => {
       metadata: metadata || {}
     });
     
+    console.log('✓ PaymentIntent créé:', paymentIntent.id);
+    
     res.json({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id
     });
     
   } catch (error) {
-    console.error('Erreur création PaymentIntent:', error);
+    console.error('❌ Erreur création PaymentIntent:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -419,10 +441,21 @@ app.post('/api/confirm-payment', async (req, res) => {
   try {
     const { paymentIntentId, orderData } = req.body;
     
+    console.log('📝 Confirmation paiement:', paymentIntentId);
+    
+    // Vérifier que Stripe est initialisé
+    if (!stripe) {
+      console.error('❌ Stripe non initialisé');
+      return res.status(500).json({ error: 'Configuration Stripe manquante' });
+    }
+    
     // Récupérer le PaymentIntent pour vérifier son statut
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
     
+    console.log('📊 Statut paiement:', paymentIntent.status);
+    
     if (paymentIntent.status !== 'succeeded') {
+      console.error('❌ Paiement non confirmé:', paymentIntent.status);
       return res.status(400).json({ 
         error: 'Paiement non confirmé',
         status: paymentIntent.status 

@@ -1990,6 +1990,13 @@ async function placeOrder() {
   const shipping=total>=state.settings.freeShippingFrom?0:state.settings.shipping;
   const finalTotal = total + shipping;
   
+  console.log('💳 Début du processus de paiement - Total:', finalTotal, '€');
+  console.log('🔍 État Stripe:', { 
+    USE_BACKEND, 
+    stripeInitialized: !!stripe, 
+    cardElementMounted: !!cardElement 
+  });
+  
   // Désactiver le bouton pendant le traitement
   const btn = document.getElementById('coOrderBtn');
   btn.disabled = true;
@@ -1998,6 +2005,8 @@ async function placeOrder() {
   // Si le backend est activé et Stripe configuré
   if(USE_BACKEND && stripe && cardElement) {
     try {
+      console.log('📡 Étape 1: Création du PaymentIntent...');
+      
       // Étape 1 : Créer un PaymentIntent sur le backend
       const intentResponse = await fetch(`${API_URL}/create-payment-intent`, {
         method: 'POST',
@@ -2013,10 +2022,15 @@ async function placeOrder() {
       });
       
       if (!intentResponse.ok) {
-        throw new Error('Erreur création PaymentIntent');
+        const errorData = await intentResponse.json();
+        console.error('❌ Erreur création PaymentIntent:', errorData);
+        throw new Error(errorData.error || 'Erreur création PaymentIntent');
       }
       
       const { clientSecret, paymentIntentId } = await intentResponse.json();
+      console.log('✓ PaymentIntent créé:', paymentIntentId);
+      
+      console.log('💳 Étape 2: Confirmation du paiement avec Stripe...');
       
       // Étape 2 : Confirmer le paiement avec Stripe
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
@@ -2035,11 +2049,15 @@ async function placeOrder() {
       });
       
       if (error) {
+        console.error('❌ Erreur confirmation paiement:', error);
         showToast(error.message, true);
         btn.disabled = false;
         btn.textContent = 'Confirmer & Payer';
         return;
       }
+      
+      console.log('✓ Paiement confirmé:', paymentIntent.status);
+      console.log('📦 Étape 3: Enregistrement de la commande...');
       
       // Étape 3 : Confirmer la commande sur le backend
       const orderResponse = await fetch(`${API_URL}/confirm-payment`, {
