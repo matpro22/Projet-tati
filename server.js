@@ -25,24 +25,32 @@ app.use(express.static('public'));
 // CONFIGURATION EMAIL
 // ============================================================
 
-const emailTransporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'ssl0.ovh.net',
-  port: parseInt(process.env.EMAIL_PORT) || 465,
-  secure: true, // true pour le port 465
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+let emailTransporter = null;
 
-// Vérifier la configuration email au démarrage
-emailTransporter.verify(function(error, success) {
-  if (error) {
-    console.log('⚠️  Configuration email incorrecte:', error.message);
-  } else {
-    console.log('✓ Serveur email prêt');
-  }
-});
+// Créer le transporteur email seulement si les credentials sont configurés
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  emailTransporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'ssl0.ovh.net',
+    port: parseInt(process.env.EMAIL_PORT) || 465,
+    secure: true, // true pour le port 465
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+
+  // Vérifier la configuration email au démarrage
+  emailTransporter.verify(function(error, success) {
+    if (error) {
+      console.log('⚠️  Configuration email incorrecte:', error.message);
+    } else {
+      console.log('✓ Serveur email prêt');
+    }
+  });
+} else {
+  console.log('ℹ️  Email non configuré (optionnel)');
+}
+
 
 // ============================================================
 // CONFIGURATION BASE DE DONNÉES
@@ -379,10 +387,24 @@ app.post('/api/create-payment-intent', async (req, res) => {
 });
 
 // Récupérer la clé publique Stripe
-app.get('/api/stripe-config', (req, res) => {
+app.get('/api/stripe-config', async (req, res) => {
   try {
-    const publicKey = process.env.STRIPE_PUBLIC_KEY || '';
-    console.log('Clé publique Stripe demandée:', publicKey ? publicKey.substring(0, 20) + '...' : 'NON CONFIGURÉE');
+    // Récupérer les paramètres depuis MongoDB ou fichier
+    const settings = await getSettings();
+    let publicKey = settings.stripeKey || '';
+    
+    if (publicKey && publicKey !== 'pk_test_VOTRE_CLE_ICI') {
+      console.log('✓ Clé Stripe depuis paramètres:', publicKey.substring(0, 20) + '...');
+    } else {
+      // Fallback sur les variables d'environnement
+      publicKey = process.env.STRIPE_PUBLIC_KEY || '';
+      if (publicKey) {
+        console.log('✓ Clé Stripe depuis .env:', publicKey.substring(0, 20) + '...');
+      } else {
+        console.log('⚠️  Aucune clé Stripe configurée');
+      }
+    }
+    
     res.json({
       publicKey: publicKey
     });
@@ -449,6 +471,15 @@ app.post('/api/contact', async (req, res) => {
     // Validation
     if (!name || !email || !message) {
       return res.status(400).json({ error: 'Tous les champs obligatoires doivent être remplis' });
+    }
+    
+    // Vérifier si l'email est configuré
+    if (!emailTransporter) {
+      console.log('Message de contact reçu (email non configuré):', { name, email, subject });
+      return res.json({ 
+        success: true, 
+        message: 'Message reçu. Nous vous répondrons sous 48h.' 
+      });
     }
     
     // Préparer l'email
@@ -838,6 +869,9 @@ initDB().then(() => {
 process.on('unhandledRejection', (error) => {
   console.error('Erreur non gérée:', error);
 });
+
+// Export pour Vercel Serverless
+module.exports = app;
 
 // Fermer la connexion MongoDB proprement
 process.on('SIGINT', async () => {
