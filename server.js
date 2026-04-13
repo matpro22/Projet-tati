@@ -380,9 +380,16 @@ app.post('/api/create-payment-intent', async (req, res) => {
 
 // Récupérer la clé publique Stripe
 app.get('/api/stripe-config', (req, res) => {
-  res.json({
-    publicKey: process.env.STRIPE_PUBLIC_KEY || ''
-  });
+  try {
+    const publicKey = process.env.STRIPE_PUBLIC_KEY || '';
+    console.log('Clé publique Stripe demandée:', publicKey ? publicKey.substring(0, 20) + '...' : 'NON CONFIGURÉE');
+    res.json({
+      publicKey: publicKey
+    });
+  } catch (error) {
+    console.error('Erreur route stripe-config:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
 // Confirmer un paiement et créer la commande
