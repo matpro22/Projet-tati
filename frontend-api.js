@@ -4,7 +4,7 @@
 // ============================================================
 
 // Configuration de l'API
-const API_URL = 'http://projet-tati.vercel.app:3000/api';
+const API_URL = 'https://projet-tati.vercel.app:3000/api';
 
 // ============================================================
 // FONCTIONS PAIEMENT STRIPE
