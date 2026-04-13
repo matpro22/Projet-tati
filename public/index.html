@@ -1880,8 +1880,8 @@ function openCheckout() {
   document.body.style.overflow='hidden';
   
   // Initialiser Stripe
-  setTimeout(() => {
-    const initialized = initStripe();
+  setTimeout(async () => {
+    const initialized = await initStripe();
     if(!initialized) {
       const placeholder = document.getElementById('stripe-placeholder');
       if(placeholder) {
@@ -1889,8 +1889,7 @@ function openCheckout() {
           <div style="padding:1.5rem;background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.3);border-radius:4px">
             <p style="font-size:.85rem;color:#ffcc00;margin-bottom:.5rem;font-weight:700">⚠️ Paiement Stripe non configuré</p>
             <p style="font-size:.78rem;color:var(--gray);line-height:1.6">
-              Pour activer les paiements en ligne, allez dans <strong style="color:var(--white)">Admin > Paramètres</strong> 
-              et ajoutez votre clé publique Stripe (pk_test_... ou pk_live_...).
+              Pour activer les paiements en ligne, contactez l'administrateur du site.
             </p>
             <p style="font-size:.78rem;color:var(--gray);margin-top:.5rem">
               Obtenez votre clé sur <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener" style="color:var(--green)">dashboard.stripe.com/apikeys</a>
