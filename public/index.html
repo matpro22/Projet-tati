@@ -1697,10 +1697,19 @@ async function initPage() {
   renderProducts('all');
   updateDevisPreview();
   updateSummary();
-  document.getElementById('adminDate').textContent = new Date().toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  
+  const adminDateEl = document.getElementById('adminDate');
+  if (adminDateEl) {
+    adminDateEl.textContent = new Date().toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  }
+  
   const dvDateInput = document.getElementById('dvValidUntil');
-  const future = new Date(); future.setDate(future.getDate()+30);
-  dvDateInput.value = future.toISOString().split('T')[0];
+  if (dvDateInput) {
+    const future = new Date(); 
+    future.setDate(future.getDate()+30);
+    dvDateInput.value = future.toISOString().split('T')[0];
+  }
+  
   initReveals();
   updateDevisPreview();
   renderAdminDashboard();
@@ -1917,6 +1926,13 @@ async function initStripe() {
   try {
     // Récupérer la clé publique depuis l'API
     const response = await fetch('/api/stripe-config');
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Erreur HTTP', response.status, ':', errorText);
+      throw new Error(`Erreur serveur (${response.status})`);
+    }
+    
     const config = await response.json();
     const stripeKey = config.publicKey;
     

@@ -320,19 +320,56 @@ async function getSettings() {
       const settings = await db.collection('settings').findOne({ _id: 'global' });
       if (settings) {
         delete settings._id; // Retirer l'_id MongoDB
+        return settings;
       }
-      return settings || {};
+      // Si pas de settings, retourner les valeurs par défaut
+      return {
+        siteName: 'BackZo',
+        email: 'team@backzo.eu',
+        phone: '+33 6 00 00 00 00',
+        currency: 'EUR',
+        shipping: 5.90,
+        freeShippingFrom: 50,
+        stripeKey: '',
+        maintenance: false,
+        notifications: true,
+        autoBackup: false
+      };
     } catch (error) {
-      console.error('Erreur lecture paramètres MongoDB:', error);
-      return {};
+      console.error('Erreur lecture paramètres MongoDB:', error.message);
+      // Retourner les valeurs par défaut en cas d'erreur
+      return {
+        siteName: 'BackZo',
+        email: 'team@backzo.eu',
+        phone: '+33 6 00 00 00 00',
+        currency: 'EUR',
+        shipping: 5.90,
+        freeShippingFrom: 50,
+        stripeKey: '',
+        maintenance: false,
+        notifications: true,
+        autoBackup: false
+      };
     }
   } else {
     try {
       const data = await fs.readFile(SETTINGS_FILE, 'utf8');
       return JSON.parse(data);
     } catch (error) {
-      console.error('Erreur lecture paramètres fichier:', error);
-      return {};
+      console.error('Erreur lecture paramètres fichier:', error.message);
+      // Retourner les valeurs par défaut
+      return {
+        siteName: 'BackZo',
+        email: 'team@backzo.eu',
+        phone: '+33 6 00 00 00 00',
+        currency: 'EUR',
+        shipping: 5.90,
+        freeShippingFrom: 50,
+        stripeKey: '',
+        maintenance: false,
+        notifications: true,
+        autoBackup: false
+      };
     }
   }
 }
@@ -415,25 +452,38 @@ app.get('/api/stripe-config', async (req, res) => {
     console.log('🔍 USE_MONGODB:', USE_MONGODB);
     console.log('🔍 db connecté:', !!db);
     
-    // Récupérer les paramètres depuis MongoDB ou fichier
-    const settings = await getSettings();
-    console.log('📊 Paramètres récupérés:', {
-      hasStripeKey: !!settings.stripeKey,
-      stripeKeyValue: settings.stripeKey ? settings.stripeKey.substring(0, 20) + '...' : 'AUCUNE',
-      allKeys: Object.keys(settings)
-    });
+    let publicKey = '';
     
-    let publicKey = settings.stripeKey || '';
+    // Essayer de récupérer depuis MongoDB d'abord
+    if (USE_MONGODB && db) {
+      try {
+        const settings = await getSettings();
+        console.log('📊 Paramètres MongoDB récupérés:', {
+          hasStripeKey: !!settings.stripeKey,
+          stripeKeyValue: settings.stripeKey ? settings.stripeKey.substring(0, 20) + '...' : 'AUCUNE',
+          allKeys: Object.keys(settings)
+        });
+        
+        publicKey = settings.stripeKey || '';
+        
+        if (publicKey && publicKey !== 'pk_test_VOTRE_CLE_ICI' && publicKey.startsWith('pk_')) {
+          console.log('✓ Clé Stripe depuis MongoDB:', publicKey.substring(0, 20) + '...');
+        } else {
+          publicKey = ''; // Réinitialiser si invalide
+        }
+      } catch (mongoError) {
+        console.warn('⚠️  Erreur lecture MongoDB:', mongoError.message);
+      }
+    }
     
-    if (publicKey && publicKey !== 'pk_test_VOTRE_CLE_ICI') {
-      console.log('✓ Clé Stripe depuis paramètres MongoDB:', publicKey.substring(0, 20) + '...');
-    } else {
-      // Fallback sur les variables d'environnement
+    // Fallback sur les variables d'environnement
+    if (!publicKey) {
       publicKey = process.env.STRIPE_PUBLIC_KEY || '';
-      if (publicKey && publicKey !== 'pk_test_VOTRE_CLE_PUBLIQUE_ICI') {
+      if (publicKey && publicKey !== 'pk_test_VOTRE_CLE_PUBLIQUE_ICI' && publicKey.startsWith('pk_')) {
         console.log('✓ Clé Stripe depuis .env:', publicKey.substring(0, 20) + '...');
       } else {
-        console.log('⚠️  Aucune clé Stripe configurée (ni MongoDB ni .env)');
+        console.log('⚠️  Aucune clé Stripe valide configurée');
+        publicKey = '';
       }
     }
     
@@ -443,8 +493,9 @@ app.get('/api/stripe-config', async (req, res) => {
       publicKey: publicKey
     });
   } catch (error) {
-    console.error('❌ Erreur route stripe-config:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    console.error('❌ Erreur route stripe-config:', error.message);
+    console.error('Stack:', error.stack);
+    res.status(500).json({ error: 'Erreur serveur: ' + error.message });
   }
 });
 
