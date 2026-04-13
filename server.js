@@ -11,6 +11,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const fs = require('fs').promises;
 const path = require('path');
 const { MongoClient, ObjectId } = require('mongodb');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,29 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+
+// ============================================================
+// CONFIGURATION EMAIL
+// ============================================================
+
+const emailTransporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || 'ssl0.ovh.net',
+  port: parseInt(process.env.EMAIL_PORT) || 465,
+  secure: true, // true pour le port 465
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+// Vérifier la configuration email au démarrage
+emailTransporter.verify(function(error, success) {
+  if (error) {
+    console.log('⚠️  Configuration email incorrecte:', error.message);
+  } else {
+    console.log('✓ Serveur email prêt');
+  }
+});
 
 // ============================================================
 // CONFIGURATION BASE DE DONNÉES
@@ -70,7 +94,7 @@ async function initDB() {
           {
             id: 'patch-s',
             name: 'Flocage Amovible — Taille S',
-            price: 12,
+            price: 13,
             category: 'particuliers',
             desc: 'Patch 25×6 cm. Idéal pour maillots individuels.',
             stock: 100,
@@ -80,7 +104,7 @@ async function initDB() {
           {
             id: 'patch-l',
             name: 'Flocage Amovible — Taille L',
-            price: 14,
+            price: 13,
             category: 'particuliers',
             desc: 'Patch 27×7 cm. Format large pour plus de visibilité.',
             stock: 100,
@@ -157,7 +181,7 @@ async function initDB() {
           {
             id: 'patch-s',
             name: 'Flocage Amovible — Taille S',
-            price: 12,
+            price: 13,
             category: 'particuliers',
             desc: 'Patch 25×6 cm. Idéal pour maillots individuels.',
             stock: 100,
@@ -166,7 +190,7 @@ async function initDB() {
           {
             id: 'patch-l',
             name: 'Flocage Amovible — Taille L',
-            price: 14,
+            price: 13,
             category: 'particuliers',
             desc: 'Patch 27×7 cm. Format large pour plus de visibilité.',
             stock: 100,
@@ -397,6 +421,95 @@ app.post('/api/confirm-payment', async (req, res) => {
   } catch (error) {
     console.error('Erreur confirmation paiement:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================
+// FORMULAIRE DE CONTACT
+// ============================================================
+
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+    
+    // Validation
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: 'Tous les champs obligatoires doivent être remplis' });
+    }
+    
+    // Préparer l'email
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || 'team@backzo.eu',
+      to: process.env.EMAIL_TO || 'team@backzo.eu',
+      subject: `[BackZo Contact] ${subject || 'Nouveau message'}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+          <div style="background: #000; color: #b8ff57; padding: 20px; text-align: center;">
+            <h1 style="margin: 0; font-size: 32px; letter-spacing: 2px;">BACK<span style="color: #fff;">ZO</span></h1>
+            <p style="margin: 10px 0 0; font-size: 14px; color: #999;">Nouveau message de contact</p>
+          </div>
+          
+          <div style="background: #fff; padding: 30px; margin-top: 20px; border-radius: 8px;">
+            <h2 style="color: #000; margin-top: 0;">Informations du contact</h2>
+            
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #666;">Nom :</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #000;">${name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #666;">Email :</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #000;"><a href="mailto:${email}" style="color: #b8ff57; text-decoration: none;">${email}</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #666;">Sujet :</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #000;">${subject || 'Non spécifié'}</td>
+              </tr>
+            </table>
+            
+            <h3 style="color: #000; margin-top: 30px; margin-bottom: 15px;">Message :</h3>
+            <div style="background: #f9f9f9; padding: 20px; border-left: 4px solid #b8ff57; border-radius: 4px;">
+              <p style="margin: 0; color: #333; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+            <p style="margin: 0;">Ce message a été envoyé depuis le formulaire de contact BackZo</p>
+            <p style="margin: 5px 0 0;">Date : ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}</p>
+          </div>
+        </div>
+      `,
+      text: `
+NOUVEAU MESSAGE DE CONTACT BACKZO
+================================
+
+Nom: ${name}
+Email: ${email}
+Sujet: ${subject || 'Non spécifié'}
+
+Message:
+${message}
+
+---
+Date: ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}
+      `
+    };
+    
+    // Envoyer l'email
+    await emailTransporter.sendMail(mailOptions);
+    
+    console.log('✓ Email de contact envoyé:', email);
+    
+    res.json({ 
+      success: true, 
+      message: 'Message envoyé avec succès. Nous vous répondrons sous 48h.' 
+    });
+    
+  } catch (error) {
+    console.error('Erreur envoi email contact:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de l\'envoi du message. Veuillez réessayer.' 
+    });
   }
 });
 

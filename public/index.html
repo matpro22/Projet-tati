@@ -96,7 +96,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--nav-h);display:
 section{padding:6rem 4rem}
 .section-tag{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--green);margin-bottom:1rem;display:flex;align-items:center;gap:.8rem}
 .section-tag::before{content:'';display:block;width:30px;height:1px;background:var(--green)}
-.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,6vw,4.5rem);line-height:.95;letter-spacing:.02em}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,6vw,4.5rem);line-height:.95;letter-spacing:.02em;padding-left: 150px}
 .reveal{opacity:0;transform:translateY(25px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
 .reveal.vis{opacity:1;transform:none;padding-top: 46px;}
 
@@ -586,6 +586,30 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
   .co-head{padding:1.2rem 1.5rem}
   .choice-card{padding:2rem 1.5rem}
 }
+
+/* UNAVAILABLE SCREEN */
+.unavailable-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--black);position:relative;overflow:hidden;padding:2rem}
+.unavailable-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(184,255,87,.03) 0%,transparent 70%);animation:pulse 4s ease-in-out infinite}
+.unavailable-content{text-align:center;position:relative;z-index:2;max-width:600px}
+.unavailable-icon{margin-bottom:3rem;display:flex;justify-content:center}
+.construction-cone{font-size:8rem;animation:bounce 2s ease-in-out infinite;filter:drop-shadow(0 8px 16px rgba(0,0,0,.4))}
+.unavailable-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,8vw,5rem);line-height:.95;letter-spacing:.05em;margin-bottom:1.5rem;animation:fadeUp .9s .2s cubic-bezier(.16,1,.3,1) both}
+.unavailable-text{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray);margin-bottom:.8rem;animation:fadeUp .9s .3s cubic-bezier(.16,1,.3,1) both}
+.unavailable-subtext{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:500;letter-spacing:.05em;color:var(--gray);opacity:.7;margin-bottom:2rem;animation:fadeUp .9s .4s cubic-bezier(.16,1,.3,1) both}
+.unavailable-dots{display:flex;gap:.8rem;justify-content:center;margin-bottom:3rem;animation:fadeUp .9s .5s cubic-bezier(.16,1,.3,1) both}
+.unavailable-dots .dot{width:12px;height:12px;border-radius:50%;background:var(--green);animation:dotPulse 1.5s ease-in-out infinite}
+.unavailable-dots .dot:nth-child(2){animation-delay:.2s}
+.unavailable-dots .dot:nth-child(3){animation-delay:.4s}
+.unavailable-btn{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--black);background:var(--green);padding:.9rem 2.4rem;border:none;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);animation:fadeUp .9s .6s cubic-bezier(.16,1,.3,1) both}
+.unavailable-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(184,255,87,.3)}
+
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes dotPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ldrOut{to{opacity:0;transform:scale(1.1)}}
+@keyframes ldrBar{to{width:100%}}
+@keyframes marqAnim{to{transform:translateX(-50%)}}
 </style>
 </head>
 <body>
@@ -749,7 +773,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
     </div>
     <button class="nav-cart" onclick="openCart()" aria-label="Panier">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61H19.4a2 2 0 001.98-1.72L23 6H6"/></svg>
-      Panier
+      <span data-i18n="nav.cart">Panier</span>
       <span class="cart-badge" id="cartBadge">0</span>
     </button>
     <button class="ham" onclick="toggleMobileMenu()" aria-label="Menu" id="hamBtn">
@@ -775,37 +799,37 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
     <div class="hero-bg"></div>
     <div class="hero-grid"></div>
     <div class="acc-inner">
-      <div class="hero-badge">🏆 L'identité des joueurs</div>
+      <div class="hero-badge" data-i18n="home.badge">🏆 Ensemble sur tous les terrains</div>
       <h1 class="acc-title">Your Name<br/><span class="ac">Your</span> <span class="ol"> Story</span></h1>
-      <p class="acc-sub">Patch amovible haute qualité · Clubs sportifs &amp; Particuliers</p>
+      <p class="acc-sub" style="color:var(--white)" data-i18n="home.subtitle">Patch amovible haute qualité · Clubs sportifs &amp; Particuliers</p>
       <div class="sports-bar">
 
       </div>
       <div class="choice-wrap">
-        <div class="choice-intro">Qui êtes-vous ?</div>
+        <div class="choice-intro" data-i18n="home.who">Qui êtes-vous ?</div>
         <div class="choice-grid">
           <a href="#" class="choice-card" onclick="showPage('clubs');return false" aria-label="Accéder à la section clubs">
             <span class="choice-tag"><span>Club Sportif</span></span>
-            <div class="choice-tit">JE SUIS UN CLUB</div>
-            <p class="choice-desc">Équipez toute votre équipe. Devis personnalisé, envoi de maillots inclus, livraison groupée.</p>
+            <div class="choice-tit" data-i18n="home.club.title">JE SUIS UN CLUB</div>
+            <p class="choice-desc" data-i18n="home.club.desc">Équipez vos équipes. Devis personnalisé, envoi de maillots inclus, livraison groupée.</p>
             <div class="choice-feats">
-              <div class="choice-feat"><span class="choice-dot"></span>Devis sur mesure</div>
-              <div class="choice-feat"><span class="choice-dot"></span>Envoi d'enveloppe préaffranchie</div>
-              <div class="choice-feat"><span class="choice-dot"></span>Tarifs dégressifs</div>
+              <div class="choice-feat"><span class="choice-dot"></span><span data-i18n="home.club.feat1">Devis sur mesure</span></div>
+              <div class="choice-feat"><span class="choice-dot"></span><span data-i18n="home.club.feat2">Envoi d'enveloppe préaffranchie</span></div>
+              <div class="choice-feat"><span class="choice-dot"></span><span data-i18n="home.club.feat3">Tarifs dégressifs</span></div>
             </div>
-            <span class="choice-cta-lnk">Obtenir un devis →</span>
+            <span class="choice-cta-lnk" data-i18n="home.club.cta">Obtenir un devis →</span>
             <div class="choice-arrow">→</div>
           </a>
           <a href="#" class="choice-card" onclick="showPage('particuliers');return false" aria-label="Accéder à la section particuliers">
             <span class="choice-tag"><span>Particulier</span></span>
-            <div class="choice-tit">JE SUIS UN PARTICULIER</div>
-            <p class="choice-desc">Commandez en ligne, choisissez votre taille, couleur et nom. Livraison rapide partout en France.</p>
+            <div class="choice-tit" data-i18n="home.individual.title">JE SUIS UN PARTICULIER</div>
+            <p class="choice-desc" data-i18n="home.individual.desc">Commandez en ligne en personnalisant votre Backzo (taille, couleur, nom). Livraison partout en France et en Europe.</p>
             <div class="choice-feats">
-              <div class="choice-feat"><span class="choice-dot"></span>Configurateur en ligne</div>
-              <div class="choice-feat"><span class="choice-dot"></span>Paiement sécurisé Stripe</div>
-              <div class="choice-feat"><span class="choice-dot"></span>Livraison incluse</div>
+              <div class="choice-feat"><span class="choice-dot"></span><span data-i18n="home.individual.feat1">Configurateur en ligne</span></div>
+              <div class="choice-feat"><span class="choice-dot"></span><span data-i18n="home.individual.feat2">Paiement sécurisé Stripe</span></div>
+              <div class="choice-feat"><span class="choice-dot"></span><span data-i18n="home.individual.feat3">Livraison France & Europe</span></div>
             </div>
-            <span class="choice-cta-lnk">Commander →</span>
+            <span class="choice-cta-lnk" data-i18n="home.individual.cta">Commander →</span>
             <div class="choice-arrow">→</div>
           </a>
         </div>
@@ -814,32 +838,32 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
   </div>
   <div class="marq" aria-hidden="true">
     <div class="marq-track">
-      <div class="marq-item"><span class="marq-dot">●</span>FLOCAGE AMOVIBLE</div>
-      <div class="marq-item"><span class="marq-dot">●</span>NOM DU JOUEUR</div>
-      <div class="marq-item"><span class="marq-dot">●</span>60+ COULEURS</div>
-      <div class="marq-item"><span class="marq-dot">●</span>AMOVIBLE</div>
-      <div class="marq-item"><span class="marq-dot">●</span>CLUBS SPORTIFS</div>
-      <div class="marq-item"><span class="marq-dot">●</span>DEVIS SUR MESURE</div>
-      <div class="marq-item"><span class="marq-dot">●</span>PAIEMENT SÉCURISÉ</div>
-      <div class="marq-item"><span class="marq-dot">●</span>FLOCAGE AMOVIBLE</div>
-      <div class="marq-item"><span class="marq-dot">●</span>NOM DU JOUEUR</div>
-      <div class="marq-item"><span class="marq-dot">●</span>60+ COULEURS</div>
-      <div class="marq-item"><span class="marq-dot">●</span>AMOVIBLE</div>
-      <div class="marq-item"><span class="marq-dot">●</span>CLUBS SPORTIFS</div>
-      <div class="marq-item"><span class="marq-dot">●</span>DEVIS SUR MESURE</div>
-      <div class="marq-item"><span class="marq-dot">●</span>PAIEMENT SÉCURISÉ</div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">FLOCAGE AMOVIBLE</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.player">NOM DU JOUEUR</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">60+ COULEURS</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">AMOVIBLE</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.clubs">CLUBS SPORTIFS</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.quote">DEVIS SUR MESURE</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.payment">PAIEMENT SÉCURISÉ</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">FLOCAGE AMOVIBLE</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.player">NOM DU JOUEUR</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">60+ COULEURS</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">AMOVIBLE</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.clubs">CLUBS SPORTIFS</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.quote">DEVIS SUR MESURE</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.payment">PAIEMENT SÉCURISÉ</span></div>
     </div>
   </div>
   <footer>
     <div class="foot-inner">
-      <div><a href="#" class="foot-logo" onclick="showPage('accueil');return false">BACK<span>ZO</span></a><div class="foot-tagline">Flocage amovible · Clubs &amp; Particuliers</div></div>
+      <div><a href="#" class="foot-logo" onclick="showPage('accueil');return false">BACK<span>ZO</span></a><div class="foot-tagline" data-i18n="footer.tagline">Flocage amovible · Clubs &amp; Particuliers</div></div>
       <ul class="foot-links">
-        <li><button onclick="openModal('cgv')">CGV</button></li>
-        <li><button onclick="openModal('mentions')">Mentions légales</button></li>
-        <li><button onclick="openModal('privacy')">Confidentialité</button></li>
+        <li><button onclick="openModal('cgv')" data-i18n="footer.cgv">CGV</button></li>
+        <li><button onclick="openModal('mentions')" data-i18n="footer.legal">Mentions légales</button></li>
+        <li><button onclick="openModal('privacy')" data-i18n="footer.privacy">Confidentialité</button></li>
         <li><a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener">TikTok</a></li>
       </ul>
-      <div class="foot-copy">© 2026 BackZo — Tous droits réservés <span style="opacity:0.3;margin-left:1rem;cursor:pointer" onclick="showPage('admin')">·</span></div>
+      <div class="foot-copy">© 2026 BackZo — <span data-i18n="footer.copyright">Tous droits réservés</span> <span style="opacity:0.3;margin-left:1rem;cursor:pointer" onclick="showPage('admin')">·</span></div>
     </div>
   </footer>
 </div>
@@ -850,13 +874,13 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
     <div class="hero-bg" style="background:radial-gradient(ellipse 60% 60% at 70% 50%,rgba(184,255,87,.06) 0%,transparent 70%),radial-gradient(ellipse 40% 80% at 10% 80%,rgba(184,255,87,.03) 0%,transparent 60%)"></div>
     <div class="hero-grid"></div>
     <div class="hero-content">
-      <div class="hero-badge">🏟️ Solution complète pour clubs sportifs</div>
+      <div class="hero-badge" data-i18n="clubs.badge">🏟️ Solution complète pour clubs sportifs</div>
       <h1 class="hero-title">BACK<span class="ac">ZONEZ</span> VOTRE<br/><span class="ol">ÉQUIPE</span></h1>
-      <p class="hero-tag">Flocage amovible sur-mesure</p>
-      <p class="hero-sub">Envoyez vos maillots, on s'occupe du reste. <em>Devis gratuit</em> en 24h.</p>
+      <p class="hero-tag" data-i18n="clubs.tag">Système d'identification personnalisée amovible et sur mesure</p>
+      <p class="hero-sub" data-i18n="clubs.subtitle">Envoyez vos maillots, on s'occupe du reste. <em>Devis gratuit</em> en 24h.</p>
       <div class="hero-acts">
-        <button class="btn-pri" onclick="document.getElementById('contact-clubs').scrollIntoView({behavior:'smooth'})">Demander un devis</button>
-        <button class="btn-sec" onclick="document.getElementById('comment-clubs').scrollIntoView({behavior:'smooth'})">Comment ça marche →</button>
+        <button class="btn-pri" onclick="document.getElementById('contact-clubs').scrollIntoView({behavior:'smooth'})" data-i18n="clubs.cta.quote">Demander un devis</button>
+        <button class="btn-sec" onclick="document.getElementById('comment-clubs').scrollIntoView({behavior:'smooth'})" data-i18n="clubs.cta.how">Comment ça marche →</button>
       </div>
     </div>
     <div class="hero-visual">
@@ -883,11 +907,11 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
     <div class="section-tag">Processus</div>
     <h2 class="section-title reveal">COMMENT ÇA<br/><span style="color:var(--green)">MARCHE</span></h2>
     <div class="how-grid">
-      <div class="how-card reveal"><div class="how-num">01</div><div class="how-tit">Contactez-nous</div><p class="how-desc">Envoyez-nous la liste de vos joueurs, couleurs souhaitées et typographie. On établit un devis personnalisé adapté à votre effectif.</p></div>
-      <div class="how-card reveal"><div class="how-num">02</div><div class="how-tit">Enveloppe préaffranchie</div><p class="how-desc">Vous recevez une enveloppe préaffranchie pour jusqu'à 15 maillots. Glissez-les, déposez au point relais le plus proche.</p></div>
-      <div class="how-card reveal"><div class="how-num">03</div><div class="how-tit">Fabrication premium</div><p class="how-desc">Chaque flocage est fabriqué avec des matériaux premium pour un rendu professionnel et durable sur tous les terrains.</p></div>
-      <div class="how-card reveal"><div class="how-num">04</div><div class="how-tit">Réception sécurisée</div><p class="how-desc">Vos maillots équipés vous sont réexpédiés contre signature à l'adresse de votre choix. Suivi en temps réel.</p></div>
-      <div class="how-card reveal"><div class="how-num">05</div><div class="how-tit">Posez &amp; retirez</div><p class="how-desc">Fixez en quelques secondes avant le match. Retirez après pour laver — réutilisable à l'infini.</p></div>
+      <div class="how-card reveal"><div class="how-num">01</div><div class="how-tit" data-i18n="clubs.how.step1.title">Contactez-nous</div><p class="how-desc" data-i18n="clubs.how.step1.desc">Envoyez-nous la liste de vos joueurs, couleurs souhaitées et typographie. On établit un devis personnalisé adapté à votre effectif.</p></div>
+      <div class="how-card reveal"><div class="how-num">02</div><div class="how-tit" data-i18n="clubs.how.step2.title">Enveloppe préaffranchie</div><p class="how-desc" data-i18n="clubs.how.step2.desc">Recevez votre enveloppe préaffranchie, glissez jusqu'à 16 maillots et déposez-les en point relais le plus proche.</p></div>
+      <div class="how-card reveal"><div class="how-num">03</div><div class="how-tit" data-i18n="clubs.how.step3.title">Fabrication premium</div><p class="how-desc" data-i18n="clubs.how.step3.desc">Chaque Backzo est fabriqué avec des matériaux premium pour un rendu professionnel et durable sur tous les terrains.</p></div>
+      <div class="how-card reveal"><div class="how-num">04</div><div class="how-tit" data-i18n="clubs.how.step4.title">Réception sécurisée</div><p class="how-desc" data-i18n="clubs.how.step4.desc">Vos maillots équipés vous sont réexpédiés contre signature à l'adresse de votre choix.</p></div>
+      <div class="how-card reveal"><div class="how-num">05</div><div class="how-tit" data-i18n="clubs.how.step5.title">Posez &amp; retirez</div><p class="how-desc" data-i18n="clubs.how.step5.desc">Fixez le Backzo en quelques secondes avant le match. Retirez avant lavage et réutilisez-le.</p></div>
     </div>
   </section>
   <section style="background:var(--black)">
@@ -896,57 +920,57 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
         <div class="section-tag">Pourquoi BackZo</div>
         <h2 class="section-title reveal">FAIT POUR<br/><span style="color:var(--green)">LES CLUBS</span></h2>
         <div class="av-list" style="margin-top:2.5rem">
-          <div class="av-item reveal"><div class="av-ico">🔄</div><div><div class="av-tit">Maillots réaffectables</div><p class="av-desc">Un joueur part, un autre arrive ? Retirez le flocage et réaffectez le maillot sans investissement supplémentaire.</p></div></div>
-          <div class="av-item reveal"><div class="av-ico">💰</div><div><div class="av-tit">Économique</div><p class="av-desc">Plus besoin d'investir dans de nouveaux maillots à chaque changement d'effectif. Réduction drastique des coûts club.</p></div></div>
-          <div class="av-item reveal"><div class="av-ico">🏟️</div><div><div class="av-tit">Fierté &amp; identité</div><p class="av-desc">Chaque joueur avec son nom dans le dos — vecteur de fierté et d'esprit d'équipe fort sur le terrain.</p></div></div>
-          <div class="av-item reveal"><div class="av-ico">🎨</div><div><div class="av-tit">Design premium</div><p class="av-desc">Matériaux de qualité, couleurs vives et durables — un rendu professionnel qui valorise votre club.</p></div></div>
+          <div class="av-item reveal"><div class="av-ico">🔄</div><div><div class="av-tit" data-i18n="clubs.why.feat1.title">Maillots réaffectables</div><p class="av-desc" data-i18n="clubs.why.feat1.desc">Un joueur part, un autre arrive ? Retirez le Backzo et réaffectez le maillot sans investissement supplémentaire.</p></div></div>
+          <div class="av-item reveal"><div class="av-ico">💰</div><div><div class="av-tit" data-i18n="clubs.why.feat2.title">Économique</div><p class="av-desc" data-i18n="clubs.why.feat2.desc">Plus besoin d'investir dans de nouveaux maillots à chaque changement d'effectif. Réduction drastique des coûts club.</p></div></div>
+          <div class="av-item reveal"><div class="av-ico">🏟️</div><div><div class="av-tit" data-i18n="clubs.why.feat3.title">Fierté &amp; identité</div><p class="av-desc" data-i18n="clubs.why.feat3.desc">Chaque joueur avec son nom dans le dos — vecteur de fierté et d'esprit d'équipe fort sur le terrain.</p></div></div>
+          <div class="av-item reveal"><div class="av-ico">🎨</div><div><div class="av-tit" data-i18n="clubs.why.feat4.title">Design premium</div><p class="av-desc" data-i18n="clubs.why.feat4.desc">Matériaux de qualité, couleurs vives et durables — un rendu professionnel qui valorise votre club.</p></div></div>
         </div>
       </div>
       <div class="av-visual reveal">
-        <div class="av-big">VOTRE<br/>ÉQUIPE</div>
-        <div class="av-tag t1">Amovible ✓</div>
-        <div class="av-tag t3">Premium ✓</div>
-        <div class="av-tag t2">Réutilisable ✓</div>
+        <div class="av-big" data-i18n="clubs.visual.team">VOTRE<br/>ÉQUIPE</div>
+        <div class="av-tag t1" data-i18n="clubs.visual.removable">Amovible ✓</div>
+        <div class="av-tag t3" data-i18n="clubs.visual.premium">Premium ✓</div>
+        <div class="av-tag t2" data-i18n="clubs.visual.reusable">Réutilisable ✓</div>
       </div>
     </div>
   </section>
   <section style="background:var(--deep)">
-    <div class="section-tag">Options</div>
-    <h2 class="section-title reveal">CE QU'ON<br/><span style="color:var(--green)">PROPOSE</span></h2>
+    <div class="section-tag" data-i18n="section.options">Options</div>
+    <h2 class="section-title reveal" data-i18n="clubs.options.title">CE QU'ON<br/><span style="color:var(--green)">PROPOSE</span></h2>
     <div class="perso-split">
       <div class="perso-bloc reveal">
-        <span class="pb-tag amov">Amovible</span>
-        <div class="pb-tit">Flocage amovible</div>
-        <p class="pb-desc">Notre cœur de métier. Flocage thermo-amovible du nom de chaque joueur. Posé avant le match, retiré après — le maillot reste intact.</p>
+        <span class="pb-tag amov" data-i18n="clubs.options.removable.tag">Amovible</span>
+        <div class="pb-tit" data-i18n="clubs.options.removable.title">Flocage amovible</div>
+        <p class="pb-desc" data-i18n="clubs.options.removable.desc">Notre cœur de métier. Flocage thermo-amovible du nom de chaque joueur. Posé avant le match, retiré après — le maillot reste intact.</p>
         <div class="pb-items">
-          <div class="pb-item"><span class="pb-dot"></span>Nom du joueur (dos du maillot)</div>
-          <div class="pb-item"><span class="pb-dot"></span>60+ couleurs disponibles</div>
-          <div class="pb-item"><span class="pb-dot"></span>Plusieurs typographies</div>
-          <div class="pb-item"><span class="pb-dot"></span>Compatible tous maillots sport</div>
-          <div class="pb-item"><span class="pb-dot"></span>Devis adapté à votre effectif</div>
+          <div class="pb-item"><span class="pb-dot"></span><span data-i18n="clubs.options.removable.feat1">Nom du joueur (dos du maillot)</span></div>
+          <div class="pb-item"><span class="pb-dot"></span><span data-i18n="clubs.options.removable.feat2">60+ couleurs disponibles</span></div>
+          <div class="pb-item"><span class="pb-dot"></span><span data-i18n="clubs.options.removable.feat3">Plusieurs typographies</span></div>
+          <div class="pb-item"><span class="pb-dot"></span><span data-i18n="clubs.options.removable.feat4">Compatible tous maillots sport</span></div>
+          <div class="pb-item"><span class="pb-dot"></span><span data-i18n="clubs.options.removable.feat5">Devis adapté à votre effectif</span></div>
         </div>
       </div>
       <div class="perso-bloc reveal">
-        <span class="pb-tag perm">Permanent</span>
-        <div class="pb-tit">Flocage permanent</div>
-        <p class="pb-desc">Pour les éléments fixes de votre tenue — sponsor, logo de club, numéro. Rendu haute définition durable.</p>
+        <span class="pb-tag perm" data-i18n="clubs.options.permanent.tag">Permanent</span>
+        <div class="pb-tit" data-i18n="clubs.options.permanent.title">Flocage permanent</div>
+        <p class="pb-desc" data-i18n="clubs.options.permanent.desc">Pour les éléments fixes de votre tenue — sponsor, logo de club, numéro. Rendu haute définition durable.</p>
         <div class="pb-items">
-          <div class="pb-item"><span class="pb-dot gr"></span>Logo de club / association</div>
-          <div class="pb-item"><span class="pb-dot gr"></span>Numéro de maillot</div>
-          <div class="pb-item"><span class="pb-dot gr"></span>Sponsor</div>
-          <div class="pb-item"><span class="pb-dot gr"></span>Rendu haute définition</div>
-          <div class="pb-item"><span class="pb-dot gr"></span>60+ couleurs disponibles</div>
+          <div class="pb-item"><span class="pb-dot gr"></span><span data-i18n="clubs.options.permanent.feat1">Logo de club / association</span></div>
+          <div class="pb-item"><span class="pb-dot gr"></span><span data-i18n="clubs.options.permanent.feat2">Numéro de maillot</span></div>
+          <div class="pb-item"><span class="pb-dot gr"></span><span data-i18n="clubs.options.permanent.feat3">Sponsor</span></div>
+          <div class="pb-item"><span class="pb-dot gr"></span><span data-i18n="clubs.options.permanent.feat4">Rendu haute définition</span></div>
+          <div class="pb-item"><span class="pb-dot gr"></span><span data-i18n="clubs.options.permanent.feat5">60+ couleurs disponibles</span></div>
         </div>
       </div>
     </div>
   </section>
   <section style="background:var(--black)" id="couleurs-clubs">
-    <div class="section-tag">Palette officielle</div>
+    <div class="section-tag" data-i18n="section.colors">Palette officielle</div>
     <div class="color-grid-wrap">
       <div>
-        <h2 class="section-title reveal">60+ COULEURS<br/><span style="color:var(--green)">DISPONIBLES</span></h2>
-        <p style="color:var(--gray);font-size:.95rem;line-height:1.8;margin-top:1rem;max-width:380px">Notre palette complète couvre plus de 60 teintes — des couleurs vives aux tons sobres.</p>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-top:1.2rem;display:flex;align-items:center;gap:.5rem">⬆ Passez sur une couleur pour voir son code</div>
+        <h2 class="section-title reveal" data-i18n="colors.title">60+ COULEURS<br/><span style="color:var(--green)">DISPONIBLES</span></h2>
+        <p style="color:var(--gray);font-size:.95rem;line-height:1.8;margin-top:1rem;max-width:380px" data-i18n="colors.subtitle">Notre palette complète couvre plus de 60 teintes — des couleurs vives aux tons sobres.</p>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-top:1.2rem;display:flex;align-items:center;gap:.5rem" data-i18n="colors.hover">⬆ Passez sur une couleur pour voir son code</div>
       </div>
       <div class="color-grid">
         <div class="color-grid-lbl">Rouges · Oranges · Jaunes</div>
@@ -963,16 +987,16 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
     </div>
   </section>
   <div class="stats reveal">
-    <div><div class="stat-num">60+</div><div class="stat-lbl">Couleurs de flocage</div></div>
-    <div><div class="stat-num">100%</div><div class="stat-lbl">Amovible &amp; réutilisable</div></div>
-    <div><div class="stat-num">2</div><div class="stat-lbl">Types de flocage</div></div>
+    <div><div class="stat-num">60+</div><div class="stat-lbl" data-i18n="stats.colors">Couleurs de flocage</div></div>
+    <div><div class="stat-num">100%</div><div class="stat-lbl" data-i18n="stats.removable">Amovible &amp; réutilisable</div></div>
+    <div><div class="stat-num">2</div><div class="stat-lbl" data-i18n="stats.types">Types de flocage</div></div>
   </div>
   <section class="cta-section" id="contact-clubs">
-    <h2 class="cta-tit reveal">VOTRE CLUB<br/><span style="color:var(--green)">MÉRITE MIEUX.</span></h2>
-    <p class="cta-sub reveal">Vivez une expérience forte — ensemble sur tous les terrains. Parlez-nous de votre projet.</p>
+    <h2 class="cta-tit reveal" data-i18n="clubs.cta.title">INNOVANT POUR<br/><span style="color:var(--green)">VOTRE CLUB</span></h2>
+    <p class="cta-sub reveal" data-i18n="clubs.cta.subtitle">Vivez une expérience forte — ensemble sur tous les terrains. Parlez-nous de votre projet.</p>
     <div class="cta-form reveal">
       <input class="cta-inp" type="email" id="ctaEmail" placeholder="contact@votreclub.fr" aria-label="Email"/>
-      <button class="cta-sub-btn" onclick="sendClubCTA()">Nous contacter →</button>
+      <button class="cta-sub-btn" onclick="sendClubCTA()" data-i18n="clubs.cta.button">Nous contacter →</button>
     </div>
     <div class="cta-msg" id="ctaMsg" role="status"></div>
   </section>
@@ -985,9 +1009,9 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
     <div class="hero-bg" style="background:radial-gradient(ellipse 60% 80% at 30% 50%,rgba(184,255,87,.06) 0%,transparent 70%)"></div>
     <div class="hero-grid"></div>
     <div class="hero-content">
-      <div class="hero-badge">🎽 Configurateur en ligne · Paiement sécurisé Stripe</div>
+      <div class="hero-badge" data-i18n="individual.badge">🎽 Configurateur en ligne · Paiement sécurisé Stripe</div>
       <h1 class="hero-title">VOTRE <span class="ac">BACK</span><span class="ol">ZO</span><br/>SUR-MESURE.</h1>
-      <p class="hero-sub">Configurez votre flocage, choisissez couleur et taille, commandez en toute sécurité. <em>Livraison rapide</em> partout en France.</p>
+      <p class="hero-sub" data-i18n="individual.subtitle">Configurez votre flocage, choisissez couleur et taille, commandez en toute sécurité. <em>Livraison rapide</em> partout en France.</p>
       <div class="hero-acts">
         <button class="btn-pri" onclick="document.getElementById('config-section').scrollIntoView({behavior:'smooth'})">Configurer maintenant</button>
       </div>
@@ -995,63 +1019,96 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
   </div>
   <div class="marq" aria-hidden="true">
     <div class="marq-track">
-      <div class="marq-item"><span class="marq-dot">●</span>FLOCAGE AMOVIBLE</div><div class="marq-item"><span class="marq-dot">●</span>TAILLE S : 25×6 cm</div><div class="marq-item"><span class="marq-dot">●</span>TAILLE L : 27×7 cm</div><div class="marq-item"><span class="marq-dot">●</span>60+ COULEURS</div><div class="marq-item"><span class="marq-dot">●</span>PAIEMENT SÉCURISÉ</div><div class="marq-item"><span class="marq-dot">●</span>LIVRAISON INCLUSE</div>
-      <div class="marq-item"><span class="marq-dot">●</span>FLOCAGE AMOVIBLE</div><div class="marq-item"><span class="marq-dot">●</span>TAILLE S : 25×6 cm</div><div class="marq-item"><span class="marq-dot">●</span>TAILLE L : 27×7 cm</div><div class="marq-item"><span class="marq-dot">●</span>60+ COULEURS</div><div class="marq-item"><span class="marq-dot">●</span>PAIEMENT SÉCURISÉ</div><div class="marq-item"><span class="marq-dot">●</span>LIVRAISON INCLUSE</div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">FLOCAGE AMOVIBLE</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.s">TAILLE S : 25×6 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.l">TAILLE L : 27×7 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">60+ COULEURS</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.payment">PAIEMENT SÉCURISÉ</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.delivery.europe">LIVRAISON FRANCE & EUROPE</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">FLOCAGE AMOVIBLE</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.s">TAILLE S : 25×6 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.l">TAILLE L : 27×7 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">60+ COULEURS</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.payment">PAIEMENT SÉCURISÉ</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.delivery.europe">LIVRAISON FRANCE & EUROPE</span></div>
     </div>
   </div>
   <!-- CONFIGURATEUR -->
   <div class="config-section" id="config-section">
-    <div class="section-tag">Configurateur</div>
-    <h2 class="section-title reveal">CRÉEZ VOTRE<br/><span style="color:var(--green)">BACKZO</span></h2>
+    <div class="section-tag" data-i18n="section.configurator">Configurateur</div>
+    <h2 class="section-title reveal" data-i18n="individual.config.title">CRÉEZ VOTRE<br/><span style="color:var(--green)">BACKZO</span></h2>
     <div class="config-layout">
       <div class="config-form">
         <!-- TAILLE -->
         <div class="form-grp reveal">
-          <div class="form-lbl"><span class="step-num">1</span> Choisissez la taille</div>
-          <p class="form-hint">Sélectionnez le format adapté à votre maillot.</p>
+          <div class="form-lbl"><span class="step-num">1</span> <span data-i18n="individual.config.step1">Choisissez la taille</span></div>
+          <p class="form-hint" data-i18n="individual.config.step1.hint">Sélectionnez le format adapté à votre maillot.</p>
           <div class="size-opts">
             <button class="size-btn active" id="sizeS" onclick="selectSize('S',this)">
-              <span class="size-code">S</span><span class="size-dims">25 × 6 cm</span><span style="font-size:.78rem;color:var(--gray)">12,00 €</span>
+              <span class="size-code" data-i18n="individual.size.s">S</span><span class="size-dims" data-i18n="individual.size.s.dims">25 × 6 cm</span><span style="font-size:.78rem;color:var(--gray)">13,00 €</span>
             </button>
             <button class="size-btn" id="sizeL" onclick="selectSize('L',this)">
-              <span class="size-code">L</span><span class="size-dims">27 × 7 cm</span><span style="font-size:.78rem;color:var(--gray)">14,00 €</span>
+              <span class="size-code" data-i18n="individual.size.l">L</span><span class="size-dims" data-i18n="individual.size.l.dims">27 × 7 cm</span><span style="font-size:.78rem;color:var(--gray)">13,00 €</span>
             </button>
+          </div>
+        </div>
+        <!-- COULEUR PATCH -->
+        <div class="form-grp reveal">
+          <div class="form-lbl"><span class="step-num">2</span> <span data-i18n="individual.config.step2">Couleur du patch</span></div>
+          <p class="form-hint" data-i18n="individual.config.step2.hint">Couleur de fond du patch amovible.</p>
+          <div class="color-swatches" id="bgSwatches">
+            <div class="p-swatch sel" style="background:#b8ff57" title="BackZo Green" onclick="selectBg('#b8ff57',this)"></div>
+            <div class="p-swatch" style="background:#ffffff;border:1.5px solid #444" title="Blanc" onclick="selectBg('#ffffff',this)"></div>
+            <div class="p-swatch" style="background:#0a0a0a;border:1.5px solid #444" title="Noir" onclick="selectBg('#0a0a0a',this)"></div>
+            <div class="p-swatch" style="background:#c0c0c0" title="Argent" onclick="selectBg('#c0c0c0',this)"></div>
+            <div class="p-swatch" style="background:#6b0f1a" title="Rouge foncé" onclick="selectBg('#6b0f1a',this)"></div>
+            <div class="p-swatch" style="background:#ff4500" title="Orange vif" onclick="selectBg('#ff4500',this)"></div>
+            <div class="p-swatch" style="background:#e35c2a" title="Orange" onclick="selectBg('#e35c2a',this)"></div>
+            <div class="p-swatch" style="background:#c8860a" title="Or foncé" onclick="selectBg('#c8860a',this)"></div>
+            <div class="p-swatch" style="background:#f5d000" title="Jaune" onclick="selectBg('#f5d000',this)"></div>
+            <div class="p-swatch" style="background:#7a0a20" title="Bordeaux" onclick="selectBg('#7a0a20',this)"></div>
+            <div class="p-swatch" style="background:#c0152a" title="Rouge" onclick="selectBg('#c0152a',this)"></div>
+            <div class="p-swatch" style="background:#d42020" title="Rouge vif" onclick="selectBg('#d42020',this)"></div>
+            <div class="p-swatch" style="background:#b8940c" title="Or" onclick="selectBg('#b8940c',this)"></div>
+            <div class="p-swatch" style="background:#d4ab30" title="Or clair" onclick="selectBg('#d4ab30',this)"></div>
+            <div class="p-swatch" style="background:#7ac8e8" title="Bleu ciel" onclick="selectBg('#7ac8e8',this)"></div>
+            <div class="p-swatch" style="background:#b51c28" title="Rouge carmin" onclick="selectBg('#b51c28',this)"></div>
+            <div class="p-swatch" style="background:#b8a070" title="Beige" onclick="selectBg('#b8a070',this)"></div>
+            <div class="p-swatch" style="background:#a07850" title="Marron clair" onclick="selectBg('#a07850',this)"></div>
+            <div class="p-swatch" style="background:#c86030" title="Orange terre" onclick="selectBg('#c86030',this)"></div>
+            <div class="p-swatch" style="background:#88c8e8" title="Bleu clair" onclick="selectBg('#88c8e8',this)"></div>
+            <div class="p-swatch" style="background:#8c1820" title="Rouge bordeaux" onclick="selectBg('#8c1820',this)"></div>
+            <div class="p-swatch" style="background:#909070" title="Gris vert" onclick="selectBg('#909070',this)"></div>
+            <div class="p-swatch" style="background:#e890a0" title="Rose" onclick="selectBg('#e890a0',this)"></div>
+            <div class="p-swatch" style="background:#e8e050" title="Jaune citron" onclick="selectBg('#e8e050',this)"></div>
+            <div class="p-swatch" style="background:#f8e020" title="Jaune vif" onclick="selectBg('#f8e020',this)"></div>
+            <div class="p-swatch" style="background:#1a4020" title="Vert foncé" onclick="selectBg('#1a4020',this)"></div>
+            <div class="p-swatch" style="background:#186030" title="Vert forêt" onclick="selectBg('#186030',this)"></div>
+            <div class="p-swatch" style="background:#30b090" title="Turquoise" onclick="selectBg('#30b090',this)"></div>
+            <div class="p-swatch" style="background:#5090c0" title="Bleu" onclick="selectBg('#5090c0',this)"></div>
+            <div class="p-swatch" style="background:#90c8e8" title="Bleu pastel" onclick="selectBg('#90c8e8',this)"></div>
+            <div class="p-swatch" style="background:#404040" title="Gris foncé" onclick="selectBg('#404040',this)"></div>
+            <div class="p-swatch" style="background:#3a5030" title="Vert olive" onclick="selectBg('#3a5030',this)"></div>
+            <div class="p-swatch" style="background:#106040" title="Vert émeraude" onclick="selectBg('#106040',this)"></div>
+            <div class="p-swatch" style="background:#187060" title="Vert teal" onclick="selectBg('#187060',this)"></div>
+            <div class="p-swatch" style="background:#3070a0" title="Bleu roi" onclick="selectBg('#3070a0',this)"></div>
+            <div class="p-swatch" style="background:#4090d0" title="Bleu azur" onclick="selectBg('#4090d0',this)"></div>
+            <div class="p-swatch" style="background:#d0d0d0" title="Gris clair" onclick="selectBg('#d0d0d0',this)"></div>
+            <div class="p-swatch" style="background:#506040" title="Kaki" onclick="selectBg('#506040',this)"></div>
+            <div class="p-swatch" style="background:#809040" title="Vert olive clair" onclick="selectBg('#809040',this)"></div>
+            <div class="p-swatch" style="background:#7080c0" title="Bleu lavande" onclick="selectBg('#7080c0',this)"></div>
+            <div class="p-swatch" style="background:#2060c0" title="Bleu marine" onclick="selectBg('#2060c0',this)"></div>
+            <div class="p-swatch" style="background:#161616;border:1.5px solid #444" title="Noir foncé" onclick="selectBg('#161616',this)"></div>
+            <div class="p-swatch" style="background:#1a3a6b" title="Bleu nuit" onclick="selectBg('#1a3a6b',this)"></div>
+            <div class="p-swatch" style="background:#2d0000" title="Rouge sombre" onclick="selectBg('#2d0000',this)"></div>
+            <div class="p-swatch" style="background:#0d2b0d" title="Vert sombre" onclick="selectBg('#0d2b0d',this)"></div>
+            <div class="p-swatch" style="background:#1a1a3a" title="Violet sombre" onclick="selectBg('#1a1a3a',this)"></div>
           </div>
         </div>
         <!-- COULEUR TEXTE -->
         <div class="form-grp reveal">
-          <div class="form-lbl"><span class="step-num">2</span> Couleur du flocage</div>
-          <p class="form-hint">Choisissez la couleur de votre texte.</p>
+          <div class="form-lbl"><span class="step-num">3</span> <span data-i18n="individual.config.step3">Couleur du texte</span></div>
+          <p class="form-hint" data-i18n="individual.config.step3.hint">Choisissez la couleur de votre texte.</p>
           <div class="color-swatches" id="colorSwatches">
-            <div class="p-swatch sel" style="background:#b8ff57" title="#b8ff57" onclick="selectColor('#b8ff57',this)"></div>
-            <div class="p-swatch" style="background:#ffffff;border:1.5px solid #444" title="#ffffff" onclick="selectColor('#ffffff',this)"></div>
-            <div class="p-swatch" style="background:#ff5757" title="#ff5757" onclick="selectColor('#ff5757',this)"></div>
-            <div class="p-swatch" style="background:#5784ff" title="#5784ff" onclick="selectColor('#5784ff',this)"></div>
-            <div class="p-swatch" style="background:#ffcc00" title="#ffcc00" onclick="selectColor('#ffcc00',this)"></div>
-            <div class="p-swatch" style="background:#ff9d00" title="#ff9d00" onclick="selectColor('#ff9d00',this)"></div>
-            <div class="p-swatch" style="background:#00d4ff" title="#00d4ff" onclick="selectColor('#00d4ff',this)"></div>
-            <div class="p-swatch" style="background:#ff00aa" title="#ff00aa" onclick="selectColor('#ff00aa',this)"></div>
-            <div class="p-swatch" style="background:#40c8b8" title="#40c8b8" onclick="selectColor('#40c8b8',this)"></div>
-            <div class="p-swatch" style="background:#c0152a" title="#c0152a" onclick="selectColor('#c0152a',this)"></div>
-          </div>
-        </div>
-        <!-- COULEUR FOND -->
-        <div class="form-grp reveal">
-          <div class="form-lbl"><span class="step-num">3</span> Couleur du patch</div>
-          <p class="form-hint">Couleur de fond du patch amovible.</p>
-          <div class="color-swatches" id="bgSwatches">
-            <div class="p-swatch sel" style="background:#161616;border:1.5px solid #444" title="#161616" onclick="selectBg('#161616',this)"></div>
-            <div class="p-swatch" style="background:#ffffff;border:1.5px solid #444" title="#ffffff" onclick="selectBg('#ffffff',this)"></div>
-            <div class="p-swatch" style="background:#1a3a6b" title="#1a3a6b" onclick="selectBg('#1a3a6b',this)"></div>
-            <div class="p-swatch" style="background:#2d0000" title="#2d0000" onclick="selectBg('#2d0000',this)"></div>
-            <div class="p-swatch" style="background:#0d2b0d" title="#0d2b0d" onclick="selectBg('#0d2b0d',this)"></div>
-            <div class="p-swatch" style="background:#1a1a3a" title="#1a1a3a" onclick="selectBg('#1a1a3a',this)"></div>
+            <div class="p-swatch sel" style="background:#ffffff;border:1.5px solid #444" title="Blanc" onclick="selectColor('#ffffff',this)"></div>
+            <div class="p-swatch" style="background:#0a0a0a;border:1.5px solid #444" title="Noir" onclick="selectColor('#0a0a0a',this)"></div>
+            <div class="p-swatch" style="background:#c0152a" title="Rouge" onclick="selectColor('#c0152a',this)"></div>
           </div>
         </div>
         <!-- NOMS -->
         <div class="form-grp reveal">
-          <div class="form-lbl"><span class="step-num">4</span> Nom(s) à flocquer</div>
-          <p class="form-hint">Ajoutez un ou plusieurs noms (max 20 caractères chacun).</p>
+          <div class="form-lbl"><span class="step-num">4</span> <span data-i18n="individual.config.step4">Nom(s) à flocquer</span></div>
+          <p class="form-hint" data-i18n="individual.config.step4.hint">Ajoutez un ou plusieurs noms (max 20 caractères chacun).</p>
           <div class="name-entries" id="nameEntries">
             <div class="name-entry">
               <input class="bz-inp" type="text" placeholder="Ex : DUPONT" maxlength="20" oninput="updatePreview(this)" aria-label="Nom à flocquer"/>
@@ -1059,50 +1116,50 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
               <button class="rm-btn" onclick="removeNameEntry(this)" aria-label="Supprimer">✕</button>
             </div>
           </div>
-          <button class="add-name-btn" onclick="addNameEntry()">+ Ajouter un nom</button>
+          <button class="add-name-btn" onclick="addNameEntry()" data-i18n="individual.add.name">+ Ajouter un nom</button>
         </div>
         <!-- EMAIL -->
         <div class="form-grp reveal">
-          <div class="form-lbl"><span class="step-num">5</span> Votre email</div>
-          <p class="form-hint">Pour la confirmation de commande et le suivi.</p>
+          <div class="form-lbl"><span class="step-num">5</span> <span data-i18n="individual.config.step5">Votre email</span></div>
+          <p class="form-hint" data-i18n="individual.config.step5.hint">Pour la confirmation de commande et le suivi.</p>
           <input class="bz-inp" type="email" id="custEmail" placeholder="votre@email.fr" aria-label="Votre email"/>
         </div>
       </div>
       <!-- PREVIEW PANEL -->
       <div class="preview-panel">
-        <div class="preview-lbl">Aperçu en temps réel</div>
+        <div class="preview-lbl" data-i18n="individual.preview">Aperçu en temps réel</div>
         <div class="preview-jersey">
           <div style="position:relative">
             <div class="jersey-glow"></div>
             <svg width="260" height="310" viewBox="0 0 280 340" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M80 30 L30 70 L50 110 L80 95 L80 300 L200 300 L200 95 L230 110 L250 70 L200 30 L175 50 C165 60 155 65 140 65 C125 65 115 60 105 50 Z" fill="#161616" stroke="#2a2a2a" stroke-width="1.5"/>
               <path d="M115 32 Q140 55 165 32" stroke="#b8ff57" stroke-width="2" fill="none"/>
-              <rect x="80" y="95" width="120" height="3" fill="#b8ff57" opacity="0.35"/>
-              <rect id="previewPatch" x="93" y="117" width="94" height="28" rx="2" fill="#161616" stroke="rgba(184,255,87,0.3)" stroke-width="1"/>
-              <text id="previewName" x="140" y="136" font-family="Bebas Neue, sans-serif" font-size="20" fill="#b8ff57" text-anchor="middle" letter-spacing="3">VOTRE NOM</text>
+              
+              <rect id="previewPatch" x="93" y="90" width="94" height="28" rx="2" fill="#b8ff57" stroke="rgba(184,255,87,0.3)" stroke-width="1"/>
+              <text id="previewName" x="140" y="109" font-family="Bebas Neue, sans-serif" font-size="20" fill="#ffffff" text-anchor="middle" letter-spacing="3" data-i18n="individual.preview.name">VOTRE NOM</text>
             </svg>
           </div>
         </div>
-        <div id="prevSizeInfo" style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gray);margin-bottom:1rem">Taille S — 25 × 6 cm</div>
+        <div id="prevSizeInfo" style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gray);margin-bottom:1rem" data-i18n="individual.preview.size.s">Taille S — 25 × 6 cm</div>
         <div class="summary-box">
-          <div class="sum-row"><span>Taille</span><span class="sum-val" id="sumSize">S</span></div>
-          <div class="sum-row"><span>Couleur</span><span class="sum-val" id="sumColor">Vert flash</span></div>
-          <div class="sum-row"><span>Quantité totale</span><span class="sum-val" id="sumQty">1</span></div>
-          <div class="sum-row"><span>Prix unitaire</span><span class="sum-val" id="sumUnit">12,00 €</span></div>
-          <div class="sum-row sum-total"><span>Total</span><span class="sum-val" id="sumTotal">12,00 €</span></div>
+          <div class="sum-row"><span data-i18n="individual.summary.size">Taille</span><span class="sum-val" id="sumSize">S</span></div>
+          <div class="sum-row"><span data-i18n="individual.summary.color">Couleur</span><span class="sum-val" id="sumColor">Blanc</span></div>
+          <div class="sum-row"><span data-i18n="individual.summary.qty">Quantité totale</span><span class="sum-val" id="sumQty">1</span></div>
+          <div class="sum-row"><span data-i18n="individual.summary.unit">Prix unitaire</span><span class="sum-val" id="sumUnit">13,00 €</span></div>
+          <div class="sum-row sum-total"><span data-i18n="individual.summary.total">Total</span><span class="sum-val" id="sumTotal">13,00 €</span></div>
         </div>
-        <button class="order-btn" onclick="openOrderCheckout()">Commander &amp; Payer →</button>
+        <button class="order-btn" onclick="openOrderCheckout()" data-i18n="individual.order">Commander &amp; Payer →</button>
       </div>
     </div>
   </div>
   <section style="padding:5rem 4rem;background:var(--black)">
-    <div class="section-tag">Pourquoi BackZo</div>
-    <h2 class="section-title reveal">LA DIFFÉRENCE<br/><span style="color:var(--green)">BACKZO</span></h2>
+    <div class="section-tag" data-i18n="section.why">Pourquoi BackZo</div>
+    <h2 class="section-title reveal" data-i18n="individual.why.title">LA DIFFÉRENCE<br/><span style="color:var(--green)">BACKZO</span></h2>
     <div class="p-av-grid">
-      <div class="p-av-card reveal"><div class="p-av-ico">🔄</div><div class="p-av-tit">Amovible</div><p class="p-av-desc">Posez avant le match, retirez après. Votre maillot reste intact et lavable normalement.</p></div>
-      <div class="p-av-card reveal"><div class="p-av-ico">🎨</div><div class="p-av-tit">60+ couleurs</div><p class="p-av-desc">Une palette complète pour assortir les couleurs de votre équipe ou vos envies personnelles.</p></div>
-      <div class="p-av-card reveal"><div class="p-av-ico">📐</div><div class="p-av-tit">2 tailles</div><p class="p-av-desc">Format S (25×6 cm) ou L (27×7 cm) selon votre maillot et vos préférences.</p></div>
-      <div class="p-av-card reveal"><div class="p-av-ico">🚚</div><div class="p-av-tit">Livraison incluse</div><p class="p-av-desc">Livraison en France toujours incluse dans le prix — sans mauvaise surprise.</p></div>
+      <div class="p-av-card reveal"><div class="p-av-ico">🔄</div><div class="p-av-tit" data-i18n="individual.why.feat1.title">Amovible</div><p class="p-av-desc" data-i18n="individual.why.feat1.desc">Posez avant le match, retirez après. Votre maillot reste intact et lavable normalement.</p></div>
+      <div class="p-av-card reveal"><div class="p-av-ico">🎨</div><div class="p-av-tit" data-i18n="individual.why.feat2.title">60+ couleurs</div><p class="p-av-desc" data-i18n="individual.why.feat2.desc">Une palette complète pour assortir les couleurs de votre équipe ou vos envies personnelles.</p></div>
+      <div class="p-av-card reveal"><div class="p-av-ico">📐</div><div class="p-av-tit" data-i18n="individual.why.feat3.title">2 tailles</div><p class="p-av-desc" data-i18n="individual.why.feat3.desc">Format S (25×6 cm) ou L (27×7 cm) selon votre maillot et vos préférences.</p></div>
+      <div class="p-av-card reveal"><div class="p-av-ico">🚚</div><div class="p-av-tit" data-i18n="individual.why.feat4.title">Livraison France & Europe</div><p class="p-av-desc" data-i18n="individual.why.feat4.desc">Livraison 7€. Au-delà de 2 patchs : forfait 10€. Livraison partout en France et en Europe.</p></div>
     </div>
   </section>
   <footer><div class="foot-inner"><div><a href="#" class="foot-logo" onclick="showPage('accueil');return false">BACK<span>ZO</span></a><div class="foot-tagline">Flocage amovible · Clubs &amp; Particuliers</div></div><ul class="foot-links"><li><button onclick="openModal('cgv')">CGV</button></li><li><button onclick="openModal('mentions')">Mentions légales</button></li><li><button onclick="openModal('privacy')">Confidentialité</button></li><li><a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener">TikTok</a></li></ul><div class="foot-copy">© 2026 BackZo — Tous droits réservés</div></div></footer>
@@ -1110,20 +1167,22 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
 
 <!-- ==================== PAGE BOUTIQUE ==================== -->
 <div id="page-shop" class="page">
-  <div style="padding:calc(var(--nav-h)+4rem) 4rem 2rem;background:var(--deep)">
-    <div class="section-tag">Boutique</div>
-    <h1 class="section-title reveal">NOS <span style="color:var(--green)">PRODUITS</span></h1>
-    <p style="color:var(--gray);font-size:.95rem;line-height:1.8;margin-top:1rem;max-width:500px">Personnalisez votre flocage et commandez directement en ligne. Paiement sécurisé par Stripe.</p>
-    <div class="filter-bar" style="margin-top:2rem">
-      <button class="filter-btn active" onclick="filterProducts('all',this)">Tous</button>
-      <button class="filter-btn" onclick="filterProducts('particuliers',this)">Particuliers</button>
-      <button class="filter-btn" onclick="filterProducts('clubs',this)">Clubs</button>
+  <div class="unavailable-screen">
+    <div class="unavailable-content">
+      <div class="unavailable-icon">
+        <div class="construction-cone">🚧</div>
+      </div>
+      <h1 class="unavailable-title">BOUTIQUE<br/><span style="color:var(--green)">INDISPONIBLE</span></h1>
+      <p class="unavailable-text">Notre boutique en ligne est actuellement en cours de construction.</p>
+      <p class="unavailable-subtext">Revenez bientôt pour découvrir nos produits !</p>
+      <div class="unavailable-dots">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+      <button class="unavailable-btn" onclick="showPage('accueil')">← Retour à l'accueil</button>
     </div>
   </div>
-  <div class="products-section" style="padding-top:2rem">
-    <div class="products-grid" id="productsGrid"></div>
-  </div>
-  <footer><div class="foot-inner"><div><a href="#" class="foot-logo" onclick="showPage('accueil');return false">BACK<span>ZO</span></a></div><ul class="foot-links"><li><button onclick="openModal('cgv')">CGV</button></li><li><button onclick="openModal('mentions')">Mentions légales</button></li><li><button onclick="openModal('privacy')">Confidentialité</button></li></ul><div class="foot-copy">© 2026 BackZo — Tous droits réservés</div></div></footer>
 </div>
 
 <!-- ==================== PAGE DEVIS ==================== -->
@@ -1229,7 +1288,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
         <div class="contact-info">
           <div class="ci-item reveal">
             <div class="ci-ico">📧</div>
-            <div><div class="ci-tit">Email</div><p class="ci-txt"><a href="mailto:team@backzo.eu">team@backzo.eu</a><br/>Réponse sous 24-48h ouvrés</p></div>
+            <div><div class="ci-tit">Email</div><p class="ci-txt"><a href="mailto:team@backzo.eu">team@backzo.eu</a><br/>Réponse garantie sous 48H</p></div>
           </div>
           <div class="ci-item reveal">
             <div class="ci-ico">📱</div>
@@ -1237,7 +1296,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
           </div>
           <div class="ci-item reveal">
             <div class="ci-ico">📍</div>
-            <div><div class="ci-tit">Localisation</div><p class="ci-txt">3 rue du Port<br/>38280 Anthon, France</p></div>
+            <div><div class="ci-tit">Localisation</div><p class="ci-txt">ANTHON 38280 FRANCE</p></div>
           </div>
           <div class="ci-item reveal">
             <div class="ci-ico">⏰</div>
@@ -1519,7 +1578,7 @@ const state = {
   cart: JSON.parse(localStorage.getItem('bz-cart') || '[]'),
   orders: JSON.parse(localStorage.getItem('bz-orders') || '[]'),
   quotes: JSON.parse(localStorage.getItem('bz-quotes') || '[]'),
-  config: { size: 'S', color: '#b8ff57', colorName: 'Vert flash', bg: '#161616', bgName: 'Anthracite' },
+  config: { size: 'S', color: '#ffffff', colorName: 'Blanc', bg: '#b8ff57', bgName: 'BackZo Green' },
   adminAuth: false,
   fontSize: parseInt(localStorage.getItem('bz-fs') || '100'),
   lang: localStorage.getItem('bz-lang') || 'fr',
@@ -2100,11 +2159,17 @@ function selectSize(size, btn) {
   updateSummary();
 }
 function selectColor(hex, el) {
-  state.config.color=hex; state.config.colorName=hex;
+  const colorNames = {
+    '#ffffff': 'Blanc',
+    '#0a0a0a': 'Noir',
+    '#c0152a': 'Rouge'
+  };
+  state.config.color=hex; 
+  state.config.colorName=colorNames[hex] || hex;
   document.querySelectorAll('#colorSwatches .p-swatch').forEach(s=>s.classList.remove('sel'));
   el.classList.add('sel');
   document.getElementById('previewName').setAttribute('fill',hex);
-  document.getElementById('sumColor').textContent=hex;
+  document.getElementById('sumColor').textContent=colorNames[hex] || hex;
 }
 function selectBg(hex, el) {
   state.config.bg=hex;
@@ -2120,7 +2185,7 @@ function updatePreview(input) {
   document.getElementById('previewName').setAttribute('fill',state.config.color);
 }
 function updateSummary() {
-  const price = state.config.size==='S'?12:14;
+  const price = 13;
   let totalQty=0;
   document.querySelectorAll('.name-qty').forEach(q=>{ totalQty+=parseInt(q.value)||1; });
   const total=totalQty*price;
@@ -2296,17 +2361,66 @@ function saveDevis() {
 // ============================================================
 // CONTACT FORM
 // ============================================================
-function sendContactForm() {
-  const name=document.getElementById('ctName')?.value.trim();
-  const email=document.getElementById('ctEmail')?.value.trim();
-  const msg=document.getElementById('ctMsg')?.value.trim();
-  const res=document.getElementById('ctResult');
-  if(!name||!email||!msg){res.style.color='var(--red)';res.textContent='Veuillez remplir tous les champs';return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){res.style.color='var(--red)';res.textContent='Email invalide';return;}
-  const subj=encodeURIComponent('[BackZo Contact] '+document.getElementById('ctSubject')?.value||'Message');
-  const body=encodeURIComponent(`Nom : ${name}\nEmail : ${email}\n\n${msg}`);
-  window.location.href=`mailto:team@backzo.eu?subject=${subj}&body=${body}`;
-  res.style.color='var(--green)'; res.textContent='✓ Message envoyé — votre client mail s\'est ouvert !';
+// CONTACT FORM
+// ============================================================
+async function sendContactForm() {
+  const name = document.getElementById('ctName')?.value.trim();
+  const email = document.getElementById('ctEmail')?.value.trim();
+  const subject = document.getElementById('ctSubject')?.value.trim();
+  const message = document.getElementById('ctMsg')?.value.trim();
+  const res = document.getElementById('ctResult');
+  const btn = document.querySelector('.contact-submit');
+  
+  // Validation
+  if (!name || !email || !message) {
+    res.style.color = 'var(--red)';
+    res.textContent = 'Veuillez remplir tous les champs obligatoires';
+    return;
+  }
+  
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    res.style.color = 'var(--red)';
+    res.textContent = 'Email invalide';
+    return;
+  }
+  
+  // Désactiver le bouton pendant l'envoi
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours...';
+  res.style.color = 'var(--gray)';
+  res.textContent = 'Envoi du message...';
+  
+  try {
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, subject, message })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      res.style.color = 'var(--green)';
+      res.textContent = '✓ ' + data.message;
+      
+      // Réinitialiser le formulaire
+      document.getElementById('ctName').value = '';
+      document.getElementById('ctEmail').value = '';
+      document.getElementById('ctSubject').value = '';
+      document.getElementById('ctMsg').value = '';
+    } else {
+      res.style.color = 'var(--red)';
+      res.textContent = '✗ ' + (data.error || 'Erreur lors de l\'envoi');
+    }
+  } catch (error) {
+    console.error('Erreur:', error);
+    res.style.color = 'var(--red)';
+    res.textContent = '✗ Erreur de connexion. Veuillez réessayer.';
+  } finally {
+    // Réactiver le bouton
+    btn.disabled = false;
+    btn.textContent = 'Envoyer le message →';
+  }
 }
 
 // ============================================================
@@ -2870,9 +2984,899 @@ function showToast(msg, isErr=false) {
 // LANG
 // ============================================================
 const LANGS = {
-  fr:{ 'nav.home':'Accueil','nav.clubs':'Clubs','nav.shop':'Boutique','nav.contact':'Contact','nav.quote':'Devis','nav.particuliers':'Particuliers' },
-  en:{ 'nav.home':'Home','nav.clubs':'Clubs','nav.shop':'Shop','nav.contact':'Contact','nav.quote':'Quote','nav.particuliers':'Individuals' },
-  nl:{ 'nav.home':'Home','nav.clubs':'Clubs','nav.shop':'Winkel','nav.contact':'Contact','nav.quote':'Offerte','nav.particuliers':'Particulieren' }
+  fr: { 
+    // Navigation
+    'nav.home': 'Accueil',
+    'nav.clubs': 'Clubs',
+    'nav.shop': 'Boutique',
+    'nav.contact': 'Contact',
+    'nav.quote': 'Devis',
+    'nav.particuliers': 'Particuliers',
+    'nav.cart': 'Panier',
+    
+    // Page d'accueil
+    'home.badge': 'Ensemble sur tous les terrains',
+    'home.title.line1': 'Your Name',
+    'home.title.line2': 'Your Story',
+    'home.subtitle': 'Patch amovible haute qualité · Clubs sportifs & Particuliers',
+    'home.who': 'Qui êtes-vous ?',
+    'home.club.title': 'JE SUIS UN CLUB',
+    'home.club.desc': 'Équipez vos équipes. Devis personnalisé, envoi de maillots inclus, livraison groupée.',
+    'home.club.feat1': 'Devis sur mesure',
+    'home.club.feat2': 'Envoi d\'enveloppe préaffranchie',
+    'home.club.feat3': 'Tarifs dégressifs',
+    'home.club.cta': 'Obtenir un devis →',
+    'home.individual.title': 'JE SUIS UN PARTICULIER',
+    'home.individual.desc': 'Commandez en ligne en personnalisant votre Backzo (taille, couleur, nom). Livraison partout en France et en Europe.',
+    'home.individual.feat1': 'Configurateur en ligne',
+    'home.individual.feat2': 'Paiement sécurisé Stripe',
+    'home.individual.feat3': 'Livraison France & Europe',
+    'home.individual.cta': 'Commander →',
+    
+    // Page Clubs
+    'clubs.badge': 'Solution complète pour clubs sportifs',
+    'clubs.title': 'BACKZONEZ VOTRE ÉQUIPE',
+    'clubs.tag': 'Système d\'identification personnalisée amovible et sur mesure',
+    'clubs.subtitle': 'Envoyez vos maillots, on s\'occupe du reste. Devis gratuit en 24h.',
+    'clubs.subtitle': 'Envoyez vos maillots, on s\'occupe du reste. Devis gratuit en 24h.',
+    'clubs.cta.quote': 'Demander un devis',
+    'clubs.cta.how': 'Comment ça marche →',
+    'clubs.how.title': 'COMMENT ÇA MARCHE',
+    'clubs.how.step1.title': 'Contactez-nous',
+    'clubs.how.step1.desc': 'Envoyez-nous la liste de vos joueurs, couleurs souhaitées et typographie. On établit un devis personnalisé adapté à votre effectif.',
+    'clubs.how.step2.title': 'Enveloppe préaffranchie',
+    'clubs.how.step2.desc': 'Recevez votre enveloppe préaffranchie, glissez jusqu\'à 16 maillots et déposez-les en point relais le plus proche.',
+    'clubs.how.step3.title': 'Fabrication premium',
+    'clubs.how.step3.desc': 'Chaque Backzo est fabriqué avec des matériaux premium pour un rendu professionnel et durable sur tous les terrains.',
+    'clubs.how.step4.title': 'Réception sécurisée',
+    'clubs.how.step4.desc': 'Vos maillots équipés vous sont réexpédiés contre signature à l\'adresse de votre choix.',
+    'clubs.how.step5.title': 'Posez & retirez',
+    'clubs.how.step5.desc': 'Fixez le Backzo en quelques secondes avant le match. Retirez avant lavage et réutilisez-le.',
+    'clubs.why.title': 'FAIT POUR LES CLUBS',
+    'clubs.why.feat1.title': 'Maillots réaffectables',
+    'clubs.why.feat1.desc': 'Un joueur part, un autre arrive ? Retirez le Backzo et réaffectez le maillot sans investissement supplémentaire.',
+    'clubs.why.feat2.title': 'Économique',
+    'clubs.why.feat2.desc': 'Plus besoin d\'investir dans de nouveaux maillots à chaque changement d\'effectif. Réduction drastique des coûts club.',
+    'clubs.why.feat3.title': 'Fierté & identité',
+    'clubs.why.feat3.desc': 'Chaque joueur avec son nom dans le dos — vecteur de fierté et d\'esprit d\'équipe fort sur le terrain.',
+    'clubs.why.feat4.title': 'Design premium',
+    'clubs.why.feat4.desc': 'Matériaux de qualité, couleurs vives et durables — un rendu professionnel qui valorise votre club.',
+    'clubs.cta.title': 'INNOVANT POUR VOTRE CLUB',
+    'clubs.cta.subtitle': 'Vivez une expérience forte — ensemble sur tous les terrains. Parlez-nous de votre projet.',
+    'clubs.cta.button': 'Nous contacter →',
+    
+    // Sections communes
+    'section.process': 'Processus',
+    'section.why': 'Pourquoi BackZo',
+    'section.options': 'Options',
+    'section.colors': 'Palette officielle',
+    'section.configurator': 'Configurateur',
+    
+    // Page Particuliers
+    'individual.badge': 'Configurateur en ligne · Paiement sécurisé Stripe',
+    'individual.title': 'VOTRE BACKZO SUR-MESURE.',
+    'individual.subtitle': 'Configurez votre flocage, choisissez couleur et taille, commandez en toute sécurité. Livraison rapide partout en France.',
+    'individual.cta': 'Configurer maintenant',
+    'individual.config.title': 'CRÉEZ VOTRE BACKZO',
+    'individual.config.step1': 'Choisissez la taille',
+    'individual.config.step1.hint': 'Sélectionnez le format adapté à votre maillot.',
+    'individual.config.step2': 'Couleur du patch',
+    'individual.config.step2.hint': 'Couleur de fond du patch amovible.',
+    'individual.config.step3': 'Couleur du texte',
+    'individual.config.step3.hint': 'Choisissez la couleur de votre texte.',
+    'individual.config.step4': 'Nom(s) à flocquer',
+    'individual.config.step4.hint': 'Ajoutez un ou plusieurs noms (max 20 caractères chacun).',
+    'individual.config.step5': 'Votre email',
+    'individual.config.step5.hint': 'Pour la confirmation de commande et le suivi.',
+    'individual.preview': 'Aperçu en temps réel',
+    'individual.summary.size': 'Taille',
+    'individual.summary.color': 'Couleur',
+    'individual.summary.qty': 'Quantité totale',
+    'individual.summary.unit': 'Prix unitaire',
+    'individual.summary.total': 'Total',
+    'individual.order': 'Commander & Payer →',
+    'individual.why.title': 'LA DIFFÉRENCE BACKZO',
+    'individual.why.feat1.title': 'Amovible',
+    'individual.why.feat1.desc': 'Posez avant le match, retirez après. Votre maillot reste intact et lavable normalement.',
+    'individual.why.feat2.title': '60+ couleurs',
+    'individual.why.feat2.desc': 'Une palette complète pour assortir les couleurs de votre équipe ou vos envies personnelles.',
+    'individual.why.feat3.title': '2 tailles',
+    'individual.why.feat3.desc': 'Format S (25×6 cm) ou L (27×7 cm) selon votre maillot et vos préférences.',
+    'individual.why.feat4.title': 'Livraison France & Europe',
+    'individual.why.feat4.desc': 'Livraison 7€. Au-delà de 2 patchs : forfait 10€. Livraison partout en France et en Europe.',
+    
+    // Page Boutique
+    'shop.title': 'NOS PRODUITS',
+    'shop.subtitle': 'INDISPONIBLE — En cours de construction. Revenez bientôt !',
+    'shop.filter.all': 'Tous',
+    'shop.filter.individual': 'Particuliers',
+    'shop.filter.clubs': 'Clubs',
+    
+    // Page Contact
+    'contact.title': 'NOUS CONTACTER',
+    'contact.email.title': 'Email',
+    'contact.email.text': 'Réponse garantie sous 48H',
+    'contact.social.title': 'TikTok',
+    'contact.social.text': 'Suivez nos réalisations',
+    'contact.location.title': 'Localisation',
+    'contact.location.text': 'ANTHON 38280 FRANCE',
+    'contact.hours.title': 'Délai de réponse',
+    'contact.hours.text': 'Lun-Ven : 9h-18h',
+    'contact.form.name': 'Nom complet *',
+    'contact.form.email': 'Email *',
+    'contact.form.subject': 'Sujet',
+    'contact.form.message': 'Message *',
+    'contact.form.submit': 'Envoyer le message →',
+    
+    // Footer
+    'footer.tagline': 'Flocage amovible · Clubs & Particuliers',
+    'footer.cgv': 'CGV',
+    'footer.legal': 'Mentions légales',
+    'footer.privacy': 'Confidentialité',
+    'footer.copyright': 'Tous droits réservés',
+    
+    // Marquee
+    'marquee.removable': 'FLOCAGE AMOVIBLE',
+    'marquee.player': 'NOM DU JOUEUR',
+    'marquee.colors': '60+ COULEURS',
+    'marquee.clubs': 'CLUBS SPORTIFS',
+    'marquee.quote': 'DEVIS SUR MESURE',
+    'marquee.payment': 'PAIEMENT SÉCURISÉ',
+    'marquee.envelope': 'ENVELOPPE PRÉAFFRANCHIE',
+    'marquee.delivery': 'LIVRAISON SÉCURISÉE',
+    'marquee.size.s': 'TAILLE S : 25×6 cm',
+    'marquee.size.l': 'TAILLE L : 27×7 cm',
+    'marquee.delivery.europe': 'LIVRAISON FRANCE & EUROPE',
+    
+    // Stats
+    'stats.colors': 'Couleurs de flocage',
+    'stats.removable': 'Amovible & réutilisable',
+    'stats.types': 'Types de flocage',
+    
+    // CGV Modal
+    'cgv.title': 'CONDITIONS GÉNÉRALES DE VENTE',
+    'cgv.close': '✕',
+    
+    // Mentions Modal
+    'mentions.title': 'MENTIONS LÉGALES',
+    
+    // Privacy Modal
+    'privacy.title': 'POLITIQUE DE CONFIDENTIALITÉ',
+    
+    // Page Particuliers - Détails
+    'individual.size.s': 'S',
+    'individual.size.l': 'L',
+    'individual.size.s.dims': '25 × 6 cm',
+    'individual.size.l.dims': '27 × 7 cm',
+    'individual.add.name': '+ Ajouter un nom',
+    'individual.preview.name': 'VOTRE NOM',
+    'individual.preview.size.s': 'Taille S — 25 × 6 cm',
+    'individual.preview.size.l': 'Taille L — 27 × 7 cm',
+    
+    // Page Contact - Détails
+    'contact.form.subject.quote': 'Demande de devis',
+    'contact.form.subject.order': 'Question sur une commande',
+    'contact.form.subject.info': 'Renseignement produit',
+    'contact.form.subject.other': 'Autre',
+    'contact.form.name.placeholder': 'Jean Dupont',
+    'contact.form.email.placeholder': 'jean@email.fr',
+    'contact.form.message.placeholder': 'Décrivez votre projet, votre équipe, vos besoins...',
+    
+    // Page Boutique - Détails
+    'shop.unavailable': 'INDISPONIBLE',
+    'shop.coming.soon': 'En cours de construction. Revenez bientôt !',
+    
+    // Panier
+    'cart.title': 'MON PANIER',
+    'cart.close': '✕',
+    'cart.empty': 'Votre panier est vide',
+    'cart.subtotal': 'Sous-total',
+    'cart.shipping': 'Livraison',
+    'cart.total': 'TOTAL',
+    'cart.checkout': 'Passer commande →',
+    'cart.quantity': 'Qté',
+    'cart.remove': 'Supprimer',
+    
+    // Checkout
+    'checkout.title': 'FINALISER MA COMMANDE',
+    'checkout.personal.info': 'Informations personnelles',
+    'checkout.firstname': 'Prénom *',
+    'checkout.lastname': 'Nom *',
+    'checkout.email': 'Email *',
+    'checkout.phone': 'Téléphone',
+    'checkout.zip': 'Code postal *',
+    'checkout.address': 'Adresse de livraison *',
+    'checkout.city': 'Ville *',
+    'checkout.country': 'Pays',
+    'checkout.payment': 'Paiement sécurisé — Stripe',
+    'checkout.card.number': 'Numéro de carte',
+    'checkout.card.expiry': 'Expiration',
+    'checkout.card.cvv': 'CVV',
+    'checkout.secure': 'Paiement 100% sécurisé par Stripe — SSL/TLS',
+    'checkout.confirm': 'Confirmer & Payer',
+    
+    // Success
+    'success.title': 'COMMANDE CONFIRMÉE !',
+    'success.message': 'Merci pour votre commande. Un email de confirmation a été envoyé à votre adresse. BackZo vous contactera sous 24h.',
+    'success.close': 'Fermer',
+    
+    // Devis
+    'quote.title': 'CRÉER UN DEVIS',
+    'quote.subtitle': 'Générez un devis professionnel, imprimez-le ou envoyez-le par email directement depuis le site.',
+    'quote.client.info': 'Informations client',
+    'quote.client.name': 'Nom / Société',
+    'quote.client.email': 'Email',
+    'quote.client.phone': 'Téléphone',
+    'quote.client.address': 'Adresse',
+    'quote.valid.until': 'Valable jusqu\'au',
+    'quote.lines': 'Lignes du devis',
+    'quote.designation': 'Désignation',
+    'quote.qty': 'Qté',
+    'quote.unit.price': 'PU (€)',
+    'quote.add.line': '+ Ajouter une ligne',
+    'quote.notes': 'Notes & Conditions particulières',
+    'quote.discount': 'Remise (%)',
+    'quote.preview': 'APERÇU DU DEVIS',
+    'quote.number': 'N° DEV-001',
+    'quote.print': 'Imprimer',
+    'quote.pdf': 'PDF',
+    'quote.send': 'Envoyer',
+    'quote.subtotal': 'Sous-total',
+    'quote.total': 'TOTAL',
+    'quote.vat.note': 'TVA non applicable, article 293 B du CGI',
+    
+    // Admin
+    'admin.login': 'Se connecter →',
+    'admin.username': 'Identifiant',
+    'admin.password': 'Mot de passe',
+    'admin.dashboard': 'Dashboard',
+    'admin.orders': 'Commandes',
+    'admin.products': 'Produits',
+    'admin.quotes': 'Créer Devis',
+    'admin.history': 'Historique',
+    'admin.settings': 'Paramètres',
+    'admin.logout': 'Déconnexion',
+    
+    // Couleurs
+    'colors.title': '60+ COULEURS DISPONIBLES',
+    'colors.subtitle': 'Notre palette complète couvre plus de 60 teintes — des couleurs vives aux tons sobres.',
+    'colors.hover': '⬆ Passez sur une couleur pour voir son code',
+    'colors.white': 'Blanc',
+    'colors.black': 'Noir',
+    'colors.red': 'Rouge',
+    
+    // Accessibilité
+    'a11y.title': 'Accessibilité',
+    'a11y.font.size': 'Taille du texte',
+    'a11y.contrast': 'Contraste élevé',
+    'a11y.reduce.motion': 'Réduire les animations',
+    'a11y.reset': 'Réinitialiser',
+    
+    // Messages
+    'message.loading': 'Chargement...',
+    'message.error': 'Une erreur est survenue',
+    'message.success': 'Opération réussie',
+    'message.language': 'Langue',
+    
+    // Clubs - Sections supplémentaires
+    'clubs.visual.team': 'VOTRE\nÉQUIPE',
+    'clubs.visual.removable': 'Amovible ✓',
+    'clubs.visual.premium': 'Premium ✓',
+    'clubs.visual.reusable': 'Réutilisable ✓',
+    'clubs.options.title': 'CE QU\'ON\nPROPOSE',
+    'clubs.options.removable.tag': 'Amovible',
+    'clubs.options.removable.title': 'Flocage amovible',
+    'clubs.options.removable.desc': 'Notre cœur de métier. Flocage thermo-amovible du nom de chaque joueur. Posé avant le match, retiré après — le maillot reste intact.',
+    'clubs.options.removable.feat1': 'Nom du joueur (dos du maillot)',
+    'clubs.options.removable.feat2': '60+ couleurs disponibles',
+    'clubs.options.removable.feat3': 'Plusieurs typographies',
+    'clubs.options.removable.feat4': 'Compatible tous maillots sport',
+    'clubs.options.removable.feat5': 'Devis adapté à votre effectif',
+    'clubs.options.permanent.tag': 'Permanent',
+    'clubs.options.permanent.title': 'Flocage permanent',
+    'clubs.options.permanent.desc': 'Pour les éléments fixes de votre tenue — sponsor, logo de club, numéro. Rendu haute définition durable.',
+    'clubs.options.permanent.feat1': 'Logo de club / association',
+    'clubs.options.permanent.feat2': 'Numéro de maillot',
+    'clubs.options.permanent.feat3': 'Sponsor',
+    'clubs.options.permanent.feat4': 'Rendu haute définition',
+    'clubs.options.permanent.feat5': '60+ couleurs disponibles'
+  },
+  
+  en: { 
+    // Navigation
+    'nav.home': 'Home',
+    'nav.clubs': 'Clubs',
+    'nav.shop': 'Shop',
+    'nav.contact': 'Contact',
+    'nav.quote': 'Quote',
+    'nav.particuliers': 'Individuals',
+    'nav.cart': 'Cart',
+    
+    // Home Page
+    'home.badge': 'Together on all fields',
+    'home.title.line1': 'Your Name',
+    'home.title.line2': 'Your Story',
+    'home.subtitle': 'Premium removable patch · Sports clubs & Individuals',
+    'home.who': 'Who are you?',
+    'home.club.title': 'I AM A CLUB',
+    'home.club.desc': 'Equip your teams. Custom quote, jersey shipping included, group delivery.',
+    'home.club.feat1': 'Custom quote',
+    'home.club.feat2': 'Prepaid envelope shipping',
+    'home.club.feat3': 'Volume discounts',
+    'home.club.cta': 'Get a quote →',
+    'home.individual.title': 'I AM AN INDIVIDUAL',
+    'home.individual.desc': 'Order online by customizing your Backzo (size, color, name). Delivery throughout France and Europe.',
+    'home.individual.feat1': 'Online configurator',
+    'home.individual.feat2': 'Secure Stripe payment',
+    'home.individual.feat3': 'France & Europe delivery',
+    'home.individual.cta': 'Order →',
+    
+    // Clubs Page
+    'clubs.badge': 'Complete solution for sports clubs',
+    'clubs.title': 'BACKZONE YOUR TEAM',
+    'clubs.tag': 'Custom removable identification system',
+    'clubs.subtitle': 'Send your jerseys, we take care of the rest. Free quote in 24h.',
+    'clubs.subtitle': 'Send your jerseys, we take care of the rest. Free quote in 24h.',
+    'clubs.cta.quote': 'Request a quote',
+    'clubs.cta.how': 'How it works →',
+    'clubs.how.title': 'HOW IT WORKS',
+    'clubs.how.step1.title': 'Contact us',
+    'clubs.how.step1.desc': 'Send us your player list, desired colors and typography. We create a custom quote adapted to your team.',
+    'clubs.how.step2.title': 'Prepaid envelope',
+    'clubs.how.step2.desc': 'Receive your prepaid envelope, slip in up to 16 jerseys and drop them at the nearest relay point.',
+    'clubs.how.step3.title': 'Premium manufacturing',
+    'clubs.how.step3.desc': 'Each Backzo is made with premium materials for a professional and durable finish on all fields.',
+    'clubs.how.step4.title': 'Secure delivery',
+    'clubs.how.step4.desc': 'Your equipped jerseys are shipped back to you with signature confirmation at your chosen address.',
+    'clubs.how.step5.title': 'Apply & remove',
+    'clubs.how.step5.desc': 'Attach the Backzo in seconds before the match. Remove before washing and reuse it.',
+    'clubs.why.title': 'MADE FOR CLUBS',
+    'clubs.why.feat1.title': 'Reassignable jerseys',
+    'clubs.why.feat1.desc': 'A player leaves, another arrives? Remove the Backzo and reassign the jersey without additional investment.',
+    'clubs.why.feat2.title': 'Economical',
+    'clubs.why.feat2.desc': 'No need to invest in new jerseys with each roster change. Drastic reduction in club costs.',
+    'clubs.why.feat3.title': 'Pride & identity',
+    'clubs.why.feat3.desc': 'Each player with their name on the back — a vector of pride and strong team spirit on the field.',
+    'clubs.why.feat4.title': 'Premium design',
+    'clubs.why.feat4.desc': 'Quality materials, vibrant and durable colors — a professional finish that enhances your club.',
+    'clubs.cta.title': 'INNOVATIVE FOR YOUR CLUB',
+    'clubs.cta.subtitle': 'Experience something strong — together on all fields. Tell us about your project.',
+    'clubs.cta.button': 'Contact us →',
+    
+    // Common sections
+    'section.process': 'Process',
+    'section.why': 'Why BackZo',
+    'section.options': 'Options',
+    'section.colors': 'Official palette',
+    'section.configurator': 'Configurator',
+    
+    // Individuals Page
+    'individual.badge': 'Online configurator · Secure Stripe payment',
+    'individual.title': 'YOUR CUSTOM BACKZO.',
+    'individual.subtitle': 'Configure your patch, choose color and size, order securely. Fast delivery throughout France.',
+    'individual.cta': 'Configure now',
+    'individual.config.title': 'CREATE YOUR BACKZO',
+    'individual.config.step1': 'Choose size',
+    'individual.config.step1.hint': 'Select the format suitable for your jersey.',
+    'individual.config.step2': 'Patch color',
+    'individual.config.step2.hint': 'Background color of the removable patch.',
+    'individual.config.step3': 'Text color',
+    'individual.config.step3.hint': 'Choose your text color.',
+    'individual.config.step4': 'Name(s) to print',
+    'individual.config.step4.hint': 'Add one or more names (max 20 characters each).',
+    'individual.config.step5': 'Your email',
+    'individual.config.step5.hint': 'For order confirmation and tracking.',
+    'individual.preview': 'Real-time preview',
+    'individual.summary.size': 'Size',
+    'individual.summary.color': 'Color',
+    'individual.summary.qty': 'Total quantity',
+    'individual.summary.unit': 'Unit price',
+    'individual.summary.total': 'Total',
+    'individual.order': 'Order & Pay →',
+    'individual.why.title': 'THE BACKZO DIFFERENCE',
+    'individual.why.feat1.title': 'Removable',
+    'individual.why.feat1.desc': 'Apply before the match, remove after. Your jersey stays intact and washable normally.',
+    'individual.why.feat2.title': '60+ colors',
+    'individual.why.feat2.desc': 'A complete palette to match your team colors or personal preferences.',
+    'individual.why.feat3.title': '2 sizes',
+    'individual.why.feat3.desc': 'S format (25×6 cm) or L (27×7 cm) depending on your jersey and preferences.',
+    'individual.why.feat4.title': 'France & Europe delivery',
+    'individual.why.feat4.desc': 'Delivery 7€. Beyond 2 patches: 10€ flat rate. Delivery throughout France and Europe.',
+    
+    // Shop Page
+    'shop.title': 'OUR PRODUCTS',
+    'shop.subtitle': 'UNAVAILABLE — Under construction. Come back soon!',
+    'shop.filter.all': 'All',
+    'shop.filter.individual': 'Individuals',
+    'shop.filter.clubs': 'Clubs',
+    
+    // Contact Page
+    'contact.title': 'CONTACT US',
+    'contact.email.title': 'Email',
+    'contact.email.text': 'Response guaranteed within 48H',
+    'contact.social.title': 'TikTok',
+    'contact.social.text': 'Follow our work',
+    'contact.location.title': 'Location',
+    'contact.location.text': 'ANTHON 38280 FRANCE',
+    'contact.hours.title': 'Response time',
+    'contact.hours.text': 'Mon-Fri: 9am-6pm',
+    'contact.form.name': 'Full name *',
+    'contact.form.email': 'Email *',
+    'contact.form.subject': 'Subject',
+    'contact.form.message': 'Message *',
+    'contact.form.submit': 'Send message →',
+    
+    // Footer
+    'footer.tagline': 'Removable patch · Clubs & Individuals',
+    'footer.cgv': 'Terms',
+    'footer.legal': 'Legal notice',
+    'footer.privacy': 'Privacy',
+    'footer.copyright': 'All rights reserved',
+    
+    // Marquee
+    'marquee.removable': 'REMOVABLE PATCH',
+    'marquee.player': 'PLAYER NAME',
+    'marquee.colors': '60+ COLORS',
+    'marquee.clubs': 'SPORTS CLUBS',
+    'marquee.quote': 'CUSTOM QUOTE',
+    'marquee.payment': 'SECURE PAYMENT',
+    'marquee.envelope': 'PREPAID ENVELOPE',
+    'marquee.delivery': 'SECURE DELIVERY',
+    'marquee.size.s': 'SIZE S: 25×6 cm',
+    'marquee.size.l': 'SIZE L: 27×7 cm',
+    'marquee.delivery.europe': 'FRANCE & EUROPE DELIVERY',
+    
+    // Stats
+    'stats.colors': 'Patch colors',
+    'stats.removable': 'Removable & reusable',
+    'stats.types': 'Patch types',
+    
+    // CGV Modal
+    'cgv.title': 'TERMS AND CONDITIONS',
+    'cgv.close': '✕',
+    
+    // Mentions Modal
+    'mentions.title': 'LEGAL NOTICE',
+    
+    // Privacy Modal
+    'privacy.title': 'PRIVACY POLICY',
+    
+    // Individuals Page - Details
+    'individual.size.s': 'S',
+    'individual.size.l': 'L',
+    'individual.size.s.dims': '25 × 6 cm',
+    'individual.size.l.dims': '27 × 7 cm',
+    'individual.add.name': '+ Add a name',
+    'individual.preview.name': 'YOUR NAME',
+    'individual.preview.size.s': 'Size S — 25 × 6 cm',
+    'individual.preview.size.l': 'Size L — 27 × 7 cm',
+    
+    // Contact Page - Details
+    'contact.form.subject.quote': 'Quote request',
+    'contact.form.subject.order': 'Order question',
+    'contact.form.subject.info': 'Product information',
+    'contact.form.subject.other': 'Other',
+    'contact.form.name.placeholder': 'John Doe',
+    'contact.form.email.placeholder': 'john@email.com',
+    'contact.form.message.placeholder': 'Describe your project, your team, your needs...',
+    
+    // Shop Page - Details
+    'shop.unavailable': 'UNAVAILABLE',
+    'shop.coming.soon': 'Under construction. Come back soon!',
+    
+    // Cart
+    'cart.title': 'MY CART',
+    'cart.close': '✕',
+    'cart.empty': 'Your cart is empty',
+    'cart.subtotal': 'Subtotal',
+    'cart.shipping': 'Shipping',
+    'cart.total': 'TOTAL',
+    'cart.checkout': 'Checkout →',
+    'cart.quantity': 'Qty',
+    'cart.remove': 'Remove',
+    
+    // Checkout
+    'checkout.title': 'COMPLETE MY ORDER',
+    'checkout.personal.info': 'Personal information',
+    'checkout.firstname': 'First name *',
+    'checkout.lastname': 'Last name *',
+    'checkout.email': 'Email *',
+    'checkout.phone': 'Phone',
+    'checkout.zip': 'Zip code *',
+    'checkout.address': 'Delivery address *',
+    'checkout.city': 'City *',
+    'checkout.country': 'Country',
+    'checkout.payment': 'Secure payment — Stripe',
+    'checkout.card.number': 'Card number',
+    'checkout.card.expiry': 'Expiration',
+    'checkout.card.cvv': 'CVV',
+    'checkout.secure': '100% secure payment by Stripe — SSL/TLS',
+    'checkout.confirm': 'Confirm & Pay',
+    
+    // Success
+    'success.title': 'ORDER CONFIRMED!',
+    'success.message': 'Thank you for your order. A confirmation email has been sent to your address. BackZo will contact you within 24 hours.',
+    'success.close': 'Close',
+    
+    // Quote
+    'quote.title': 'CREATE A QUOTE',
+    'quote.subtitle': 'Generate a professional quote, print it or send it by email directly from the site.',
+    'quote.client.info': 'Client information',
+    'quote.client.name': 'Name / Company',
+    'quote.client.email': 'Email',
+    'quote.client.phone': 'Phone',
+    'quote.client.address': 'Address',
+    'quote.valid.until': 'Valid until',
+    'quote.lines': 'Quote lines',
+    'quote.designation': 'Description',
+    'quote.qty': 'Qty',
+    'quote.unit.price': 'UP (€)',
+    'quote.add.line': '+ Add a line',
+    'quote.notes': 'Notes & Special conditions',
+    'quote.discount': 'Discount (%)',
+    'quote.preview': 'QUOTE PREVIEW',
+    'quote.number': 'No. QUO-001',
+    'quote.print': 'Print',
+    'quote.pdf': 'PDF',
+    'quote.send': 'Send',
+    'quote.subtotal': 'Subtotal',
+    'quote.total': 'TOTAL',
+    'quote.vat.note': 'VAT not applicable',
+    
+    // Admin
+    'admin.login': 'Login →',
+    'admin.username': 'Username',
+    'admin.password': 'Password',
+    'admin.dashboard': 'Dashboard',
+    'admin.orders': 'Orders',
+    'admin.products': 'Products',
+    'admin.quotes': 'Create Quote',
+    'admin.history': 'History',
+    'admin.settings': 'Settings',
+    'admin.logout': 'Logout',
+    
+    // Colors
+    'colors.title': '60+ COLORS AVAILABLE',
+    'colors.subtitle': 'Our complete palette covers more than 60 shades — from bright colors to sober tones.',
+    'colors.hover': '⬆ Hover over a color to see its code',
+    'colors.white': 'White',
+    'colors.black': 'Black',
+    'colors.red': 'Red',
+    
+    // Accessibility
+    'a11y.title': 'Accessibility',
+    'a11y.font.size': 'Text size',
+    'a11y.contrast': 'High contrast',
+    'a11y.reduce.motion': 'Reduce animations',
+    'a11y.reset': 'Reset',
+    
+    // Messages
+    'message.loading': 'Loading...',
+    'message.error': 'An error occurred',
+    'message.success': 'Operation successful',
+    'message.language': 'Language',
+    
+    // Clubs - Additional sections
+    'clubs.visual.team': 'YOUR\nTEAM',
+    'clubs.visual.removable': 'Removable ✓',
+    'clubs.visual.premium': 'Premium ✓',
+    'clubs.visual.reusable': 'Reusable ✓',
+    'clubs.options.title': 'WHAT WE\nOFFER',
+    'clubs.options.removable.tag': 'Removable',
+    'clubs.options.removable.title': 'Removable patch',
+    'clubs.options.removable.desc': 'Our core business. Thermo-removable patch with each player\'s name. Applied before the match, removed after — the jersey stays intact.',
+    'clubs.options.removable.feat1': 'Player name (back of jersey)',
+    'clubs.options.removable.feat2': '60+ colors available',
+    'clubs.options.removable.feat3': 'Multiple fonts',
+    'clubs.options.removable.feat4': 'Compatible with all sports jerseys',
+    'clubs.options.removable.feat5': 'Quote adapted to your team',
+    'clubs.options.permanent.tag': 'Permanent',
+    'clubs.options.permanent.title': 'Permanent patch',
+    'clubs.options.permanent.desc': 'For fixed elements of your outfit — sponsor, club logo, number. Durable high-definition finish.',
+    'clubs.options.permanent.feat1': 'Club / association logo',
+    'clubs.options.permanent.feat2': 'Jersey number',
+    'clubs.options.permanent.feat3': 'Sponsor',
+    'clubs.options.permanent.feat4': 'High-definition finish',
+    'clubs.options.permanent.feat5': '60+ colors available'
+  },
+  
+  nl: { 
+    // Navigatie
+    'nav.home': 'Home',
+    'nav.clubs': 'Clubs',
+    'nav.shop': 'Winkel',
+    'nav.contact': 'Contact',
+    'nav.quote': 'Offerte',
+    'nav.particuliers': 'Particulieren',
+    'nav.cart': 'Winkelwagen',
+    
+    // Startpagina
+    'home.badge': 'Samen op alle velden',
+    'home.title.line1': 'Your Name',
+    'home.title.line2': 'Your Story',
+    'home.subtitle': 'Premium verwijderbare patch · Sportclubs & Particulieren',
+    'home.who': 'Wie bent u?',
+    'home.club.title': 'IK BEN EEN CLUB',
+    'home.club.desc': 'Rust uw teams uit. Offerte op maat, verzending van shirts inbegrepen, groepslevering.',
+    'home.club.feat1': 'Offerte op maat',
+    'home.club.feat2': 'Vooraf betaalde envelop',
+    'home.club.feat3': 'Volumekortingen',
+    'home.club.cta': 'Offerte aanvragen →',
+    'home.individual.title': 'IK BEN EEN PARTICULIER',
+    'home.individual.desc': 'Bestel online door uw Backzo aan te passen (maat, kleur, naam). Levering in heel Frankrijk en Europa.',
+    'home.individual.feat1': 'Online configurator',
+    'home.individual.feat2': 'Veilige Stripe betaling',
+    'home.individual.feat3': 'Frankrijk & Europa levering',
+    'home.individual.cta': 'Bestellen →',
+    
+    // Clubs Pagina
+    'clubs.badge': 'Complete oplossing voor sportclubs',
+    'clubs.title': 'BACKZONE UW TEAM',
+    'clubs.tag': 'Aangepast verwijderbaar identificatiesysteem',
+    'clubs.subtitle': 'Stuur uw shirts, wij zorgen voor de rest. Gratis offerte binnen 24 uur.',
+    'clubs.subtitle': 'Stuur uw shirts, wij zorgen voor de rest. Gratis offerte binnen 24 uur.',
+    'clubs.cta.quote': 'Offerte aanvragen',
+    'clubs.cta.how': 'Hoe het werkt →',
+    'clubs.how.title': 'HOE HET WERKT',
+    'clubs.how.step1.title': 'Neem contact op',
+    'clubs.how.step1.desc': 'Stuur ons uw spelerslijst, gewenste kleuren en typografie. We maken een offerte op maat voor uw team.',
+    'clubs.how.step2.title': 'Vooraf betaalde envelop',
+    'clubs.how.step2.desc': 'Ontvang uw vooraf betaalde envelop, stop tot 16 shirts erin en breng ze naar het dichtstbijzijnde afhaalpunt.',
+    'clubs.how.step3.title': 'Premium productie',
+    'clubs.how.step3.desc': 'Elke Backzo wordt gemaakt met premium materialen voor een professionele en duurzame afwerking op alle velden.',
+    'clubs.how.step4.title': 'Veilige levering',
+    'clubs.how.step4.desc': 'Uw uitgeruste shirts worden teruggestuurd met handtekeningbevestiging op uw gekozen adres.',
+    'clubs.how.step5.title': 'Aanbrengen & verwijderen',
+    'clubs.how.step5.desc': 'Bevestig de Backzo in seconden voor de wedstrijd. Verwijder voor het wassen en hergebruik.',
+    'clubs.why.title': 'GEMAAKT VOOR CLUBS',
+    'clubs.why.feat1.title': 'Herbruikbare shirts',
+    'clubs.why.feat1.desc': 'Een speler vertrekt, een andere komt? Verwijder de Backzo en wijs het shirt opnieuw toe zonder extra investering.',
+    'clubs.why.feat2.title': 'Economisch',
+    'clubs.why.feat2.desc': 'Geen nieuwe shirts nodig bij elke spelerswissel. Drastische verlaging van clubkosten.',
+    'clubs.why.feat3.title': 'Trots & identiteit',
+    'clubs.why.feat3.desc': 'Elke speler met zijn naam op de rug — een bron van trots en sterke teamgeest op het veld.',
+    'clubs.why.feat4.title': 'Premium ontwerp',
+    'clubs.why.feat4.desc': 'Kwaliteitsmaterialen, levendige en duurzame kleuren — een professionele afwerking die uw club versterkt.',
+    'clubs.cta.title': 'INNOVATIEF VOOR UW CLUB',
+    'clubs.cta.subtitle': 'Ervaar iets sterks — samen op alle velden. Vertel ons over uw project.',
+    'clubs.cta.button': 'Neem contact op →',
+    
+    // Gemeenschappelijke secties
+    'section.process': 'Proces',
+    'section.why': 'Waarom BackZo',
+    'section.options': 'Opties',
+    'section.colors': 'Officieel palet',
+    'section.configurator': 'Configurator',
+    
+    // Particulieren Pagina
+    'individual.badge': 'Online configurator · Veilige Stripe betaling',
+    'individual.title': 'UW AANGEPASTE BACKZO.',
+    'individual.subtitle': 'Configureer uw patch, kies kleur en maat, bestel veilig. Snelle levering in heel Frankrijk.',
+    'individual.cta': 'Nu configureren',
+    'individual.config.title': 'MAAK UW BACKZO',
+    'individual.config.step1': 'Kies maat',
+    'individual.config.step1.hint': 'Selecteer het formaat geschikt voor uw shirt.',
+    'individual.config.step2': 'Patch kleur',
+    'individual.config.step2.hint': 'Achtergrondkleur van de verwijderbare patch.',
+    'individual.config.step3': 'Tekstkleur',
+    'individual.config.step3.hint': 'Kies uw tekstkleur.',
+    'individual.config.step4': 'Naam/namen om te bedrukken',
+    'individual.config.step4.hint': 'Voeg een of meer namen toe (max 20 tekens elk).',
+    'individual.config.step5': 'Uw e-mail',
+    'individual.config.step5.hint': 'Voor orderbevestiging en tracking.',
+    'individual.preview': 'Real-time voorbeeld',
+    'individual.summary.size': 'Maat',
+    'individual.summary.color': 'Kleur',
+    'individual.summary.qty': 'Totale hoeveelheid',
+    'individual.summary.unit': 'Eenheidsprijs',
+    'individual.summary.total': 'Totaal',
+    'individual.order': 'Bestellen & Betalen →',
+    'individual.why.title': 'HET BACKZO VERSCHIL',
+    'individual.why.feat1.title': 'Verwijderbaar',
+    'individual.why.feat1.desc': 'Aanbrengen voor de wedstrijd, verwijderen erna. Uw shirt blijft intact en normaal wasbaar.',
+    'individual.why.feat2.title': '60+ kleuren',
+    'individual.why.feat2.desc': 'Een compleet palet om uw teamkleuren of persoonlijke voorkeuren te matchen.',
+    'individual.why.feat3.title': '2 maten',
+    'individual.why.feat3.desc': 'S formaat (25×6 cm) of L (27×7 cm) afhankelijk van uw shirt en voorkeuren.',
+    'individual.why.feat4.title': 'Frankrijk & Europa levering',
+    'individual.why.feat4.desc': 'Levering 7€. Meer dan 2 patches: 10€ vast tarief. Levering in heel Frankrijk en Europa.',
+    
+    // Winkel Pagina
+    'shop.title': 'ONZE PRODUCTEN',
+    'shop.subtitle': 'NIET BESCHIKBAAR — In aanbouw. Kom snel terug!',
+    'shop.filter.all': 'Alle',
+    'shop.filter.individual': 'Particulieren',
+    'shop.filter.clubs': 'Clubs',
+    
+    // Contact Pagina
+    'contact.title': 'NEEM CONTACT OP',
+    'contact.email.title': 'E-mail',
+    'contact.email.text': 'Reactie gegarandeerd binnen 48 uur',
+    'contact.social.title': 'TikTok',
+    'contact.social.text': 'Volg ons werk',
+    'contact.location.title': 'Locatie',
+    'contact.location.text': 'ANTHON 38280 FRANKRIJK',
+    'contact.hours.title': 'Reactietijd',
+    'contact.hours.text': 'Ma-Vr: 9u-18u',
+    'contact.form.name': 'Volledige naam *',
+    'contact.form.email': 'E-mail *',
+    'contact.form.subject': 'Onderwerp',
+    'contact.form.message': 'Bericht *',
+    'contact.form.submit': 'Bericht verzenden →',
+    
+    // Footer
+    'footer.tagline': 'Verwijderbare patch · Clubs & Particulieren',
+    'footer.cgv': 'Voorwaarden',
+    'footer.legal': 'Juridische kennisgeving',
+    'footer.privacy': 'Privacy',
+    'footer.copyright': 'Alle rechten voorbehouden',
+    
+    // Marquee
+    'marquee.removable': 'VERWIJDERBARE PATCH',
+    'marquee.player': 'SPELERSNAAM',
+    'marquee.colors': '60+ KLEUREN',
+    'marquee.clubs': 'SPORTCLUBS',
+    'marquee.quote': 'OFFERTE OP MAAT',
+    'marquee.payment': 'VEILIGE BETALING',
+    'marquee.envelope': 'VOORAF BETAALDE ENVELOP',
+    'marquee.delivery': 'VEILIGE LEVERING',
+    'marquee.size.s': 'MAAT S: 25×6 cm',
+    'marquee.size.l': 'MAAT L: 27×7 cm',
+    'marquee.delivery.europe': 'FRANKRIJK & EUROPA LEVERING',
+    
+    // Stats
+    'stats.colors': 'Patch kleuren',
+    'stats.removable': 'Verwijderbaar & herbruikbaar',
+    'stats.types': 'Patch types',
+    
+    // CGV Modal
+    'cgv.title': 'ALGEMENE VOORWAARDEN',
+    'cgv.close': '✕',
+    
+    // Mentions Modal
+    'mentions.title': 'JURIDISCHE KENNISGEVING',
+    
+    // Privacy Modal
+    'privacy.title': 'PRIVACYBELEID',
+    
+    // Particulieren Pagina - Details
+    'individual.size.s': 'S',
+    'individual.size.l': 'L',
+    'individual.size.s.dims': '25 × 6 cm',
+    'individual.size.l.dims': '27 × 7 cm',
+    'individual.add.name': '+ Naam toevoegen',
+    'individual.preview.name': 'UW NAAM',
+    'individual.preview.size.s': 'Maat S — 25 × 6 cm',
+    'individual.preview.size.l': 'Maat L — 27 × 7 cm',
+    
+    // Contact Pagina - Details
+    'contact.form.subject.quote': 'Offerte aanvraag',
+    'contact.form.subject.order': 'Vraag over bestelling',
+    'contact.form.subject.info': 'Product informatie',
+    'contact.form.subject.other': 'Andere',
+    'contact.form.name.placeholder': 'Jan Jansen',
+    'contact.form.email.placeholder': 'jan@email.nl',
+    'contact.form.message.placeholder': 'Beschrijf uw project, uw team, uw behoeften...',
+    
+    // Winkel Pagina - Details
+    'shop.unavailable': 'NIET BESCHIKBAAR',
+    'shop.coming.soon': 'In aanbouw. Kom snel terug!',
+    
+    // Winkelwagen
+    'cart.title': 'MIJN WINKELWAGEN',
+    'cart.close': '✕',
+    'cart.empty': 'Uw winkelwagen is leeg',
+    'cart.subtotal': 'Subtotaal',
+    'cart.shipping': 'Verzending',
+    'cart.total': 'TOTAAL',
+    'cart.checkout': 'Afrekenen →',
+    'cart.quantity': 'Aantal',
+    'cart.remove': 'Verwijderen',
+    
+    // Checkout
+    'checkout.title': 'MIJN BESTELLING VOLTOOIEN',
+    'checkout.personal.info': 'Persoonlijke informatie',
+    'checkout.firstname': 'Voornaam *',
+    'checkout.lastname': 'Achternaam *',
+    'checkout.email': 'E-mail *',
+    'checkout.phone': 'Telefoon',
+    'checkout.zip': 'Postcode *',
+    'checkout.address': 'Bezorgadres *',
+    'checkout.city': 'Stad *',
+    'checkout.country': 'Land',
+    'checkout.payment': 'Veilige betaling — Stripe',
+    'checkout.card.number': 'Kaartnummer',
+    'checkout.card.expiry': 'Vervaldatum',
+    'checkout.card.cvv': 'CVV',
+    'checkout.secure': '100% veilige betaling via Stripe — SSL/TLS',
+    'checkout.confirm': 'Bevestigen & Betalen',
+    
+    // Succes
+    'success.title': 'BESTELLING BEVESTIGD!',
+    'success.message': 'Bedankt voor uw bestelling. Een bevestigingsmail is naar uw adres verzonden. BackZo neemt binnen 24 uur contact met u op.',
+    'success.close': 'Sluiten',
+    
+    // Offerte
+    'quote.title': 'OFFERTE MAKEN',
+    'quote.subtitle': 'Genereer een professionele offerte, print deze of verstuur per e-mail direct vanaf de site.',
+    'quote.client.info': 'Klantinformatie',
+    'quote.client.name': 'Naam / Bedrijf',
+    'quote.client.email': 'E-mail',
+    'quote.client.phone': 'Telefoon',
+    'quote.client.address': 'Adres',
+    'quote.valid.until': 'Geldig tot',
+    'quote.lines': 'Offerte regels',
+    'quote.designation': 'Omschrijving',
+    'quote.qty': 'Aantal',
+    'quote.unit.price': 'EP (€)',
+    'quote.add.line': '+ Regel toevoegen',
+    'quote.notes': 'Notities & Speciale voorwaarden',
+    'quote.discount': 'Korting (%)',
+    'quote.preview': 'OFFERTE VOORBEELD',
+    'quote.number': 'Nr. OFF-001',
+    'quote.print': 'Afdrukken',
+    'quote.pdf': 'PDF',
+    'quote.send': 'Verzenden',
+    'quote.subtotal': 'Subtotaal',
+    'quote.total': 'TOTAAL',
+    'quote.vat.note': 'BTW niet van toepassing',
+    
+    // Admin
+    'admin.login': 'Inloggen →',
+    'admin.username': 'Gebruikersnaam',
+    'admin.password': 'Wachtwoord',
+    'admin.dashboard': 'Dashboard',
+    'admin.orders': 'Bestellingen',
+    'admin.products': 'Producten',
+    'admin.quotes': 'Offerte maken',
+    'admin.history': 'Geschiedenis',
+    'admin.settings': 'Instellingen',
+    'admin.logout': 'Uitloggen',
+    
+    // Kleuren
+    'colors.title': '60+ KLEUREN BESCHIKBAAR',
+    'colors.subtitle': 'Ons complete palet omvat meer dan 60 tinten — van felle kleuren tot sobere tinten.',
+    'colors.hover': '⬆ Beweeg over een kleur om de code te zien',
+    'colors.white': 'Wit',
+    'colors.black': 'Zwart',
+    'colors.red': 'Rood',
+    
+    // Toegankelijkheid
+    'a11y.title': 'Toegankelijkheid',
+    'a11y.font.size': 'Tekstgrootte',
+    'a11y.contrast': 'Hoog contrast',
+    'a11y.reduce.motion': 'Animaties verminderen',
+    'a11y.reset': 'Resetten',
+    
+    // Berichten
+    'message.loading': 'Laden...',
+    'message.error': 'Er is een fout opgetreden',
+    'message.success': 'Operatie geslaagd',
+    'message.language': 'Taal',
+    
+    // Clubs - Aanvullende secties
+    'clubs.visual.team': 'UW\nTEAM',
+    'clubs.visual.removable': 'Verwijderbaar ✓',
+    'clubs.visual.premium': 'Premium ✓',
+    'clubs.visual.reusable': 'Herbruikbaar ✓',
+    'clubs.options.title': 'WAT WIJ\nAANBIEDEN',
+    'clubs.options.removable.tag': 'Verwijderbaar',
+    'clubs.options.removable.title': 'Verwijderbare patch',
+    'clubs.options.removable.desc': 'Onze kernactiviteit. Thermo-verwijderbare patch met de naam van elke speler. Aangebracht voor de wedstrijd, verwijderd erna — het shirt blijft intact.',
+    'clubs.options.removable.feat1': 'Spelersnaam (achterkant shirt)',
+    'clubs.options.removable.feat2': '60+ kleuren beschikbaar',
+    'clubs.options.removable.feat3': 'Meerdere lettertypen',
+    'clubs.options.removable.feat4': 'Compatibel met alle sportshirts',
+    'clubs.options.removable.feat5': 'Offerte aangepast aan uw team',
+    'clubs.options.permanent.tag': 'Permanent',
+    'clubs.options.permanent.title': 'Permanente patch',
+    'clubs.options.permanent.desc': 'Voor vaste elementen van uw outfit — sponsor, clublogo, nummer. Duurzame high-definition afwerking.',
+    'clubs.options.permanent.feat1': 'Club / verenigingslogo',
+    'clubs.options.permanent.feat2': 'Shirtnummer',
+    'clubs.options.permanent.feat3': 'Sponsor',
+    'clubs.options.permanent.feat4': 'High-definition afwerking',
+    'clubs.options.permanent.feat5': '60+ kleuren beschikbaar'
+  }
 };
 function toggleLang() {
   const d=document.getElementById('langDrop');
@@ -2884,17 +3888,405 @@ function setLang(code, label) {
   document.getElementById('currentLang').textContent=label;
   document.getElementById('langDrop').classList.remove('open');
   document.querySelectorAll('.lang-opt').forEach(o=>o.classList.toggle('active',o.textContent.toLowerCase().includes(code)));
-  // Update nav labels
-  const l=LANGS[code]||LANGS.fr;
-  const navItems=[{id:'nl-accueil',key:'nav.home'},{id:'nl-clubs',key:'nav.clubs'},{id:'nl-shop',key:'nav.shop'},{id:'nl-contact',key:'nav.contact'},{id:'nl-devis',key:'nav.quote'},{id:'nl-particuliers',key:'nav.particuliers'}];
-  navItems.forEach(({id,key})=>{ const el=document.getElementById(id); if(el) el.textContent=l[key]||el.textContent; });
+  
+  // Apply translations
+  applyTranslations(code);
+  
   document.documentElement.lang=code;
   showToast('Langue : '+label);
 }
+
+function applyTranslations(code) {
+  const l = LANGS[code] || LANGS.fr;
+  
+  // Translate all elements with data-i18n attribute
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (l[key]) {
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        el.placeholder = l[key];
+      } else {
+        el.textContent = l[key];
+      }
+    }
+  });
+  
+  // Auto-translate common text patterns
+  const textMap = {
+    // Buttons and CTAs
+    'Demander un devis': 'clubs.cta.quote',
+    'Request a quote': 'clubs.cta.quote',
+    'Offerte aanvragen': 'clubs.cta.quote',
+    'Comment ça marche →': 'clubs.cta.how',
+    'How it works →': 'clubs.cta.how',
+    'Hoe het werkt →': 'clubs.cta.how',
+    'Nous contacter →': 'clubs.cta.button',
+    'Contact us →': 'clubs.cta.button',
+    'Neem contact op →': 'clubs.cta.button',
+    'Commander →': 'home.individual.cta',
+    'Order →': 'home.individual.cta',
+    'Bestellen →': 'home.individual.cta',
+    'Obtenir un devis →': 'home.club.cta',
+    'Get a quote →': 'home.club.cta',
+    'Offerte aanvragen →': 'home.club.cta',
+    'Configurer maintenant': 'individual.cta',
+    'Configure now': 'individual.cta',
+    'Nu configureren': 'individual.cta',
+    'Commander & Payer →': 'individual.order',
+    'Order & Pay →': 'individual.order',
+    'Bestellen & Betalen →': 'individual.order',
+    '+ Ajouter un nom': 'individual.add.name',
+    '+ Add a name': 'individual.add.name',
+    '+ Naam toevoegen': 'individual.add.name',
+    'Envoyer le message →': 'contact.form.submit',
+    'Send message →': 'contact.form.submit',
+    'Bericht verzenden →': 'contact.form.submit',
+    'Se connecter →': 'admin.login',
+    'Login →': 'admin.login',
+    'Inloggen →': 'admin.login',
+    'Passer commande →': 'cart.checkout',
+    'Checkout →': 'cart.checkout',
+    'Afrekenen →': 'cart.checkout',
+    'Confirmer & Payer': 'checkout.confirm',
+    'Confirm & Pay': 'checkout.confirm',
+    'Bevestigen & Betalen': 'checkout.confirm',
+    'Fermer': 'success.close',
+    'Close': 'success.close',
+    'Sluiten': 'success.close',
+    
+    // Titles
+    'COMMENT ÇA': 'clubs.how.title',
+    'HOW IT': 'clubs.how.title',
+    'HOE HET': 'clubs.how.title',
+    'FAIT POUR': 'clubs.why.title',
+    'MADE FOR': 'clubs.why.title',
+    'GEMAAKT VOOR': 'clubs.why.title',
+    'INNOVANT POUR': 'clubs.cta.title',
+    'INNOVATIVE FOR': 'clubs.cta.title',
+    'INNOVATIEF VOOR': 'clubs.cta.title',
+    'LA DIFFÉRENCE': 'individual.why.title',
+    'THE BACKZO': 'individual.why.title',
+    'HET BACKZO': 'individual.why.title',
+    'CRÉEZ VOTRE': 'individual.config.title',
+    'CREATE YOUR': 'individual.config.title',
+    'MAAK UW': 'individual.config.title',
+    'NOS PRODUITS': 'shop.title',
+    'OUR PRODUCTS': 'shop.title',
+    'ONZE PRODUCTEN': 'shop.title',
+    'NOUS CONTACTER': 'contact.title',
+    'CONTACT US': 'contact.title',
+    'NEEM CONTACT OP': 'contact.title',
+    'MON PANIER': 'cart.title',
+    'MY CART': 'cart.title',
+    'MIJN WINKELWAGEN': 'cart.title',
+    'FINALISER MA COMMANDE': 'checkout.title',
+    'COMPLETE MY ORDER': 'checkout.title',
+    'MIJN BESTELLING VOLTOOIEN': 'checkout.title',
+    'COMMANDE CONFIRMÉE !': 'success.title',
+    'ORDER CONFIRMED!': 'success.title',
+    'BESTELLING BEVESTIGD!': 'success.title',
+    'CRÉER UN DEVIS': 'quote.title',
+    'CREATE A QUOTE': 'quote.title',
+    'OFFERTE MAKEN': 'quote.title',
+    '60+ COULEURS DISPONIBLES': 'colors.title',
+    '60+ COLORS AVAILABLE': 'colors.title',
+    '60+ KLEUREN BESCHIKBAAR': 'colors.title',
+    
+    // Labels
+    'Choisissez la taille': 'individual.config.step1',
+    'Choose size': 'individual.config.step1',
+    'Kies maat': 'individual.config.step1',
+    'Couleur du patch': 'individual.config.step2',
+    'Patch color': 'individual.config.step2',
+    'Patch kleur': 'individual.config.step2',
+    'Couleur du texte': 'individual.config.step3',
+    'Text color': 'individual.config.step3',
+    'Tekstkleur': 'individual.config.step3',
+    'Nom(s) à flocquer': 'individual.config.step4',
+    'Name(s) to print': 'individual.config.step4',
+    'Naam/namen om te bedrukken': 'individual.config.step4',
+    'Votre email': 'individual.config.step5',
+    'Your email': 'individual.config.step5',
+    'Uw e-mail': 'individual.config.step5',
+    'Aperçu en temps réel': 'individual.preview',
+    'Real-time preview': 'individual.preview',
+    'Real-time voorbeeld': 'individual.preview',
+    'Taille': 'individual.summary.size',
+    'Size': 'individual.summary.size',
+    'Maat': 'individual.summary.size',
+    'Couleur': 'individual.summary.color',
+    'Color': 'individual.summary.color',
+    'Kleur': 'individual.summary.color',
+    'Quantité totale': 'individual.summary.qty',
+    'Total quantity': 'individual.summary.qty',
+    'Totale hoeveelheid': 'individual.summary.qty',
+    'Prix unitaire': 'individual.summary.unit',
+    'Unit price': 'individual.summary.unit',
+    'Eenheidsprijs': 'individual.summary.unit',
+    'Total': 'individual.summary.total',
+    'Totaal': 'individual.summary.total',
+    'Email': 'contact.email.title',
+    'E-mail': 'contact.email.title',
+    'TikTok': 'contact.social.title',
+    'Localisation': 'contact.location.title',
+    'Location': 'contact.location.title',
+    'Locatie': 'contact.location.title',
+    'Délai de réponse': 'contact.hours.title',
+    'Response time': 'contact.hours.title',
+    'Reactietijd': 'contact.hours.title',
+    'Nom complet *': 'contact.form.name',
+    'Full name *': 'contact.form.name',
+    'Volledige naam *': 'contact.form.name',
+    'Email *': 'contact.form.email',
+    'E-mail *': 'contact.form.email',
+    'Sujet': 'contact.form.subject',
+    'Subject': 'contact.form.subject',
+    'Onderwerp': 'contact.form.subject',
+    'Message *': 'contact.form.message',
+    'Bericht *': 'contact.form.message',
+    'Tous': 'shop.filter.all',
+    'All': 'shop.filter.all',
+    'Alle': 'shop.filter.all',
+    'Particuliers': 'shop.filter.individual',
+    'Individuals': 'shop.filter.individual',
+    'Particulieren': 'shop.filter.individual',
+    'Clubs': 'shop.filter.clubs',
+    'Votre panier est vide': 'cart.empty',
+    'Your cart is empty': 'cart.empty',
+    'Uw winkelwagen is leeg': 'cart.empty',
+    'Sous-total': 'cart.subtotal',
+    'Subtotal': 'cart.subtotal',
+    'Subtotaal': 'cart.subtotal',
+    'Livraison': 'cart.shipping',
+    'Shipping': 'cart.shipping',
+    'Verzending': 'cart.shipping',
+    'TOTAL': 'cart.total',
+    'TOTAAL': 'cart.total',
+    'Blanc': 'colors.white',
+    'White': 'colors.white',
+    'Wit': 'colors.white',
+    'Noir': 'colors.black',
+    'Black': 'colors.black',
+    'Zwart': 'colors.black',
+    'Rouge': 'colors.red',
+    'Red': 'colors.red',
+    'Rood': 'colors.red',
+    'Chargement...': 'message.loading',
+    'Loading...': 'message.loading',
+    'Laden...': 'message.loading'
+  };
+  
+  // Apply text-based translations to buttons and common elements
+  document.querySelectorAll('button:not([data-i18n]), .btn-pri:not([data-i18n]), .btn-sec:not([data-i18n]), .choice-cta-lnk:not([data-i18n]), .order-btn:not([data-i18n]), .add-name-btn:not([data-i18n]), .contact-submit:not([data-i18n]), .al-btn:not([data-i18n]), .cart-checkout-btn:not([data-i18n]), .co-order-btn:not([data-i18n]), .success-close:not([data-i18n])').forEach(el => {
+    const text = el.textContent.trim();
+    const key = textMap[text];
+    if (key && l[key]) {
+      el.textContent = l[key];
+    }
+  });
+  
+  // Translate section tags
+  document.querySelectorAll('.section-tag:not([data-i18n])').forEach(el => {
+    const text = el.textContent.trim();
+    const sectionMap = {
+      'Processus': 'section.process',
+      'Process': 'section.process',
+      'Proces': 'section.process',
+      'Pourquoi BackZo': 'section.why',
+      'Why BackZo': 'section.why',
+      'Waarom BackZo': 'section.why',
+      'Options': 'section.options',
+      'Opties': 'section.options',
+      'Palette officielle': 'section.colors',
+      'Official palette': 'section.colors',
+      'Officieel palet': 'section.colors',
+      'Configurateur': 'section.configurator',
+      'Configurator': 'section.configurator',
+      'Boutique': 'nav.shop',
+      'Shop': 'nav.shop',
+      'Winkel': 'nav.shop',
+      'Nous joindre': 'contact.title',
+      'Contact us': 'contact.title',
+      'Neem contact op': 'contact.title',
+      'Outil professionnel': 'quote.title',
+      'Professional tool': 'quote.title',
+      'Professioneel gereedschap': 'quote.title'
+    };
+    const key = sectionMap[text];
+    if (key && l[key]) {
+      el.textContent = l[key];
+    }
+  });
+  
+  // Translate labels
+  document.querySelectorAll('.form-lbl:not([data-i18n]), .bz-lbl:not([data-i18n]), .preview-lbl:not([data-i18n]), .ci-tit:not([data-i18n])').forEach(el => {
+    const text = el.textContent.trim().replace(/\d+/g, '').trim();
+    const key = textMap[text];
+    if (key && l[key]) {
+      // Preserve step numbers
+      const stepNum = el.querySelector('.step-num');
+      if (stepNum) {
+        el.textContent = '';
+        el.appendChild(stepNum);
+        const span = document.createElement('span');
+        span.textContent = ' ' + l[key];
+        el.appendChild(span);
+      } else {
+        el.textContent = l[key];
+      }
+    }
+  });
+  
+  // Translate section titles
+  document.querySelectorAll('.section-title:not([data-i18n]), .cta-tit:not([data-i18n]), .cart-title:not([data-i18n]), .co-tit:not([data-i18n]), .success-tit:not([data-i18n]), .admin-tit:not([data-i18n]), h1:not([data-i18n]), h2:not([data-i18n])').forEach(el => {
+    const text = el.textContent.replace(/\n/g, '').replace(/<[^>]*>/g, '').trim();
+    for (const [pattern, key] of Object.entries(textMap)) {
+      if (text.includes(pattern) && l[key]) {
+        // Preserve HTML structure for titles with spans
+        const spans = el.querySelectorAll('span');
+        if (spans.length > 0) {
+          const translation = l[key];
+          const parts = translation.split(' ');
+          if (parts.length >= 2) {
+            // Find text nodes
+            const textNodes = Array.from(el.childNodes).filter(node => node.nodeType === 3);
+            if (textNodes.length > 0) {
+              textNodes[0].textContent = parts.slice(0, -1).join(' ');
+            }
+            if (spans[0]) spans[0].textContent = parts[parts.length - 1];
+          }
+        } else {
+          el.textContent = l[key];
+        }
+        break;
+      }
+    }
+  });
+  
+  // Translate placeholders
+  document.querySelectorAll('input[placeholder]:not([data-i18n]), textarea[placeholder]:not([data-i18n])').forEach(el => {
+    const placeholder = el.placeholder;
+    const key = textMap[placeholder];
+    if (key && l[key]) {
+      el.placeholder = l[key];
+    }
+  });
+  
+  // Translate marquee items
+  const marqueeMap = {
+    'FLOCAGE AMOVIBLE': 'marquee.removable',
+    'REMOVABLE PATCH': 'marquee.removable',
+    'VERWIJDERBARE PATCH': 'marquee.removable',
+    'NOM DU JOUEUR': 'marquee.player',
+    'PLAYER NAME': 'marquee.player',
+    'SPELERSNAAM': 'marquee.player',
+    '60+ COULEURS': 'marquee.colors',
+    '60+ COLORS': 'marquee.colors',
+    '60+ KLEUREN': 'marquee.colors',
+    'AMOVIBLE': 'marquee.removable',
+    'REMOVABLE': 'marquee.removable',
+    'VERWIJDERBAAR': 'marquee.removable',
+    'CLUBS SPORTIFS': 'marquee.clubs',
+    'SPORTS CLUBS': 'marquee.clubs',
+    'SPORTCLUBS': 'marquee.clubs',
+    'DEVIS SUR MESURE': 'marquee.quote',
+    'CUSTOM QUOTE': 'marquee.quote',
+    'OFFERTE OP MAAT': 'marquee.quote',
+    'PAIEMENT SÉCURISÉ': 'marquee.payment',
+    'SECURE PAYMENT': 'marquee.payment',
+    'VEILIGE BETALING': 'marquee.payment',
+    'ENVELOPPE PRÉAFFRANCHIE': 'marquee.envelope',
+    'PREPAID ENVELOPE': 'marquee.envelope',
+    'VOORAF BETAALDE ENVELOP': 'marquee.envelope',
+    'LIVRAISON SÉCURISÉE': 'marquee.delivery',
+    'SECURE DELIVERY': 'marquee.delivery',
+    'VEILIGE LEVERING': 'marquee.delivery',
+    'TAILLE S : 25×6 cm': 'marquee.size.s',
+    'SIZE S: 25×6 cm': 'marquee.size.s',
+    'MAAT S: 25×6 cm': 'marquee.size.s',
+    'TAILLE L : 27×7 cm': 'marquee.size.l',
+    'SIZE L: 27×7 cm': 'marquee.size.l',
+    'MAAT L: 27×7 cm': 'marquee.size.l',
+    'LIVRAISON FRANCE & EUROPE': 'marquee.delivery.europe',
+    'FRANCE & EUROPE DELIVERY': 'marquee.delivery.europe',
+    'FRANKRIJK & EUROPA LEVERING': 'marquee.delivery.europe'
+  };
+  
+  document.querySelectorAll('.marq-item').forEach(el => {
+    const text = el.textContent.replace('●', '').trim();
+    const key = marqueeMap[text];
+    if (key && l[key]) {
+      const dot = el.querySelector('.marq-dot');
+      const existingSpan = el.querySelector('span:not(.marq-dot)');
+      if (existingSpan) {
+        existingSpan.textContent = l[key];
+      } else {
+        el.textContent = '';
+        if (dot) el.appendChild(dot);
+        const span = document.createElement('span');
+        span.textContent = l[key];
+        el.appendChild(span);
+      }
+    }
+  });
+  
+  // Translate footer elements
+  document.querySelectorAll('.foot-tagline').forEach(el => {
+    if (l['footer.tagline']) el.textContent = l['footer.tagline'];
+  });
+  
+  document.querySelectorAll('.foot-links button, .foot-links a').forEach(el => {
+    const text = el.textContent.trim();
+    if (text === 'CGV' || text === 'Terms' || text === 'Voorwaarden') {
+      el.textContent = l['footer.cgv'];
+    } else if (text === 'Mentions légales' || text === 'Legal notice' || text === 'Juridische kennisgeving') {
+      el.textContent = l['footer.legal'];
+    } else if (text === 'Confidentialité' || text === 'Privacy') {
+      el.textContent = l['footer.privacy'];
+    }
+  });
+  
+  document.querySelectorAll('.foot-copy').forEach(el => {
+    const adminDot = el.querySelector('span[onclick]');
+    const copyrightSpan = el.querySelector('[data-i18n="footer.copyright"]');
+    if (copyrightSpan) {
+      copyrightSpan.textContent = l['footer.copyright'];
+    } else {
+      el.innerHTML = `© 2026 BackZo — ${l['footer.copyright']}`;
+      if (adminDot) el.appendChild(adminDot);
+    }
+  });
+  
+  // Update nav items
+  const navItems=[
+    {id:'nl-accueil',key:'nav.home'},
+    {id:'nl-clubs',key:'nav.clubs'},
+    {id:'nl-shop',key:'nav.shop'},
+    {id:'nl-contact',key:'nav.contact'},
+    {id:'nl-devis',key:'nav.quote'},
+    {id:'nl-particuliers',key:'nav.particuliers'}
+  ];
+  navItems.forEach(({id,key})=>{ 
+    const el=document.getElementById(id); 
+    if(el) el.textContent=l[key]||el.textContent; 
+  });
+}
+
 function setLangFromSelect(code) {
   const labels={fr:'FR',en:'EN',nl:'NL'};
-  setLang(code, labels[code]);
+  const flags={fr:'🇫🇷',en:'🇬🇧',nl:'🇳🇱'};
+  setLang(code, labels[code], flags[code]);
 }
+
+// Apply translations on page load
+document.addEventListener('DOMContentLoaded', () => {
+  const flags = {fr:'🇫🇷', en:'🇬🇧', nl:'🇳🇱'};
+  const flag = flags[state.lang] || '🇫🇷';
+  const flagEl = document.getElementById('currentLangFlag');
+  if (flagEl) flagEl.textContent = flag;
+  applyTranslations(state.lang);
+});
+
 document.addEventListener('click',e=>{ if(!e.target.closest('.lang-sel')) document.getElementById('langDrop').classList.remove('open'); });
 
 // ============================================================
