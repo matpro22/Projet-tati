@@ -378,6 +378,13 @@ app.post('/api/create-payment-intent', async (req, res) => {
   }
 });
 
+// Récupérer la clé publique Stripe
+app.get('/api/stripe-config', (req, res) => {
+  res.json({
+    publicKey: process.env.STRIPE_PUBLIC_KEY || ''
+  });
+});
+
 // Confirmer un paiement et créer la commande
 app.post('/api/confirm-payment', async (req, res) => {
   try {

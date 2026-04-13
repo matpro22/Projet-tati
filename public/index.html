@@ -1908,19 +1908,24 @@ function closeCheckout() {
 // ============================================================
 // STRIPE INTEGRATION
 // ============================================================
+// STRIPE
+// ============================================================
 let stripe = null;
 let cardElement = null;
 
-function initStripe() {
-  const stripeKey = state.settings.stripeKey;
-  
-  // Vérifier si la clé est valide
-  if(!stripeKey || stripeKey === 'pk_test_VOTRE_CLE_ICI' || !stripeKey.startsWith('pk_')) {
-    console.warn('Clé Stripe non configurée. Allez dans Admin > Paramètres pour configurer Stripe.');
-    return false;
-  }
-  
+async function initStripe() {
   try {
+    // Récupérer la clé publique depuis l'API
+    const response = await fetch('/api/stripe-config');
+    const config = await response.json();
+    const stripeKey = config.publicKey;
+    
+    // Vérifier si la clé est valide
+    if(!stripeKey || stripeKey === 'pk_test_VOTRE_CLE_ICI' || !stripeKey.startsWith('pk_')) {
+      console.warn('Clé Stripe non configurée sur le serveur.');
+      return false;
+    }
+    
     stripe = Stripe(stripeKey);
     const elements = stripe.elements();
     
