@@ -516,10 +516,22 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
 .foot-logo{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.08em;color:var(--white);text-decoration:none}
 .foot-logo span{color:var(--green)}
 .foot-tagline{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gray);margin-top:.25rem}
-.foot-links{display:flex;gap:2rem;list-style:none;flex-wrap:wrap}
+.foot-links{display:flex;gap:2rem;list-style:none;flex-wrap:wrap;align-items:center}
 .foot-links button,.foot-links a{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);background:none;border:none;padding:0;text-decoration:none;transition:color .2s}
 .foot-links button:hover,.foot-links a:hover{color:var(--green)}
 .foot-copy{font-size:.78rem;color:var(--gray)}
+
+/* SOCIAL LINKS */
+.social-links{display:flex;gap:1rem;align-items:center}
+.social-link{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:var(--lg);color:var(--gray);transition:all .3s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden}
+.social-link::before{content:'';position:absolute;inset:0;background:var(--green);opacity:0;transition:opacity .3s;border-radius:50%}
+.social-link svg{position:relative;z-index:1;transition:all .3s}
+.social-link:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 8px 20px rgba(184,255,87,.3)}
+.social-link:hover::before{opacity:1}
+.social-link:hover svg{color:var(--black);transform:scale(1.1) rotate(5deg)}
+.social-link:hover{animation:socialBounce .6s ease-in-out}
+
+@keyframes socialBounce{0%,100%{transform:translateY(-4px) scale(1.05)}50%{transform:translateY(-8px) scale(1.08)}}
 
 /* SKIP LINK */
 .skip-lnk{position:absolute;top:-100px;left:0;background:var(--green);color:var(--black);padding:.75rem 1.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;z-index:9999;transition:top .2s}
@@ -861,7 +873,20 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
         <li><button onclick="openModal('cgv')" data-i18n="footer.cgv">CGV</button></li>
         <li><button onclick="openModal('mentions')" data-i18n="footer.legal">Mentions légales</button></li>
         <li><button onclick="openModal('privacy')" data-i18n="footer.privacy">Confidentialité</button></li>
-        <li><a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener">TikTok</a></li>
+        <li>
+          <div class="social-links">
+            <a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener" class="social-link" aria-label="TikTok">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+              </svg>
+            </a>
+            <a href="https://www.instagram.com/backzo.eu" target="_blank" rel="noopener" class="social-link" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+            </a>
+          </div>
+        </li>
       </ul>
       <div class="foot-copy">© 2026 BackZo — <span data-i18n="footer.copyright">Tous droits réservés</span> <span style="opacity:0.3;margin-left:1rem;cursor:pointer" onclick="showPage('admin')">·</span></div>
     </div>
@@ -1000,7 +1025,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
     </div>
     <div class="cta-msg" id="ctaMsg" role="status"></div>
   </section>
-  <footer><div class="foot-inner"><div><a href="#" class="foot-logo" onclick="showPage('accueil');return false">BACK<span>ZO</span></a><div class="foot-tagline">Flocage amovible · Clubs &amp; Particuliers</div></div><ul class="foot-links"><li><button onclick="openModal('cgv')">CGV</button></li><li><button onclick="openModal('mentions')">Mentions légales</button></li><li><button onclick="openModal('privacy')">Confidentialité</button></li><li><a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener">TikTok</a></li></ul><div class="foot-copy">© 2026 BackZo — Tous droits réservés</div></div></footer>
+  <footer><div class="foot-inner"><div><a href="#" class="foot-logo" onclick="showPage('accueil');return false">BACK<span>ZO</span></a><div class="foot-tagline">Flocage amovible · Clubs &amp; Particuliers</div></div><ul class="foot-links"><li><button onclick="openModal('cgv')">CGV</button></li><li><button onclick="openModal('mentions')">Mentions légales</button></li><li><button onclick="openModal('privacy')">Confidentialité</button></li><li><div class="social-links"><a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener" class="social-link" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg></a><a href="https://www.instagram.com/backzo.eu" target="_blank" rel="noopener" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a></div></li></ul><div class="foot-copy">© 2026 BackZo — Tous droits réservés</div></div></footer>
 </div>
 
 <!-- ==================== PAGE PARTICULIERS ==================== -->
@@ -1162,7 +1187,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
       <div class="p-av-card reveal"><div class="p-av-ico">🚚</div><div class="p-av-tit" data-i18n="individual.why.feat4.title">Livraison France & Europe</div><p class="p-av-desc" data-i18n="individual.why.feat4.desc">Livraison 7€. Au-delà de 2 patchs : forfait 10€. Livraison partout en France et en Europe.</p></div>
     </div>
   </section>
-  <footer><div class="foot-inner"><div><a href="#" class="foot-logo" onclick="showPage('accueil');return false">BACK<span>ZO</span></a><div class="foot-tagline">Flocage amovible · Clubs &amp; Particuliers</div></div><ul class="foot-links"><li><button onclick="openModal('cgv')">CGV</button></li><li><button onclick="openModal('mentions')">Mentions légales</button></li><li><button onclick="openModal('privacy')">Confidentialité</button></li><li><a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener">TikTok</a></li></ul><div class="foot-copy">© 2026 BackZo — Tous droits réservés</div></div></footer>
+  <footer><div class="foot-inner"><div><a href="#" class="foot-logo" onclick="showPage('accueil');return false">BACK<span>ZO</span></a><div class="foot-tagline">Flocage amovible · Clubs &amp; Particuliers</div></div><ul class="foot-links"><li><button onclick="openModal('cgv')">CGV</button></li><li><button onclick="openModal('mentions')">Mentions légales</button></li><li><button onclick="openModal('privacy')">Confidentialité</button></li><li><div class="social-links"><a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener" class="social-link" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg></a><a href="https://www.instagram.com/backzo.eu" target="_blank" rel="noopener" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a></div></li></ul><div class="foot-copy">© 2026 BackZo — Tous droits réservés</div></div></footer>
 </div>
 
 <!-- ==================== PAGE BOUTIQUE ==================== -->
@@ -1291,16 +1316,27 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
             <div><div class="ci-tit">Email</div><p class="ci-txt"><a href="mailto:team@backzo.eu">team@backzo.eu</a><br/>Réponse garantie sous 48H</p></div>
           </div>
           <div class="ci-item reveal">
-            <div class="ci-ico">📱</div>
-            <div><div class="ci-tit">TikTok</div><p class="ci-txt"><a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener">@back_zo</a><br/>Suivez nos réalisations</p></div>
-          </div>
-          <div class="ci-item reveal">
             <div class="ci-ico">📍</div>
             <div><div class="ci-tit">Localisation</div><p class="ci-txt">ANTHON 38280 FRANCE</p></div>
           </div>
           <div class="ci-item reveal">
             <div class="ci-ico">⏰</div>
             <div><div class="ci-tit">Délai de réponse</div><p class="ci-txt">Lun-Ven : 9h-18h<br/>Réponse garantie sous 48h</p></div>
+          </div>
+          <div class="ci-item reveal">
+            <div class="ci-tit" style="margin-bottom:1rem">Suivez-nous</div>
+            <div class="social-links">
+              <a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener" class="social-link" aria-label="TikTok">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                </svg>
+              </a>
+              <a href="https://www.instagram.com/backzo.eu" target="_blank" rel="noopener" class="social-link" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
         <div>
