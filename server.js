@@ -7,7 +7,6 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const fs = require('fs').promises;
 const path = require('path');
 const { MongoClient, ObjectId } = require('mongodb');
@@ -16,8 +15,10 @@ const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Vérifier la configuration Stripe au démarrage
+// Initialiser Stripe seulement si la clé est configurée
+let stripe = null;
 if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.startsWith('sk_')) {
+  stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
   console.log('✓ Stripe initialisé avec clé secrète:', process.env.STRIPE_SECRET_KEY.substring(0, 20) + '...');
 } else {
   console.error('❌ STRIPE_SECRET_KEY manquante ou invalide !');
@@ -939,7 +940,15 @@ app.get('/api/stats', async (req, res) => {
 // DÉMARRAGE DU SERVEUR
 // ============================================================
 
+// Initialiser la base de données
 initDB().then(() => {
+  console.log('✓ Base de données initialisée');
+}).catch(error => {
+  console.error('❌ Erreur initialisation DB:', error.message);
+});
+
+// Démarrer le serveur seulement en mode local (pas sur Vercel)
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log('');
     console.log('🚀 BackZo Backend démarré !');
@@ -959,7 +968,7 @@ initDB().then(() => {
     console.log('   GET  /api/stats');
     console.log('');
   });
-});
+}
 
 // Gestion des erreurs non capturées
 process.on('unhandledRejection', (error) => {
