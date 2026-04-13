@@ -1919,12 +1919,15 @@ async function initStripe() {
     const config = await response.json();
     const stripeKey = config.publicKey;
     
+    console.log('Clé Stripe reçue:', stripeKey ? stripeKey.substring(0, 20) + '...' : 'AUCUNE');
+    
     // Vérifier si la clé est valide
     if(!stripeKey || stripeKey === 'pk_test_VOTRE_CLE_ICI' || !stripeKey.startsWith('pk_')) {
       console.warn('Clé Stripe non configurée sur le serveur.');
       return false;
     }
     
+    console.log('Initialisation de Stripe...');
     stripe = Stripe(stripeKey);
     const elements = stripe.elements();
     
@@ -1958,6 +1961,7 @@ async function initStripe() {
       });
     }
     
+    console.log('✓ Stripe initialisé avec succès');
     return true;
   } catch(error) {
     console.error('Erreur initialisation Stripe:', error);
