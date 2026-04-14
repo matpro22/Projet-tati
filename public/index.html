@@ -2362,7 +2362,58 @@ function selectColor(hex, el) {
   document.getElementById('sumColor').textContent=colorNames[hex] || hex;
 }
 function selectBg(hex, el) {
-  state.config.bg=hex;
+  // Mapping des couleurs de patch avec leurs noms
+  const bgColorNames = {
+    '#b8ff57': 'BackZo Green',
+    '#ffffff': 'Blanc',
+    '#0a0a0a': 'Noir',
+    '#c0c0c0': 'Argent',
+    '#6b0f1a': 'Rouge foncé',
+    '#ff4500': 'Orange vif',
+    '#e35c2a': 'Orange',
+    '#c8860a': 'Or foncé',
+    '#f5d000': 'Jaune',
+    '#7a0a20': 'Bordeaux',
+    '#c0152a': 'Rouge',
+    '#d42020': 'Rouge vif',
+    '#b8940c': 'Or',
+    '#d4ab30': 'Or clair',
+    '#7ac8e8': 'Bleu ciel',
+    '#b51c28': 'Rouge carmin',
+    '#b8a070': 'Beige',
+    '#a07850': 'Marron clair',
+    '#c86030': 'Orange terre',
+    '#88c8e8': 'Bleu clair',
+    '#8c1820': 'Rouge bordeaux',
+    '#909070': 'Gris vert',
+    '#e890a0': 'Rose',
+    '#e8e050': 'Jaune citron',
+    '#f8e020': 'Jaune vif',
+    '#1a4020': 'Vert foncé',
+    '#186030': 'Vert forêt',
+    '#30b090': 'Turquoise',
+    '#5090c0': 'Bleu',
+    '#90c8e8': 'Bleu pastel',
+    '#404040': 'Gris foncé',
+    '#3a5030': 'Vert olive',
+    '#106040': 'Vert émeraude',
+    '#187060': 'Vert teal',
+    '#3070a0': 'Bleu roi',
+    '#4090d0': 'Bleu azur',
+    '#d0d0d0': 'Gris clair',
+    '#506040': 'Kaki',
+    '#809040': 'Vert olive clair',
+    '#7080c0': 'Bleu lavande',
+    '#2060c0': 'Bleu marine',
+    '#161616': 'Noir foncé',
+    '#1a3a6b': 'Bleu nuit',
+    '#2d0000': 'Rouge sombre',
+    '#0d2b0d': 'Vert sombre',
+    '#1a1a3a': 'Violet sombre'
+  };
+  
+  state.config.bg = hex;
+  state.config.bgName = bgColorNames[hex] || hex;
   document.querySelectorAll('#bgSwatches .p-swatch').forEach(s=>s.classList.remove('sel'));
   el.classList.add('sel');
   document.getElementById('previewPatch').setAttribute('fill',hex);
