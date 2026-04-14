@@ -1487,6 +1487,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
             <button class="btn-sec" onclick="fixProductPrices()" style="font-size:.85rem;padding:.7rem 1.5rem;background:var(--orange)" title="Mettre à jour les prix à 13€">� Corriger prix</button>
             <button class="btn-sec" onclick="initDatabase()" style="font-size:.85rem;padding:.7rem 1.5rem" title="Initialiser la base de données avec les produits par défaut">🔄 Initialiser DB</button>
             <button class="btn-pri" onclick="showAddProductModal()" style="font-size:.85rem;padding:.7rem 1.5rem">+ Ajouter</button>
+            <button class="btn-sec" onclick="recreateParticularPatches()" style="font-size:.85rem;padding:.7rem 1.5rem;background:var(--green)" title="Recréer les patchs Taille S et L">Recréer patchs</button>
           </div>
         </div>
         <div style="overflow-x:auto"><table class="admin-table"><thead><tr><th>Nom</th><th>Catégorie</th><th>Prix</th><th>Stock</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="productsTableBody"></tbody></table></div>
@@ -3048,6 +3049,71 @@ async function fixProductPrices() {
     } catch (error) {
       console.error('Erreur mise à jour prix:', error);
       showToast('Erreur lors de la mise à jour', true);
+    }
+  } else {
+    showToast('Mode local - Connectez le backend');
+  }
+}
+
+// Recréer les patchs pour particuliers
+async function recreateParticularPatches() {
+  if (!confirm('Recréer les patchs pour particuliers ?\n\nCela créera les produits Taille S et Taille L à 13€.')) {
+    return;
+  }
+  
+  if(USE_BACKEND) {
+    try {
+      showToast('🔄 Création des patchs...');
+      
+      // Créer patch-s
+      const patchS = {
+        id: 'patch-s',
+        name: 'Flocage Amovible — Taille S',
+        price: 13,
+        category: 'particuliers',
+        desc: 'Patch 25×6 cm. Idéal pour maillots individuels.',
+        stock: 100,
+        active: true
+      };
+      
+      const response1 = await fetch(`${API_URL}/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patchS)
+      });
+      
+      // Créer patch-l
+      const patchL = {
+        id: 'patch-l',
+        name: 'Flocage Amovible — Taille L',
+        price: 13,
+        category: 'particuliers',
+        desc: 'Patch 27×7 cm. Format large pour plus de visibilité.',
+        stock: 100,
+        active: true
+      };
+      
+      const response2 = await fetch(`${API_URL}/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patchL)
+      });
+      
+      if (!response1.ok || !response2.ok) {
+        throw new Error('Erreur création des patchs');
+      }
+      
+      showToast('✓ Patchs créés avec succès !');
+      await loadProductsFromBackend();
+      renderProductsTable();
+      
+      // Mettre à jour aussi l'affichage de la boutique
+      const grid = document.getElementById('productsGrid');
+      if (grid) renderProducts('all');
+      
+    } catch (error) {
+      console.error('Erreur création patchs:', error);
+      showToast('Erreur lors de la création: ' + error.message, true);
     }
   } else {
     showToast('Mode local - Connectez le backend');
