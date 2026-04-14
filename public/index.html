@@ -1488,6 +1488,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
             <button class="btn-sec" onclick="initDatabase()" style="font-size:.85rem;padding:.7rem 1.5rem" title="Initialiser la base de données avec les produits par défaut">🔄 Initialiser DB</button>
             <button class="btn-pri" onclick="showAddProductModal()" style="font-size:.85rem;padding:.7rem 1.5rem">+ Ajouter</button>
             <button class="btn-sec" onclick="recreateParticularPatches()" style="font-size:.85rem;padding:.7rem 1.5rem;background:var(--green)" title="Recréer les patchs Taille S et L">Recréer patchs</button>
+            <button class="btn-sec" onclick="forceSyncCart()" style="font-size:.85rem;padding:.7rem 1.5rem;background:#3b82f6" title="Forcer la synchronisation des prix du panier">🔄 Sync panier</button>
           </div>
         </div>
         <div style="overflow-x:auto"><table class="admin-table"><thead><tr><th>Nom</th><th>Catégorie</th><th>Prix</th><th>Stock</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="productsTableBody"></tbody></table></div>
@@ -1871,7 +1872,23 @@ function syncCartPrices() {
   state.cart = state.cart.map(item => {
     console.log(`  Vérification: ${item.name} (${item.id}) - Prix actuel: ${item.price}€`);
     
-    // Trouver le produit correspondant
+    // Pour les produits configurés (Particuliers), forcer le prix à 13€
+    if (item.id && item.id.startsWith('config-')) {
+      if (item.price !== 13) {
+        console.log(`    ✓ Produit configuré - Prix mis à jour: ${item.price}€ → 13€`);
+        priceChanges.push({
+          name: item.name,
+          oldPrice: item.price,
+          newPrice: 13
+        });
+        updated = true;
+        return { ...item, price: 13 };
+      }
+      console.log(`    = Produit configuré - Prix correct (13€)`);
+      return item;
+    }
+    
+    // Trouver le produit correspondant dans la liste
     const product = products.find(p => p.id === item.id);
     
     if (!product) {
@@ -2370,7 +2387,7 @@ function openOrderCheckout() {
   if(!names.length){showToast('Entrez au moins un nom',true);return;}
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showToast('Email invalide',true);return;}
   // Add config to cart
-  const price=state.config.size==='S'?12:14;
+  const price = 13; // Prix unique de 13€ pour les deux tailles
   const totalQty=names.reduce((s,n)=>s+n.qty,0);
   const cartItem={
     id:'config-'+Date.now(), name:'Flocage Amovible '+state.config.size,
@@ -3117,6 +3134,35 @@ async function recreateParticularPatches() {
     }
   } else {
     showToast('Mode local - Connectez le backend');
+  }
+}
+
+// Forcer la synchronisation des prix du panier
+async function forceSyncCart() {
+  if (!confirm('Forcer la synchronisation des prix du panier ?\n\nCela mettra à jour tous les prix des articles dans le panier avec les prix actuels de MongoDB.')) {
+    return;
+  }
+  
+  try {
+    showToast('🔄 Synchronisation en cours...');
+    
+    // Recharger les produits depuis MongoDB
+    await loadProductsFromBackend();
+    
+    // Synchroniser les prix du panier
+    syncCartPrices();
+    
+    // Sauvegarder le panier
+    saveCart();
+    
+    // Mettre à jour l'affichage
+    updateCartBadge();
+    
+    showToast('✓ Panier synchronisé avec succès !');
+    
+  } catch (error) {
+    console.error('Erreur synchronisation panier:', error);
+    showToast('Erreur lors de la synchronisation: ' + error.message, true);
   }
 }
 
