@@ -1484,6 +1484,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
         <div class="admin-head">
           <div class="admin-tit">PRODUITS</div>
           <div style="display:flex;gap:.5rem">
+            <button class="btn-sec" onclick="fixProductPrices()" style="font-size:.85rem;padding:.7rem 1.5rem;background:var(--orange)" title="Mettre à jour les prix à 13€">� Corriger prix</button>
             <button class="btn-sec" onclick="initDatabase()" style="font-size:.85rem;padding:.7rem 1.5rem" title="Initialiser la base de données avec les produits par défaut">🔄 Initialiser DB</button>
             <button class="btn-pri" onclick="showAddProductModal()" style="font-size:.85rem;padding:.7rem 1.5rem">+ Ajouter</button>
           </div>
@@ -1858,16 +1859,30 @@ function updateCartBadge() {
 // Synchroniser les prix du panier avec les prix actuels des produits
 function syncCartPrices() {
   const products = window.PRODUCTS || PRODUCTS;
+  
+  console.log('🔄 Synchronisation des prix du panier...');
+  console.log('  Produits disponibles:', products.length);
+  console.log('  Articles dans le panier:', state.cart.length);
+  
   let updated = false;
   let priceChanges = [];
   
   state.cart = state.cart.map(item => {
+    console.log(`  Vérification: ${item.name} (${item.id}) - Prix actuel: ${item.price}€`);
+    
     // Trouver le produit correspondant
     const product = products.find(p => p.id === item.id);
     
+    if (!product) {
+      console.warn(`  ⚠️  Produit ${item.id} non trouvé dans la liste`);
+      return item;
+    }
+    
+    console.log(`    → Prix dans MongoDB: ${product.price}€`);
+    
     // Si le produit existe et que le prix a changé
-    if (product && product.price !== item.price) {
-      console.log(`Prix mis à jour pour ${item.name}: ${item.price}€ → ${product.price}€`);
+    if (product.price !== item.price) {
+      console.log(`    ✓ Prix mis à jour: ${item.price}€ → ${product.price}€`);
       priceChanges.push({
         name: item.name,
         oldPrice: item.price,
@@ -1875,6 +1890,8 @@ function syncCartPrices() {
       });
       updated = true;
       return { ...item, price: product.price, name: product.name };
+    } else {
+      console.log(`    = Prix identique, pas de changement`);
     }
     
     return item;
@@ -1886,12 +1903,14 @@ function syncCartPrices() {
     // Afficher un message si des prix ont changé
     if (priceChanges.length > 0) {
       const message = priceChanges.length === 1 
-        ? `Le prix de ${priceChanges[0].name} a été mis à jour`
+        ? `Le prix de ${priceChanges[0].name} a été mis à jour à ${priceChanges[0].newPrice}€`
         : `${priceChanges.length} prix ont été mis à jour`;
       showToast(message);
     }
     
-    console.log('✓ Prix du panier synchronisés');
+    console.log('✓ Prix du panier synchronisés et sauvegardés');
+  } else {
+    console.log('= Aucun prix à mettre à jour');
   }
 }
 
@@ -2984,6 +3003,54 @@ async function initDatabase() {
     }
   } else {
     showToast('Mode local - Connectez le backend pour initialiser la DB');
+  }
+}
+
+// Forcer la mise à jour des prix à 13€ pour les patchs
+async function fixProductPrices() {
+  if (!confirm('Mettre à jour les prix des patchs à 13€ ?\n\nCela modifiera les produits patch-s et patch-l dans MongoDB.')) {
+    return;
+  }
+  
+  if(USE_BACKEND) {
+    try {
+      showToast('🔄 Mise à jour des prix...');
+      
+      // Mettre à jour patch-s
+      const response1 = await fetch(`${API_URL}/products/patch-s`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ price: 13 })
+      });
+      
+      // Mettre à jour patch-l
+      const response2 = await fetch(`${API_URL}/products/patch-l`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ price: 13 })
+      });
+      
+      if (!response1.ok || !response2.ok) {
+        throw new Error('Erreur mise à jour des prix');
+      }
+      
+      showToast('✓ Prix mis à jour à 13€ !');
+      await loadProductsFromBackend();
+      renderProductsTable();
+      
+      // Mettre à jour aussi l'affichage de la boutique
+      const grid = document.getElementById('productsGrid');
+      if (grid) renderProducts('all');
+      
+      // Synchroniser le panier
+      syncCartPrices();
+      
+    } catch (error) {
+      console.error('Erreur mise à jour prix:', error);
+      showToast('Erreur lors de la mise à jour', true);
+    }
+  } else {
+    showToast('Mode local - Connectez le backend');
   }
 }
 
