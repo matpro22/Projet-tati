@@ -3925,12 +3925,18 @@ async function loadPresentations() {
       
       if (clubsMedia) {
         if (clubsData.mediaType === 'video') {
-          const videoId = extractVideoId(clubsData.mediaUrl);
-          if (videoId) {
-            clubsMedia.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+          const videoInfo = extractVideoId(clubsData.mediaUrl);
+          if (videoInfo) {
+            if (videoInfo.type === 'youtube') {
+              clubsMedia.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoInfo.id}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
+            } else if (videoInfo.type === 'vimeo') {
+              clubsMedia.innerHTML = `<iframe width="100%" height="100%" src="https://player.vimeo.com/video/${videoInfo.id}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
+            }
+          } else {
+            clubsMedia.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--card);color:var(--gray)">❌ URL vidéo invalide</div>`;
           }
         } else {
-          clubsMedia.innerHTML = `<img src="${clubsData.mediaUrl}" alt="Présentation produit clubs" style="width:100%;height:100%;object-fit:cover"/>`;
+          clubsMedia.innerHTML = `<img src="${clubsData.mediaUrl}" alt="Présentation produit clubs" style="width:100%;height:100%;object-fit:cover;border-radius:8px"/>`;
         }
       }
       
@@ -3967,12 +3973,18 @@ async function loadPresentations() {
       
       if (particuliersMedia) {
         if (particuliersData.mediaType === 'video') {
-          const videoId = extractVideoId(particuliersData.mediaUrl);
-          if (videoId) {
-            particuliersMedia.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+          const videoInfo = extractVideoId(particuliersData.mediaUrl);
+          if (videoInfo) {
+            if (videoInfo.type === 'youtube') {
+              particuliersMedia.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoInfo.id}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
+            } else if (videoInfo.type === 'vimeo') {
+              particuliersMedia.innerHTML = `<iframe width="100%" height="100%" src="https://player.vimeo.com/video/${videoInfo.id}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
+            }
+          } else {
+            particuliersMedia.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--card);color:var(--gray)">❌ URL vidéo invalide</div>`;
           }
         } else {
-          particuliersMedia.innerHTML = `<img src="${particuliersData.mediaUrl}" alt="Présentation produit particuliers" style="width:100%;height:100%;object-fit:cover"/>`;
+          particuliersMedia.innerHTML = `<img src="${particuliersData.mediaUrl}" alt="Présentation produit particuliers" style="width:100%;height:100%;object-fit:cover;border-radius:8px"/>`;
         }
       }
       
@@ -4000,13 +4012,28 @@ async function loadPresentations() {
 
 // Extraire l'ID d'une vidéo YouTube ou Vimeo
 function extractVideoId(url) {
-  // YouTube
-  const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\?\/]+)/);
-  if (youtubeMatch) return youtubeMatch[1];
+  if (!url) return null;
+  
+  // YouTube - différents formats
+  const youtubePatterns = [
+    /(?:youtube\.com\/watch\?v=)([^&\?\/]+)/,
+    /(?:youtu\.be\/)([^&\?\/]+)/,
+    /(?:youtube\.com\/embed\/)([^&\?\/]+)/,
+    /(?:youtube\.com\/v\/)([^&\?\/]+)/
+  ];
+  
+  for (const pattern of youtubePatterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return { type: 'youtube', id: match[1] };
+    }
+  }
   
   // Vimeo
   const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-  if (vimeoMatch) return vimeoMatch[1];
+  if (vimeoMatch && vimeoMatch[1]) {
+    return { type: 'vimeo', id: vimeoMatch[1] };
+  }
   
   return null;
 }
