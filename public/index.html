@@ -1701,6 +1701,9 @@ async function initPage() {
   updateDevisPreview();
   updateSummary();
   
+  // Synchroniser les prix du panier au chargement
+  syncCartPrices();
+  
   const adminDateEl = document.getElementById('adminDate');
   if (adminDateEl) {
     adminDateEl.textContent = new Date().toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
@@ -1804,6 +1807,9 @@ function closeMobileMenu() { document.getElementById('mobileMenu').style.display
 // CART
 // ============================================================
 function openCart() {
+  // Synchroniser les prix avant d'afficher le panier
+  syncCartPrices();
+  
   document.getElementById('cartOverlay').classList.add('open');
   document.getElementById('cartDrawer').classList.add('open');
   document.body.style.overflow='hidden';
@@ -1841,6 +1847,33 @@ function updateCartBadge() {
   const b = document.getElementById('cartBadge');
   b.textContent=n; b.style.display=n>0?'flex':'none';
 }
+
+// Synchroniser les prix du panier avec les prix actuels des produits
+function syncCartPrices() {
+  const products = window.PRODUCTS || PRODUCTS;
+  let updated = false;
+  
+  state.cart = state.cart.map(item => {
+    // Trouver le produit correspondant
+    const product = products.find(p => p.id === item.id);
+    
+    // Si le produit existe et que le prix a changé
+    if (product && product.price !== item.price) {
+      console.log(`Prix mis à jour pour ${item.name}: ${item.price}€ → ${product.price}€`);
+      updated = true;
+      return { ...item, price: product.price };
+    }
+    
+    return item;
+  });
+  
+  if (updated) {
+    saveCart();
+    renderCart();
+    console.log('✓ Prix du panier synchronisés');
+  }
+}
+
 function renderCart() {
   const items=document.getElementById('cartItems');
   const foot=document.getElementById('cartFoot');
@@ -2942,6 +2975,9 @@ async function loadProductsFromBackend() {
     
     const products = await response.json();
     window.PRODUCTS = products;
+    
+    // Synchroniser les prix du panier avec les nouveaux prix
+    syncCartPrices();
     
     const grid = document.getElementById('productsGrid');
     if (grid) renderProducts('all');
