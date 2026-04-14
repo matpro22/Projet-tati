@@ -1551,14 +1551,19 @@ app.put('/api/orders/:id/status', async (req, res) => {
           { returnDocument: 'after' }
         );
         
-        if (!result.value) {
+        // MongoDB 4+ retourne result directement, pas result.value
+        const updatedOrder = result.value || result;
+        
+        if (!updatedOrder) {
+          console.log('⚠️  Commande non trouvée dans MongoDB:', orderId);
           return res.status(404).json({ error: 'Commande non trouvée' });
         }
         
-        order = result.value;
+        order = updatedOrder;
         console.log('✓ Statut mis à jour dans MongoDB');
       } catch (error) {
         console.error('❌ Erreur mise à jour MongoDB:', error.message);
+        console.error('   Stack:', error.stack);
         // Fallback vers fichier JSON
       }
     }
@@ -1585,14 +1590,29 @@ app.put('/api/orders/:id/status', async (req, res) => {
     // Envoyer un email de notification au client si le statut a changé
     if (emailTransporter && oldStatus !== status && order.customer && order.customer.email) {
       try {
+        console.log('📧 Envoi email de mise à jour:', {
+          orderId: order.id,
+          oldStatus,
+          newStatus: status,
+          customerEmail: order.customer.email
+        });
         await sendOrderStatusUpdateEmail(order, status, oldStatus);
         console.log('✓ Email de mise à jour envoyé au client:', order.customer.email);
       } catch (emailError) {
         console.warn('⚠️  Erreur envoi email de mise à jour:', emailError.message);
+        console.warn('   Stack:', emailError.stack);
         // Ne pas bloquer la réponse si l'email échoue
       }
+    } else {
+      console.log('ℹ️  Email non envoyé:', {
+        hasTransporter: !!emailTransporter,
+        statusChanged: oldStatus !== status,
+        hasCustomer: !!order.customer,
+        hasEmail: !!(order.customer && order.customer.email)
+      });
     }
     
+    console.log('✅ Réponse envoyée au client');
     res.json({
       success: true,
       order: order
