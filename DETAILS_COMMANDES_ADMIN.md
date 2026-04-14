@@ -11,7 +11,7 @@ Une modal complète affiche :
 - **Informations client** : Nom, email, téléphone, adresse complète
 - **Articles commandés** : Tableau détaillé avec :
   - Nom de l'article
-  - Options (taille, couleur, noms personnalisés)
+  - Options (taille, couleur du patch, couleur du flocage, noms personnalisés)
   - Quantité
   - Prix unitaire
   - Total par article
@@ -22,7 +22,7 @@ Une modal complète affiche :
 Un bouton dans la modal permet d'imprimer une facture professionnelle avec :
 - En-tête BackZo avec logo
 - Informations vendeur et client
-- Détail complet des articles
+- Détail complet des articles avec toutes les options
 - Totaux (sous-total, livraison, TTC)
 - Informations légales
 - Design optimisé pour l'impression
@@ -64,7 +64,11 @@ La facture imprimée contient :
 ### Détail des articles
 Tableau avec :
 - Nom de l'article
-- Options (taille, couleur, noms personnalisés)
+- Options détaillées :
+  - Taille (S ou L)
+  - Couleur du patch (BackZo Green, Noir, Blanc, etc.)
+  - Couleur du flocage (Blanc, Noir, Rouge, etc.)
+  - Noms personnalisés avec quantités
 - Quantité
 - Prix unitaire
 - Total par ligne
@@ -119,10 +123,25 @@ Les détails proviennent de l'objet `order` qui contient :
 - `notes` : Notes éventuelles
 
 ### Affichage des options
-Les options des articles (taille, couleur, noms) sont automatiquement détectées et affichées :
-- Taille S ou L
-- Couleur du flocage
-- Liste des noms personnalisés avec quantités
+Les options des articles sont automatiquement détectées et affichées :
+- **Taille** : S ou L
+- **Couleur du patch** : BackZo Green, Noir, Blanc, Rouge, Bleu, Jaune
+- **Couleur du flocage** : Blanc, Noir, Rouge, Bleu, Jaune, Vert
+- **Noms personnalisés** : Liste avec quantités
+
+### Structure des options dans le panier
+Lors de l'ajout au panier depuis la page Particuliers, les options sont stockées ainsi :
+```javascript
+opts: {
+  size: 'S',                    // Taille du patch
+  patchColor: 'BackZo Green',   // Couleur du patch
+  color: 'Blanc',               // Couleur du flocage
+  names: [                      // Noms personnalisés
+    { name: 'DUPONT', qty: 2 },
+    { name: 'MARTIN', qty: 1 }
+  ]
+}
+```
 
 ### Compatibilité
 - Fonctionne sur tous les navigateurs modernes
@@ -136,7 +155,8 @@ Une commande typique affichera :
 Article: Flocage Amovible S
 Options:
   Taille: S
-  Couleur: Blanc
+  Couleur du patch: BackZo Green
+  Couleur du flocage: Blanc
   Noms:
     • DUPONT (x2)
     • MARTIN (x1)
@@ -145,10 +165,18 @@ Prix unitaire: 13,00 €
 Total: 39,00 €
 ```
 
-## Améliorations futures possibles
+## Améliorations apportées
 
+### Version actuelle
+- ✅ Affichage de la couleur du patch
+- ✅ Affichage de la couleur du flocage
+- ✅ Distinction claire entre les deux couleurs
+- ✅ Informations complètes dans les détails et la facture
+
+### Améliorations futures possibles
 - Export PDF automatique
 - Envoi de la facture par email
 - Numérotation automatique des factures
 - Archivage des factures
 - Génération de factures en masse
+

@@ -2408,7 +2408,7 @@ function openOrderCheckout() {
   const totalQty=names.reduce((s,n)=>s+n.qty,0);
   const cartItem={
     id:'config-'+Date.now(), name:'Flocage Amovible '+state.config.size,
-    price, opts:{size:state.config.size, names, color:state.config.colorName},
+    price, opts:{size:state.config.size, names, color:state.config.colorName, patchColor:state.config.bgName},
     quantity:totalQty
   };
   const key='config-'+Date.now();
@@ -2807,7 +2807,8 @@ function showOrderDetails(orderId) {
               
               if (item.opts) {
                 if (item.opts.size) optionsHtml += `<div>Taille: ${item.opts.size}</div>`;
-                if (item.opts.color) optionsHtml += `<div>Couleur: ${item.opts.color}</div>`;
+                if (item.opts.patchColor) optionsHtml += `<div>Couleur du patch: ${item.opts.patchColor}</div>`;
+                if (item.opts.color) optionsHtml += `<div>Couleur du flocage: ${item.opts.color}</div>`;
                 if (item.opts.names && item.opts.names.length > 0) {
                   optionsHtml += `<div style="margin-top:.3rem"><strong>Noms:</strong></div>`;
                   item.opts.names.forEach(n => {
@@ -2961,7 +2962,8 @@ function printInvoice() {
               
               if (item.opts) {
                 if (item.opts.size) optionsText += `Taille: ${item.opts.size}<br/>`;
-                if (item.opts.color) optionsText += `Couleur: ${item.opts.color}<br/>`;
+                if (item.opts.patchColor) optionsText += `Couleur du patch: ${item.opts.patchColor}<br/>`;
+                if (item.opts.color) optionsText += `Couleur du flocage: ${item.opts.color}<br/>`;
                 if (item.opts.names && item.opts.names.length > 0) {
                   optionsText += `<strong>Noms:</strong><br/>`;
                   item.opts.names.forEach(n => {
