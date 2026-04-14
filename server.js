@@ -60,6 +60,63 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
   console.log('ℹ️  Email non configuré (optionnel)');
 }
 
+// Fonction pour envoyer un email de confirmation de commande
+async function sendOrderConfirmationEmail(order) {
+  if (!emailTransporter) {
+    throw new Error('Email non configuré');
+  }
+  
+  const itemsList = order.items.map(item => 
+    `<li>${item.name} (${item.size}) - ${item.quantity}x - ${item.price}€</li>`
+  ).join('');
+  
+  const mailOptions = {
+    from: process.env.EMAIL_FROM || 'team@backzo.eu',
+    to: order.customer.email,
+    subject: `Confirmation de commande ${order.id} - BackZo`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2d5016;">Merci pour votre commande !</h2>
+        <p>Bonjour ${order.customer.firstName} ${order.customer.lastName},</p>
+        <p>Votre commande a été confirmée et payée avec succès.</p>
+        
+        <div style="background: #f5f5f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0;">Détails de la commande</h3>
+          <p><strong>Numéro de commande :</strong> ${order.id}</p>
+          <p><strong>Date :</strong> ${new Date(order.date).toLocaleDateString('fr-FR')}</p>
+          <p><strong>Statut :</strong> En cours de traitement</p>
+        </div>
+        
+        <h3>Articles commandés</h3>
+        <ul style="list-style: none; padding: 0;">
+          ${itemsList}
+        </ul>
+        
+        <div style="background: #f5f5f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p style="margin: 5px 0;"><strong>Sous-total :</strong> ${(order.total - order.shipping).toFixed(2)}€</p>
+          <p style="margin: 5px 0;"><strong>Livraison :</strong> ${order.shipping.toFixed(2)}€</p>
+          <p style="margin: 5px 0; font-size: 1.2em;"><strong>Total :</strong> ${order.total.toFixed(2)}€</p>
+        </div>
+        
+        <h3>Adresse de livraison</h3>
+        <p>
+          ${order.customer.firstName} ${order.customer.lastName}<br>
+          ${order.customer.address}<br>
+          ${order.customer.zip} ${order.customer.city}
+        </p>
+        
+        <p style="margin-top: 30px;">Vous recevrez un email de suivi dès que votre commande sera expédiée.</p>
+        
+        <p style="color: #888; font-size: 0.9em; margin-top: 40px;">
+          Si vous avez des questions, contactez-nous à ${process.env.EMAIL_FROM || 'team@backzo.eu'}
+        </p>
+      </div>
+    `
+  };
+  
+  await emailTransporter.sendMail(mailOptions);
+}
+
 
 // ============================================================
 // CONFIGURATION BASE DE DONNÉES
@@ -526,13 +583,38 @@ app.post('/api/confirm-payment', async (req, res) => {
       shipping: orderData.shipping || 0
     };
     
-    // Sauvegarder la commande
-    const orders = await readData('orders', ORDERS_FILE);
-    orders.push(order);
-    await writeData('orders', ORDERS_FILE, orders);
+    console.log('💾 Sauvegarde de la commande:', order.id);
     
-    // Envoyer un email de confirmation (optionnel - nécessite un service d'email)
-    // await sendOrderConfirmationEmail(order);
+    // Sauvegarder la commande dans MongoDB ou fichier JSON
+    if (USE_MONGODB && db) {
+      try {
+        await db.collection('orders').insertOne(order);
+        console.log('✓ Commande sauvegardée dans MongoDB');
+      } catch (error) {
+        console.error('❌ Erreur sauvegarde MongoDB:', error.message);
+        // Fallback vers fichier JSON
+        const orders = await readData('orders', ORDERS_FILE);
+        orders.push(order);
+        await writeData('orders', ORDERS_FILE, orders);
+        console.log('✓ Commande sauvegardée dans fichier JSON (fallback)');
+      }
+    } else {
+      // Mode fichier JSON
+      const orders = await readData('orders', ORDERS_FILE);
+      orders.push(order);
+      await writeData('orders', ORDERS_FILE, orders);
+      console.log('✓ Commande sauvegardée dans fichier JSON');
+    }
+    
+    // Envoyer un email de confirmation (optionnel)
+    if (emailTransporter) {
+      try {
+        await sendOrderConfirmationEmail(order);
+        console.log('✓ Email de confirmation envoyé');
+      } catch (emailError) {
+        console.warn('⚠️  Erreur envoi email:', emailError.message);
+      }
+    }
     
     res.json({
       success: true,
@@ -827,8 +909,42 @@ app.get('/api/orders/:id', async (req, res) => {
 app.patch('/api/orders/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
+    const orderId = req.params.id;
+    
+    console.log('📝 Mise à jour statut commande:', orderId, '→', status);
+    
+    // Mise à jour dans MongoDB ou fichier JSON
+    if (USE_MONGODB && db) {
+      try {
+        const result = await db.collection('orders').findOneAndUpdate(
+          { id: orderId },
+          { 
+            $set: { 
+              status: status,
+              updatedAt: new Date().toISOString()
+            }
+          },
+          { returnDocument: 'after' }
+        );
+        
+        if (!result.value) {
+          return res.status(404).json({ error: 'Commande non trouvée' });
+        }
+        
+        console.log('✓ Statut mis à jour dans MongoDB');
+        return res.json({
+          success: true,
+          order: result.value
+        });
+      } catch (error) {
+        console.error('❌ Erreur mise à jour MongoDB:', error.message);
+        // Fallback vers fichier JSON
+      }
+    }
+    
+    // Mode fichier JSON (ou fallback)
     const orders = await readData('orders', ORDERS_FILE);
-    const index = orders.findIndex(o => o.id === req.params.id);
+    const index = orders.findIndex(o => o.id === orderId);
     
     if (index === -1) {
       return res.status(404).json({ error: 'Commande non trouvée' });
@@ -839,12 +955,14 @@ app.patch('/api/orders/:id/status', async (req, res) => {
     
     await writeData('orders', ORDERS_FILE, orders);
     
+    console.log('✓ Statut mis à jour dans fichier JSON');
     res.json({
       success: true,
       order: orders[index]
     });
     
   } catch (error) {
+    console.error('❌ Erreur mise à jour statut:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
