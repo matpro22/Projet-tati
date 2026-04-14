@@ -762,6 +762,23 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
   </div>
 </div>
 
+<!-- MODAL DÉTAILS COMMANDE -->
+<div class="modal-ov" id="modal-order-details">
+  <div class="modal-box" style="max-width:900px">
+    <div class="modal-head">
+      <div class="modal-tit">DÉTAILS <span>COMMANDE</span></div>
+      <button class="modal-cls" onclick="closeModal('order-details')">✕</button>
+    </div>
+    <div class="modal-body" id="orderDetailsContent">
+      <!-- Contenu dynamique -->
+    </div>
+    <div style="display:flex;gap:1rem;justify-content:flex-end;padding:1rem 2rem;border-top:1px solid var(--lightgray)">
+      <button class="btn-sec" onclick="closeModal('order-details')">Fermer</button>
+      <button class="btn-pri" onclick="printInvoice()">🖨️ Imprimer facture</button>
+    </div>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav id="nav" aria-label="Navigation principale">
   <a href="#" class="nav-logo" onclick="showPage('accueil');return false" aria-label="BackZo - Accueil">BACK<span>ZO</span></a>
@@ -2702,7 +2719,8 @@ function renderOrdersTable(tbodyId='allOrdersBody', limit=null) {
       </select></td>
       <td style="color:var(--gray);font-size:.8rem">${new Date(o.date).toLocaleDateString('fr-FR')}</td>
       <td>
-        <button class="admin-action-btn" onclick="sendOrderConfirmation('${o.id}')">📧 Email</button>
+        <button class="admin-action-btn" onclick="showOrderDetails('${o.id}')" style="background:var(--blue)">�️ Détails</button>
+        <button class="admin-action-btn" onclick="sendOrderConfirmation('${o.id}')">� Email</button>
         <button class="admin-action-btn del" onclick="deleteOrder('${o.id}')">🗑 Suppr.</button>
       </td>
     </tr>`).join('');
@@ -2724,6 +2742,295 @@ function sendOrderConfirmation(id) {
   const body=encodeURIComponent(`Bonjour ${order.customer.firstName},\n\nVotre commande ${id} a été mise à jour.\nStatut : ${{pending:'En attente',processing:'En traitement',shipped:'Expédié',delivered:'Livré',cancelled:'Annulé'}[order.status]}\n\nPour toute question : team@backzo.eu\n\nL'équipe BackZo`);
   window.location.href=`mailto:${order.customer.email}?subject=${subject}&body=${body}`;
 }
+
+// Afficher les détails d'une commande
+function showOrderDetails(orderId) {
+  const order = state.orders.find(o => o.id === orderId);
+  if (!order) {
+    showToast('Commande introuvable', true);
+    return;
+  }
+  
+  // Stocker la commande actuelle pour l'impression
+  window.currentOrderForPrint = order;
+  
+  const statusLabels = {
+    pending: 'En attente',
+    processing: 'En traitement',
+    shipped: 'Expédié',
+    delivered: 'Livré',
+    cancelled: 'Annulé'
+  };
+  
+  const content = `
+    <div style="display:grid;gap:2rem">
+      <!-- Informations générales -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem">
+        <div>
+          <h3 style="margin:0 0 1rem;color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:1.3rem">INFORMATIONS COMMANDE</h3>
+          <div style="display:grid;gap:.5rem">
+            <div><strong>N° Commande:</strong> ${order.id}</div>
+            <div><strong>Date:</strong> ${new Date(order.date).toLocaleDateString('fr-FR', {day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</div>
+            <div><strong>Statut:</strong> <span style="color:var(--green);font-weight:700">${statusLabels[order.status] || order.status}</span></div>
+            <div><strong>Montant total:</strong> <span style="font-size:1.2rem;font-weight:700;color:var(--green)">${order.total?.toFixed(2).replace('.', ',') || '0,00'} €</span></div>
+          </div>
+        </div>
+        
+        <div>
+          <h3 style="margin:0 0 1rem;color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:1.3rem">INFORMATIONS CLIENT</h3>
+          <div style="display:grid;gap:.5rem">
+            <div><strong>Nom:</strong> ${order.customer?.firstName || ''} ${order.customer?.lastName || ''}</div>
+            <div><strong>Email:</strong> ${order.customer?.email || '—'}</div>
+            <div><strong>Téléphone:</strong> ${order.customer?.phone || '—'}</div>
+            <div><strong>Adresse:</strong><br/>${order.customer?.address || '—'}<br/>${order.customer?.postalCode || ''} ${order.customer?.city || ''}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Articles commandés -->
+      <div>
+        <h3 style="margin:0 0 1rem;color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:1.3rem">ARTICLES COMMANDÉS</h3>
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="background:var(--lightgray);text-align:left">
+              <th style="padding:.8rem;border:1px solid var(--gray)">Article</th>
+              <th style="padding:.8rem;border:1px solid var(--gray)">Options</th>
+              <th style="padding:.8rem;border:1px solid var(--gray);text-align:center">Quantité</th>
+              <th style="padding:.8rem;border:1px solid var(--gray);text-align:right">Prix unitaire</th>
+              <th style="padding:.8rem;border:1px solid var(--gray);text-align:right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(order.items || []).map(item => {
+              const itemTotal = (item.price || 0) * (item.quantity || 1);
+              let optionsHtml = '';
+              
+              if (item.opts) {
+                if (item.opts.size) optionsHtml += `<div>Taille: ${item.opts.size}</div>`;
+                if (item.opts.color) optionsHtml += `<div>Couleur: ${item.opts.color}</div>`;
+                if (item.opts.names && item.opts.names.length > 0) {
+                  optionsHtml += `<div style="margin-top:.3rem"><strong>Noms:</strong></div>`;
+                  item.opts.names.forEach(n => {
+                    optionsHtml += `<div style="margin-left:.5rem">• ${n.name} ${n.qty > 1 ? '(x' + n.qty + ')' : ''}</div>`;
+                  });
+                }
+              }
+              
+              return `
+                <tr>
+                  <td style="padding:.8rem;border:1px solid var(--lightgray)">${item.name || '—'}</td>
+                  <td style="padding:.8rem;border:1px solid var(--lightgray);font-size:.85rem;color:var(--gray)">${optionsHtml || '—'}</td>
+                  <td style="padding:.8rem;border:1px solid var(--lightgray);text-align:center">${item.quantity || 1}</td>
+                  <td style="padding:.8rem;border:1px solid var(--lightgray);text-align:right">${(item.price || 0).toFixed(2).replace('.', ',')} €</td>
+                  <td style="padding:.8rem;border:1px solid var(--lightgray);text-align:right;font-weight:700">${itemTotal.toFixed(2).replace('.', ',')} €</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" style="padding:.8rem;border:1px solid var(--lightgray);text-align:right;font-weight:700">Sous-total:</td>
+              <td style="padding:.8rem;border:1px solid var(--lightgray);text-align:right;font-weight:700">${(order.subtotal || 0).toFixed(2).replace('.', ',')} €</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="padding:.8rem;border:1px solid var(--lightgray);text-align:right;font-weight:700">Livraison:</td>
+              <td style="padding:.8rem;border:1px solid var(--lightgray);text-align:right;font-weight:700">${(order.shipping || 0).toFixed(2).replace('.', ',')} €</td>
+            </tr>
+            <tr style="background:var(--lightgray)">
+              <td colspan="4" style="padding:.8rem;border:1px solid var(--gray);text-align:right;font-size:1.1rem;font-weight:700">TOTAL:</td>
+              <td style="padding:.8rem;border:1px solid var(--gray);text-align:right;font-size:1.2rem;font-weight:700;color:var(--green)">${(order.total || 0).toFixed(2).replace('.', ',')} €</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      
+      ${order.notes ? `
+      <div>
+        <h3 style="margin:0 0 1rem;color:var(--green);font-family:'Barlow Condensed',sans-serif;font-size:1.3rem">NOTES</h3>
+        <div style="padding:1rem;background:var(--lightgray);border-radius:8px">${order.notes}</div>
+      </div>
+      ` : ''}
+    </div>
+  `;
+  
+  document.getElementById('orderDetailsContent').innerHTML = content;
+  openModal('order-details');
+}
+
+// Imprimer la facture
+function printInvoice() {
+  const order = window.currentOrderForPrint;
+  if (!order) {
+    showToast('Aucune commande sélectionnée', true);
+    return;
+  }
+  
+  const statusLabels = {
+    pending: 'En attente',
+    processing: 'En traitement',
+    shipped: 'Expédié',
+    delivered: 'Livré',
+    cancelled: 'Annulé'
+  };
+  
+  // Créer le contenu de la facture
+  const invoiceContent = `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <title>Facture ${order.id} - BackZo</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; padding: 2rem; color: #333; }
+        .header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem; border-bottom: 3px solid #00ff88; padding-bottom: 1rem; }
+        .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 2.5rem; font-weight: 900; color: #000; }
+        .logo span { color: #00ff88; }
+        .invoice-info { text-align: right; }
+        .invoice-title { font-size: 1.8rem; font-weight: 700; color: #00ff88; margin-bottom: .5rem; }
+        .section { margin-bottom: 2rem; }
+        .section-title { font-size: 1.2rem; font-weight: 700; color: #00ff88; margin-bottom: 1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: .5rem; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .info-block { }
+        .info-row { margin-bottom: .5rem; }
+        .info-row strong { display: inline-block; min-width: 120px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th { background: #f0f0f0; padding: .8rem; text-align: left; border: 1px solid #ddd; font-weight: 700; }
+        td { padding: .8rem; border: 1px solid #ddd; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .total-row { background: #f0f0f0; font-weight: 700; }
+        .grand-total { background: #00ff88; color: #000; font-size: 1.1rem; }
+        .footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid #f0f0f0; text-align: center; color: #666; font-size: .9rem; }
+        .company-info { margin-top: 2rem; padding: 1rem; background: #f9f9f9; border-radius: 8px; }
+        @media print {
+          body { padding: 1rem; }
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div>
+          <div class="logo">BACK<span>ZO</span></div>
+          <div style="margin-top:.5rem;color:#666">Flocages amovibles personnalisés</div>
+        </div>
+        <div class="invoice-info">
+          <div class="invoice-title">FACTURE</div>
+          <div><strong>N°:</strong> ${order.id}</div>
+          <div><strong>Date:</strong> ${new Date(order.date).toLocaleDateString('fr-FR')}</div>
+          <div><strong>Statut:</strong> ${statusLabels[order.status] || order.status}</div>
+        </div>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-block">
+          <div class="section-title">VENDEUR</div>
+          <div class="info-row"><strong>BackZo</strong></div>
+          <div class="info-row">Laurie SEABRA DA SILVA</div>
+          <div class="info-row">Email: team@backzo.eu</div>
+          <div class="info-row">SIRET: [À compléter]</div>
+        </div>
+        
+        <div class="info-block">
+          <div class="section-title">CLIENT</div>
+          <div class="info-row"><strong>${order.customer?.firstName || ''} ${order.customer?.lastName || ''}</strong></div>
+          <div class="info-row">${order.customer?.email || ''}</div>
+          <div class="info-row">${order.customer?.phone || ''}</div>
+          <div class="info-row">${order.customer?.address || ''}</div>
+          <div class="info-row">${order.customer?.postalCode || ''} ${order.customer?.city || ''}</div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">DÉTAIL DE LA COMMANDE</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Article</th>
+              <th>Options</th>
+              <th class="text-center">Quantité</th>
+              <th class="text-right">Prix unitaire</th>
+              <th class="text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(order.items || []).map(item => {
+              const itemTotal = (item.price || 0) * (item.quantity || 1);
+              let optionsText = '';
+              
+              if (item.opts) {
+                if (item.opts.size) optionsText += `Taille: ${item.opts.size}<br/>`;
+                if (item.opts.color) optionsText += `Couleur: ${item.opts.color}<br/>`;
+                if (item.opts.names && item.opts.names.length > 0) {
+                  optionsText += `<strong>Noms:</strong><br/>`;
+                  item.opts.names.forEach(n => {
+                    optionsText += `• ${n.name} ${n.qty > 1 ? '(x' + n.qty + ')' : ''}<br/>`;
+                  });
+                }
+              }
+              
+              return `
+                <tr>
+                  <td>${item.name || '—'}</td>
+                  <td style="font-size:.85rem">${optionsText || '—'}</td>
+                  <td class="text-center">${item.quantity || 1}</td>
+                  <td class="text-right">${(item.price || 0).toFixed(2).replace('.', ',')} €</td>
+                  <td class="text-right">${itemTotal.toFixed(2).replace('.', ',')} €</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="text-right total-row">Sous-total:</td>
+              <td class="text-right total-row">${(order.subtotal || 0).toFixed(2).replace('.', ',')} €</td>
+            </tr>
+            <tr>
+              <td colspan="4" class="text-right total-row">Livraison:</td>
+              <td class="text-right total-row">${(order.shipping || 0).toFixed(2).replace('.', ',')} €</td>
+            </tr>
+            <tr class="grand-total">
+              <td colspan="4" class="text-right">TOTAL TTC:</td>
+              <td class="text-right">${(order.total || 0).toFixed(2).replace('.', ',')} €</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      
+      ${order.notes ? `
+      <div class="section">
+        <div class="section-title">NOTES</div>
+        <div style="padding:1rem;background:#f9f9f9;border-radius:8px">${order.notes}</div>
+      </div>
+      ` : ''}
+      
+      <div class="company-info">
+        <div style="font-weight:700;margin-bottom:.5rem">Informations légales</div>
+        <div>BackZo - Laurie SEABRA DA SILVA</div>
+        <div>Email: team@backzo.eu</div>
+        <div>TVA non applicable, article 293 B du CGI</div>
+      </div>
+      
+      <div class="footer">
+        <div>Merci pour votre confiance !</div>
+        <div style="margin-top:.5rem">BackZo - Flocages amovibles personnalisés</div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  // Ouvrir une nouvelle fenêtre pour l'impression
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(invoiceContent);
+  printWindow.document.close();
+  
+  // Attendre que le contenu soit chargé puis lancer l'impression
+  printWindow.onload = function() {
+    printWindow.print();
+  };
+}
+
 function renderProductsTable() {
   const tbody=document.getElementById('productsTableBody'); if(!tbody) return;
   
