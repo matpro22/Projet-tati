@@ -126,6 +126,8 @@ async function sendOrderConfirmationEmail(order) {
 let mongoClient = null;
 let db = null;
 const USE_MONGODB = !!process.env.MONGODB_URI;
+let isConnecting = false;
+let connectionPromise = null;
 
 // Chemins fichiers JSON (fallback)
 const DB_PATH = path.join(__dirname, 'data');
@@ -133,28 +135,47 @@ const ORDERS_FILE = path.join(DB_PATH, 'orders.json');
 const PRODUCTS_FILE = path.join(DB_PATH, 'products.json');
 const SETTINGS_FILE = path.join(DB_PATH, 'settings.json');
 
-// Connexion MongoDB
+// Connexion MongoDB avec cache
 async function connectMongoDB() {
+  // Si déjà connecté, retourner true
+  if (db) {
+    return true;
+  }
+  
+  // Si une connexion est en cours, attendre
+  if (isConnecting && connectionPromise) {
+    return await connectionPromise;
+  }
+  
   if (!USE_MONGODB) {
     console.log('ℹ️  MongoDB non configuré - Utilisation des fichiers JSON');
     return false;
   }
   
-  try {
-    console.log('🔄 Connexion à MongoDB...');
-    mongoClient = new MongoClient(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000, // Timeout de 5 secondes
-      connectTimeoutMS: 5000
-    });
-    await mongoClient.connect();
-    db = mongoClient.db('backzo');
-    console.log('✓ MongoDB connecté');
-    return true;
-  } catch (error) {
-    console.error('✗ Erreur connexion MongoDB:', error.message);
-    console.log('ℹ️  Fallback vers fichiers JSON');
-    return false;
-  }
+  // Marquer qu'une connexion est en cours
+  isConnecting = true;
+  
+  connectionPromise = (async () => {
+    try {
+      console.log('🔄 Connexion à MongoDB...');
+      mongoClient = new MongoClient(process.env.MONGODB_URI, {
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 5000
+      });
+      await mongoClient.connect();
+      db = mongoClient.db('backzo');
+      console.log('✓ MongoDB connecté');
+      isConnecting = false;
+      return true;
+    } catch (error) {
+      console.error('✗ Erreur connexion MongoDB:', error.message);
+      console.log('ℹ️  Fallback vers fichiers JSON');
+      isConnecting = false;
+      return false;
+    }
+  })();
+  
+  return await connectionPromise;
 }
 
 // Initialiser la base de données
@@ -329,19 +350,31 @@ async function initDB() {
 
 // Lire depuis MongoDB ou fichier JSON
 async function readData(collection, filePath) {
+  // Essayer de se connecter à MongoDB si pas encore fait
+  if (USE_MONGODB && !db) {
+    await connectMongoDB();
+  }
+  
   if (USE_MONGODB && db) {
     try {
       return await db.collection(collection).find({}).toArray();
     } catch (error) {
-      console.error(`Erreur lecture MongoDB ${collection}:`, error);
+      console.error(`Erreur lecture MongoDB ${collection}:`, error.message);
+      // Ne pas essayer le fallback fichier sur Vercel (système de fichiers en lecture seule)
       return [];
     }
   } else {
+    // Mode fichier JSON (seulement en local)
+    if (process.env.VERCEL) {
+      console.warn('⚠️  MongoDB non disponible sur Vercel, retour tableau vide');
+      return [];
+    }
+    
     try {
       const data = await fs.readFile(filePath, 'utf8');
       return JSON.parse(data);
     } catch (error) {
-      console.error('Erreur lecture fichier:', error);
+      console.error('Erreur lecture fichier:', error.message);
       return [];
     }
   }
@@ -349,6 +382,11 @@ async function readData(collection, filePath) {
 
 // Écrire dans MongoDB ou fichier JSON
 async function writeData(collection, filePath, data) {
+  // Essayer de se connecter à MongoDB si pas encore fait
+  if (USE_MONGODB && !db) {
+    await connectMongoDB();
+  }
+  
   if (USE_MONGODB && db) {
     try {
       // Supprimer tous les documents et insérer les nouveaux
@@ -358,15 +396,21 @@ async function writeData(collection, filePath, data) {
       }
       return true;
     } catch (error) {
-      console.error(`Erreur écriture MongoDB ${collection}:`, error);
+      console.error(`Erreur écriture MongoDB ${collection}:`, error.message);
       return false;
     }
   } else {
+    // Mode fichier JSON (seulement en local)
+    if (process.env.VERCEL) {
+      console.error('⚠️  Impossible d\'écrire sur Vercel sans MongoDB');
+      return false;
+    }
+    
     try {
       await fs.writeFile(filePath, JSON.stringify(data, null, 2));
       return true;
     } catch (error) {
-      console.error('Erreur écriture fichier:', error);
+      console.error('Erreur écriture fichier:', error.message);
       return false;
     }
   }
@@ -374,6 +418,11 @@ async function writeData(collection, filePath, data) {
 
 // Lire les paramètres
 async function getSettings() {
+  // Essayer de se connecter à MongoDB si pas encore fait
+  if (USE_MONGODB && !db) {
+    await connectMongoDB();
+  }
+  
   if (USE_MONGODB && db) {
     try {
       const settings = await db.collection('settings').findOne({ _id: 'global' });
@@ -382,59 +431,51 @@ async function getSettings() {
         return settings;
       }
       // Si pas de settings, retourner les valeurs par défaut
-      return {
-        siteName: 'BackZo',
-        email: 'team@backzo.eu',
-        phone: '+33 6 00 00 00 00',
-        currency: 'EUR',
-        shipping: 5.90,
-        freeShippingFrom: 50,
-        stripeKey: '',
-        maintenance: false,
-        notifications: true,
-        autoBackup: false
-      };
+      return getDefaultSettings();
     } catch (error) {
       console.error('Erreur lecture paramètres MongoDB:', error.message);
-      // Retourner les valeurs par défaut en cas d'erreur
-      return {
-        siteName: 'BackZo',
-        email: 'team@backzo.eu',
-        phone: '+33 6 00 00 00 00',
-        currency: 'EUR',
-        shipping: 5.90,
-        freeShippingFrom: 50,
-        stripeKey: '',
-        maintenance: false,
-        notifications: true,
-        autoBackup: false
-      };
+      return getDefaultSettings();
     }
   } else {
+    // Mode fichier JSON (seulement en local)
+    if (process.env.VERCEL) {
+      console.warn('⚠️  MongoDB non disponible, utilisation des valeurs par défaut');
+      return getDefaultSettings();
+    }
+    
     try {
       const data = await fs.readFile(SETTINGS_FILE, 'utf8');
       return JSON.parse(data);
     } catch (error) {
       console.error('Erreur lecture paramètres fichier:', error.message);
-      // Retourner les valeurs par défaut
-      return {
-        siteName: 'BackZo',
-        email: 'team@backzo.eu',
-        phone: '+33 6 00 00 00 00',
-        currency: 'EUR',
-        shipping: 5.90,
-        freeShippingFrom: 50,
-        stripeKey: '',
-        maintenance: false,
-        notifications: true,
-        autoBackup: false
-      };
+      return getDefaultSettings();
     }
   }
 }
 
+// Valeurs par défaut des paramètres
+function getDefaultSettings() {
+  return {
+    siteName: 'BackZo',
+    email: 'team@backzo.eu',
+    phone: '+33 6 00 00 00 00',
+    currency: 'EUR',
+    shipping: 5.90,
+    freeShippingFrom: 50,
+    stripeKey: '',
+    maintenance: false,
+    notifications: true,
+    autoBackup: false
+  };
+}
+
 // Sauvegarder les paramètres
 async function saveSettings(settings) {
+  // Essayer de se connecter à MongoDB si pas encore fait
+  if (USE_MONGODB && !db) {
+    await connectMongoDB();
+  }
+  
   if (USE_MONGODB && db) {
     try {
       await db.collection('settings').updateOne(
@@ -444,15 +485,21 @@ async function saveSettings(settings) {
       );
       return true;
     } catch (error) {
-      console.error('Erreur sauvegarde paramètres MongoDB:', error);
+      console.error('Erreur sauvegarde paramètres MongoDB:', error.message);
       return false;
     }
   } else {
+    // Mode fichier JSON (seulement en local)
+    if (process.env.VERCEL) {
+      console.error('⚠️  Impossible de sauvegarder sur Vercel sans MongoDB');
+      return false;
+    }
+    
     try {
       await fs.writeFile(SETTINGS_FILE, JSON.stringify(settings, null, 2));
       return true;
     } catch (error) {
-      console.error('Erreur sauvegarde paramètres fichier:', error);
+      console.error('Erreur sauvegarde paramètres fichier:', error.message);
       return false;
     }
   }
@@ -585,21 +632,37 @@ app.post('/api/confirm-payment', async (req, res) => {
     
     console.log('💾 Sauvegarde de la commande:', order.id);
     
-    // Sauvegarder la commande dans MongoDB ou fichier JSON
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    // Sauvegarder la commande dans MongoDB
     if (USE_MONGODB && db) {
       try {
         await db.collection('orders').insertOne(order);
         console.log('✓ Commande sauvegardée dans MongoDB');
       } catch (error) {
         console.error('❌ Erreur sauvegarde MongoDB:', error.message);
-        // Fallback vers fichier JSON
+        
+        // Sur Vercel, on ne peut pas utiliser les fichiers
+        if (process.env.VERCEL) {
+          throw new Error('Impossible de sauvegarder la commande sans MongoDB');
+        }
+        
+        // Fallback vers fichier JSON (seulement en local)
         const orders = await readData('orders', ORDERS_FILE);
         orders.push(order);
         await writeData('orders', ORDERS_FILE, orders);
         console.log('✓ Commande sauvegardée dans fichier JSON (fallback)');
       }
     } else {
-      // Mode fichier JSON
+      // Sur Vercel sans MongoDB, erreur
+      if (process.env.VERCEL) {
+        throw new Error('MongoDB non disponible sur Vercel');
+      }
+      
+      // Mode fichier JSON (seulement en local)
       const orders = await readData('orders', ORDERS_FILE);
       orders.push(order);
       await writeData('orders', ORDERS_FILE, orders);
