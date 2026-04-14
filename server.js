@@ -279,6 +279,35 @@ async function initDB() {
         console.log('✓ Paramètres par défaut créés dans MongoDB');
       }
       
+      // Vérifier si les présentations produits existent
+      const clubsPresentation = await db.collection('presentations').findOne({ _id: 'clubs' });
+      if (!clubsPresentation) {
+        const defaultClubsPresentation = {
+          _id: 'clubs',
+          title: 'Flocage Amovible pour Clubs',
+          description: 'Découvrez notre solution de flocage amovible spécialement conçue pour les clubs sportifs. Personnalisez vos maillots avec facilité et professionnalisme.',
+          mediaType: 'image',
+          mediaUrl: '1.jpg',
+          updatedAt: new Date()
+        };
+        await db.collection('presentations').insertOne(defaultClubsPresentation);
+        console.log('✓ Présentation Clubs créée dans MongoDB');
+      }
+      
+      const particuliersPresentation = await db.collection('presentations').findOne({ _id: 'particuliers' });
+      if (!particuliersPresentation) {
+        const defaultParticuliersPresentation = {
+          _id: 'particuliers',
+          title: 'Flocage Personnalisé pour Particuliers',
+          description: 'Créez votre flocage sur-mesure en quelques clics. Choisissez votre taille, vos couleurs et personnalisez votre maillot comme vous le souhaitez.',
+          mediaType: 'image',
+          mediaUrl: '2.jpg',
+          updatedAt: new Date()
+        };
+        await db.collection('presentations').insertOne(defaultParticuliersPresentation);
+        console.log('✓ Présentation Particuliers créée dans MongoDB');
+      }
+      
       console.log('✓ MongoDB initialisé');
     } catch (error) {
       console.error('Erreur initialisation MongoDB:', error);
@@ -1194,6 +1223,121 @@ app.delete('/api/orders/:id', async (req, res) => {
 });
 
 // ============================================================
+// ROUTES PRÉSENTATIONS PRODUITS
+// ============================================================
+
+// Récupérer une présentation (clubs ou particuliers)
+app.get('/api/presentations/:type', async (req, res) => {
+  try {
+    const type = req.params.type; // 'clubs' ou 'particuliers'
+    
+    if (type !== 'clubs' && type !== 'particuliers') {
+      return res.status(400).json({ error: 'Type invalide' });
+    }
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        const presentation = await db.collection('presentations').findOne({ _id: type });
+        if (presentation) {
+          delete presentation._id;
+          return res.json(presentation);
+        }
+      } catch (error) {
+        console.error('Erreur lecture présentation MongoDB:', error.message);
+      }
+    }
+    
+    // Valeurs par défaut
+    const defaultPresentations = {
+      clubs: {
+        title: 'Flocage Amovible pour Clubs',
+        description: 'Découvrez notre solution de flocage amovible spécialement conçue pour les clubs sportifs. Personnalisez vos maillots avec facilité et professionnalisme.',
+        mediaType: 'image',
+        mediaUrl: '1.jpg'
+      },
+      particuliers: {
+        title: 'Flocage Personnalisé pour Particuliers',
+        description: 'Créez votre flocage sur-mesure en quelques clics. Choisissez votre taille, vos couleurs et personnalisez votre maillot comme vous le souhaitez.',
+        mediaType: 'image',
+        mediaUrl: '2.jpg'
+      }
+    };
+    
+    res.json(defaultPresentations[type]);
+    
+  } catch (error) {
+    console.error('Erreur récupération présentation:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Mettre à jour une présentation (admin)
+app.put('/api/presentations/:type', async (req, res) => {
+  try {
+    const type = req.params.type;
+    const { title, description, mediaType, mediaUrl } = req.body;
+    
+    if (type !== 'clubs' && type !== 'particuliers') {
+      return res.status(400).json({ error: 'Type invalide' });
+    }
+    
+    const presentationData = {
+      title,
+      description,
+      mediaType,
+      mediaUrl,
+      updatedAt: new Date()
+    };
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        await db.collection('presentations').updateOne(
+          { _id: type },
+          { $set: presentationData },
+          { upsert: true }
+        );
+        
+        console.log('✓ Présentation mise à jour dans MongoDB');
+        return res.json({
+          success: true,
+          presentation: presentationData
+        });
+      } catch (error) {
+        console.error('Erreur mise à jour présentation MongoDB:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.status(500).json({ error: 'Erreur mise à jour MongoDB' });
+        }
+      }
+    }
+    
+    // Sur Vercel sans MongoDB
+    if (process.env.VERCEL) {
+      return res.status(500).json({ error: 'MongoDB non disponible' });
+    }
+    
+    res.json({
+      success: true,
+      presentation: presentationData
+    });
+    
+  } catch (error) {
+    console.error('Erreur mise à jour présentation:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================
 // ROUTES PARAMÈTRES
 // ============================================================
 
@@ -1224,105 +1368,6 @@ app.post('/api/settings', async (req, res) => {
     
   } catch (error) {
     console.error('Erreur sauvegarde paramètres:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// ============================================================
-// ROUTES PRÉSENTATIONS PRODUITS
-// ============================================================
-
-// Récupérer les présentations
-app.get('/api/presentations', async (req, res) => {
-  try {
-    // Essayer de se connecter à MongoDB si pas encore fait
-    if (USE_MONGODB && !db) {
-      await connectMongoDB();
-    }
-    
-    if (USE_MONGODB && db) {
-      try {
-        const presentations = await db.collection('presentations').findOne({ _id: 'global' });
-        if (presentations) {
-          delete presentations._id;
-          return res.json(presentations);
-        }
-      } catch (error) {
-        console.warn('Erreur lecture présentations MongoDB:', error.message);
-      }
-    }
-    
-    // Valeurs par défaut
-    res.json({
-      clubs: {
-        text: '<p>BackZo révolutionne le flocage sportif avec sa technologie amovible unique. Parfait pour les clubs qui veulent optimiser leur budget tout en offrant une identification professionnelle à chaque joueur.</p><p>Notre système permet de réaffecter les maillots facilement, sans investissement supplémentaire à chaque changement d\'effectif.</p>',
-        mediaUrl: '1.jpg',
-        mediaType: 'image'
-      },
-      particuliers: {
-        text: '<p>Personnalisez votre maillot avec notre flocage amovible premium. Choisissez parmi plus de 60 couleurs et créez votre BackZo unique en quelques clics.</p><p>Livraison rapide partout en France, paiement 100% sécurisé avec Stripe.</p>',
-        mediaUrl: '2.jpg',
-        mediaType: 'image'
-      }
-    });
-  } catch (error) {
-    console.error('Erreur récupération présentations:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Sauvegarder les présentations (admin)
-app.post('/api/presentations', async (req, res) => {
-  try {
-    const presentations = {
-      clubs: req.body.clubs || {},
-      particuliers: req.body.particuliers || {},
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Essayer de se connecter à MongoDB si pas encore fait
-    if (USE_MONGODB && !db) {
-      await connectMongoDB();
-    }
-    
-    if (USE_MONGODB && db) {
-      try {
-        await db.collection('presentations').updateOne(
-          { _id: 'global' },
-          { $set: presentations },
-          { upsert: true }
-        );
-        
-        console.log('✓ Présentations sauvegardées dans MongoDB');
-        
-        return res.json({
-          success: true,
-          presentations: presentations
-        });
-      } catch (error) {
-        console.error('Erreur sauvegarde présentations MongoDB:', error.message);
-        
-        if (process.env.VERCEL) {
-          throw new Error('Impossible de sauvegarder sans MongoDB sur Vercel');
-        }
-      }
-    }
-    
-    // Sur Vercel sans MongoDB, erreur
-    if (process.env.VERCEL) {
-      throw new Error('MongoDB non disponible sur Vercel');
-    }
-    
-    // Mode local sans MongoDB - pas de sauvegarde persistante
-    console.warn('⚠️  Présentations non sauvegardées (pas de MongoDB)');
-    res.json({
-      success: true,
-      presentations: presentations,
-      warning: 'Sauvegarde temporaire uniquement (pas de MongoDB)'
-    });
-    
-  } catch (error) {
-    console.error('Erreur sauvegarde présentations:', error);
     res.status(500).json({ error: error.message });
   }
 });

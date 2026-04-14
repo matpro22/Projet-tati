@@ -947,22 +947,20 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
   </div>
   <!-- PRÉSENTATION PRODUIT CLUBS -->
   <section style="background:var(--black);padding:5rem 4rem" id="presentation-clubs">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1400px;margin:0 auto">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center">
       <div class="reveal">
-        <div class="section-tag">Découvrez BackZo</div>
-        <h2 class="section-title" style="padding-left:0">NOTRE<br/><span style="color:var(--green)">PRODUIT</span></h2>
-        <div id="clubs-presentation-text" style="font-size:1rem;line-height:1.8;color:var(--gray);margin-top:2rem">
-          <p>Chargement...</p>
-        </div>
+        <div class="section-tag">Notre produit</div>
+        <h2 id="clubs-pres-title" style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,3.5rem);line-height:.95;letter-spacing:.02em;margin-bottom:1.5rem">Flocage Amovible pour Clubs</h2>
+        <p id="clubs-pres-desc" style="color:var(--gray);font-size:1rem;line-height:1.8;margin-bottom:2rem">Découvrez notre solution de flocage amovible spécialement conçue pour les clubs sportifs. Personnalisez vos maillots avec facilité et professionnalisme.</p>
       </div>
-      <div class="reveal" style="position:relative;border:1px solid var(--lg);overflow:hidden;background:var(--card)">
-        <div id="clubs-presentation-media" style="width:100%;min-height:400px;display:flex;align-items:center;justify-content:center">
-          <p style="color:var(--gray)">Chargement du média...</p>
+      <div class="reveal" style="position:relative;overflow:hidden;border-radius:8px;border:1px solid var(--lg)">
+        <div id="clubs-pres-media" style="width:100%;aspect-ratio:16/9;background:var(--deep);display:flex;align-items:center;justify-content:center">
+          <img src="1.jpg" alt="Présentation produit clubs" style="width:100%;height:100%;object-fit:cover"/>
         </div>
       </div>
     </div>
   </section>
-  <section style="background:var(--deep)" id="comment-clubs"></section>
+  <section style="background:var(--deep)" id="comment-clubs">
     <div class="section-tag">Processus</div>
     <h2 class="section-title reveal">COMMENT ÇA<br/><span style="color:var(--green)">MARCHE</span></h2>
     <div class="how-grid">
@@ -1084,23 +1082,21 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
   </div>
   <!-- PRÉSENTATION PRODUIT PARTICULIERS -->
   <section style="background:var(--black);padding:5rem 4rem" id="presentation-particuliers">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1400px;margin:0 auto">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center">
       <div class="reveal">
-        <div class="section-tag">Découvrez BackZo</div>
-        <h2 class="section-title" style="padding-left:0">NOTRE<br/><span style="color:var(--green)">PRODUIT</span></h2>
-        <div id="particuliers-presentation-text" style="font-size:1rem;line-height:1.8;color:var(--gray);margin-top:2rem">
-          <p>Chargement...</p>
-        </div>
+        <div class="section-tag">Notre produit</div>
+        <h2 id="particuliers-pres-title" style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,3.5rem);line-height:.95;letter-spacing:.02em;margin-bottom:1.5rem">Flocage Personnalisé pour Particuliers</h2>
+        <p id="particuliers-pres-desc" style="color:var(--gray);font-size:1rem;line-height:1.8;margin-bottom:2rem">Créez votre flocage sur-mesure en quelques clics. Choisissez votre taille, vos couleurs et personnalisez votre maillot comme vous le souhaitez.</p>
       </div>
-      <div class="reveal" style="position:relative;border:1px solid var(--lg);overflow:hidden;background:var(--card)">
-        <div id="particuliers-presentation-media" style="width:100%;min-height:400px;display:flex;align-items:center;justify-content:center">
-          <p style="color:var(--gray)">Chargement du média...</p>
+      <div class="reveal" style="position:relative;overflow:hidden;border-radius:8px;border:1px solid var(--lg)">
+        <div id="particuliers-pres-media" style="width:100%;aspect-ratio:16/9;background:var(--deep);display:flex;align-items:center;justify-content:center">
+          <img src="2.jpg" alt="Présentation produit particuliers" style="width:100%;height:100%;object-fit:cover"/>
         </div>
       </div>
     </div>
   </section>
   <!-- CONFIGURATEUR -->
-  <div class="config-section" id="config-section"></div>
+  <div class="config-section" id="config-section">
     <div class="section-tag" data-i18n="section.configurator">Configurateur</div>
     <h2 class="section-title reveal" data-i18n="individual.config.title">CRÉEZ VOTRE<br/><span style="color:var(--green)">BACKZO</span></h2>
     <div class="config-layout">
@@ -1609,73 +1605,69 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
         
         <!-- Présentation Clubs -->
         <div class="settings-section">
-          <div class="settings-tit">📋 Présentation Clubs</div>
-          <p style="font-size:.85rem;color:var(--gray);margin-bottom:1rem">Cette section s'affiche sur la page Clubs, juste après le hero.</p>
-          
-          <div style="margin-bottom:1rem">
-            <label class="bz-lbl" for="clubsText">Texte de présentation (HTML autorisé)</label>
-            <textarea class="bz-inp" id="clubsText" rows="6" placeholder="<p>Votre texte ici...</p>" style="font-family:monospace;font-size:.9rem"></textarea>
-            <p style="font-size:.75rem;color:var(--gray);margin-top:.3rem">Vous pouvez utiliser des balises HTML: &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;</p>
-          </div>
-          
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div class="settings-tit">Page Clubs</div>
+          <div style="display:flex;flex-direction:column;gap:1rem">
             <div>
-              <label class="bz-lbl" for="clubsMediaUrl">URL du média (image ou vidéo)</label>
-              <input class="bz-inp" id="clubsMediaUrl" type="text" placeholder="https://... ou 1.jpg" />
-              <p style="font-size:.75rem;color:var(--gray);margin-top:.3rem">Image locale (1.jpg) ou URL complète. Pour YouTube, collez le lien de la vidéo.</p>
+              <label class="bz-lbl" for="clubsPresTitle">Titre de la présentation</label>
+              <input class="bz-inp" id="clubsPresTitle" type="text" placeholder="Flocage Amovible pour Clubs"/>
             </div>
             <div>
-              <label class="bz-lbl" for="clubsMediaType">Type de média</label>
-              <select class="bz-sel" id="clubsMediaType">
+              <label class="bz-lbl" for="clubsPresDesc">Description</label>
+              <textarea class="bz-inp" id="clubsPresDesc" style="min-height:100px;resize:vertical" placeholder="Découvrez notre solution..."></textarea>
+            </div>
+            <div>
+              <label class="bz-lbl" for="clubsPresMediaType">Type de média</label>
+              <select class="bz-sel" id="clubsPresMediaType" onchange="toggleMediaInput('clubs')">
                 <option value="image">Image</option>
-                <option value="video">Vidéo</option>
+                <option value="video">Vidéo (YouTube/Vimeo)</option>
               </select>
             </div>
+            <div id="clubsImageInput">
+              <label class="bz-lbl" for="clubsPresMediaUrl">URL de l'image</label>
+              <input class="bz-inp" id="clubsPresMediaUrl" type="text" placeholder="1.jpg ou https://..."/>
+              <p style="font-size:.78rem;color:var(--gray);margin-top:.3rem">Placez vos images dans le dossier /public/ ou utilisez une URL complète</p>
+            </div>
+            <div id="clubsVideoInput" style="display:none">
+              <label class="bz-lbl" for="clubsPresVideoUrl">URL de la vidéo</label>
+              <input class="bz-inp" id="clubsPresVideoUrl" type="text" placeholder="https://www.youtube.com/watch?v=..."/>
+              <p style="font-size:.78rem;color:var(--gray);margin-top:.3rem">Formats supportés : YouTube, Vimeo</p>
+            </div>
+            <button class="save-btn" onclick="savePresentationClubs()">Enregistrer présentation Clubs →</button>
           </div>
-          
-          <button class="btn-sec" onclick="savePresentations()" style="background:var(--green);color:var(--black)">💾 Enregistrer Clubs</button>
         </div>
         
         <!-- Présentation Particuliers -->
         <div class="settings-section">
-          <div class="settings-tit">🎽 Présentation Particuliers</div>
-          <p style="font-size:.85rem;color:var(--gray);margin-bottom:1rem">Cette section s'affiche sur la page Particuliers, juste après le hero.</p>
-          
-          <div style="margin-bottom:1rem">
-            <label class="bz-lbl" for="particuliersText">Texte de présentation (HTML autorisé)</label>
-            <textarea class="bz-inp" id="particuliersText" rows="6" placeholder="<p>Votre texte ici...</p>" style="font-family:monospace;font-size:.9rem"></textarea>
-            <p style="font-size:.75rem;color:var(--gray);margin-top:.3rem">Vous pouvez utiliser des balises HTML: &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;</p>
-          </div>
-          
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div class="settings-tit">Page Particuliers</div>
+          <div style="display:flex;flex-direction:column;gap:1rem">
             <div>
-              <label class="bz-lbl" for="particuliersMediaUrl">URL du média (image ou vidéo)</label>
-              <input class="bz-inp" id="particuliersMediaUrl" type="text" placeholder="https://... ou 2.jpg" />
-              <p style="font-size:.75rem;color:var(--gray);margin-top:.3rem">Image locale (2.jpg) ou URL complète. Pour YouTube, collez le lien de la vidéo.</p>
+              <label class="bz-lbl" for="particuliersPresTitle">Titre de la présentation</label>
+              <input class="bz-inp" id="particuliersPresTitle" type="text" placeholder="Flocage Personnalisé pour Particuliers"/>
             </div>
             <div>
-              <label class="bz-lbl" for="particuliersMediaType">Type de média</label>
-              <select class="bz-sel" id="particuliersMediaType">
+              <label class="bz-lbl" for="particuliersPresDesc">Description</label>
+              <textarea class="bz-inp" id="particuliersPresDesc" style="min-height:100px;resize:vertical" placeholder="Créez votre flocage sur-mesure..."></textarea>
+            </div>
+            <div>
+              <label class="bz-lbl" for="particuliersPresMediaType">Type de média</label>
+              <select class="bz-sel" id="particuliersPresMediaType" onchange="toggleMediaInput('particuliers')">
                 <option value="image">Image</option>
-                <option value="video">Vidéo</option>
+                <option value="video">Vidéo (YouTube/Vimeo)</option>
               </select>
             </div>
+            <div id="particuliersImageInput">
+              <label class="bz-lbl" for="particuliersPresMediaUrl">URL de l'image</label>
+              <input class="bz-inp" id="particuliersPresMediaUrl" type="text" placeholder="2.jpg ou https://..."/>
+              <p style="font-size:.78rem;color:var(--gray);margin-top:.3rem">Placez vos images dans le dossier /public/ ou utilisez une URL complète</p>
+            </div>
+            <div id="particuliersVideoInput" style="display:none">
+              <label class="bz-lbl" for="particuliersPresVideoUrl">URL de la vidéo</label>
+              <input class="bz-inp" id="particuliersPresVideoUrl" type="text" placeholder="https://www.youtube.com/watch?v=..."/>
+              <p style="font-size:.78rem;color:var(--gray);margin-top:.3rem">Formats supportés : YouTube, Vimeo</p>
+            </div>
+            <button class="save-btn" onclick="savePresentationParticuliers()">Enregistrer présentation Particuliers →</button>
           </div>
-          
-          <button class="btn-sec" onclick="savePresentations()" style="background:var(--green);color:var(--black)">💾 Enregistrer Particuliers</button>
         </div>
-        
-        <div class="settings-section" style="background:rgba(184,255,87,.05);border:1px solid rgba(184,255,87,.2)">
-          <div class="settings-tit">💡 Conseils</div>
-          <ul style="font-size:.9rem;color:var(--gray);line-height:1.8;padding-left:1.5rem">
-            <li>Pour les images, utilisez des fichiers locaux (1.jpg, 2.jpg) ou des URLs complètes</li>
-            <li>Pour YouTube, collez simplement le lien de la vidéo (ex: https://youtube.com/watch?v=...)</li>
-            <li>Le texte supporte le HTML basique pour la mise en forme</li>
-            <li>Recommandé: images de 800x600px minimum pour une bonne qualité</li>
-          </ul>
-        </div>
-        
-        <button class="save-btn" onclick="savePresentations()">💾 Enregistrer toutes les présentations →</button>
       </div>
     </div>
   </div>
@@ -1829,6 +1821,9 @@ async function initPage() {
     await loadProductsFromBackend();
   }
   
+  // Charger les présentations produits
+  await loadPresentations();
+  
   // Appliquer les paramètres (même si chargés depuis localStorage)
   applySettings();
   
@@ -1840,9 +1835,6 @@ async function initPage() {
   
   // Synchroniser les prix du panier au chargement (après avoir chargé les produits)
   syncCartPrices();
-  
-  // Charger les présentations produits
-  loadPresentations();
   
   const adminDateEl = document.getElementById('adminDate');
   if (adminDateEl) {
@@ -2853,7 +2845,6 @@ function adminTab(tab) {
   if(tab==='products') renderProductsTable();
   if(tab==='devis-history') renderQuotesTable();
   if(tab==='settings') loadSettings();
-  if(tab==='presentations') loadPresentationsAdmin();
   // Scroll to top
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -3834,109 +3825,6 @@ async function loadSettingsFromBackend() {
   }
 }
 
-// Charger les présentations produits
-async function loadPresentations() {
-  if(!USE_BACKEND) {
-    // Mode local - utiliser des valeurs par défaut
-    displayPresentation('clubs', {
-      text: '<p>BackZo révolutionne le flocage sportif avec sa technologie amovible unique. Parfait pour les clubs qui veulent optimiser leur budget tout en offrant une identification professionnelle à chaque joueur.</p><p>Notre système permet de réaffecter les maillots facilement, sans investissement supplémentaire à chaque changement d\'effectif.</p>',
-      mediaUrl: '1.jpg',
-      mediaType: 'image'
-    });
-    displayPresentation('particuliers', {
-      text: '<p>Personnalisez votre maillot avec notre flocage amovible premium. Choisissez parmi plus de 60 couleurs et créez votre BackZo unique en quelques clics.</p><p>Livraison rapide partout en France, paiement 100% sécurisé avec Stripe.</p>',
-      mediaUrl: '2.jpg',
-      mediaType: 'image'
-    });
-    return;
-  }
-  
-  try {
-    const response = await fetch(`${API_URL}/presentations`);
-    if (!response.ok) throw new Error('Erreur chargement présentations');
-    
-    const data = await response.json();
-    
-    // Afficher les présentations
-    if(data.clubs) displayPresentation('clubs', data.clubs);
-    if(data.particuliers) displayPresentation('particuliers', data.particuliers);
-    
-    console.log('✓ Présentations chargées');
-  } catch (error) {
-    console.warn('Présentations non disponibles:', error);
-    // Afficher des valeurs par défaut
-    displayPresentation('clubs', {
-      text: '<p>BackZo révolutionne le flocage sportif avec sa technologie amovible unique.</p>',
-      mediaUrl: '1.jpg',
-      mediaType: 'image'
-    });
-    displayPresentation('particuliers', {
-      text: '<p>Personnalisez votre maillot avec notre flocage amovible premium.</p>',
-      mediaUrl: '2.jpg',
-      mediaType: 'image'
-    });
-  }
-}
-
-// Afficher une présentation
-function displayPresentation(type, data) {
-  const textEl = document.getElementById(`${type}-presentation-text`);
-  const mediaEl = document.getElementById(`${type}-presentation-media`);
-  
-  if(!textEl || !mediaEl) return;
-  
-  // Afficher le texte
-  textEl.innerHTML = data.text || '<p>Aucun texte de présentation.</p>';
-  
-  // Afficher le média
-  if(data.mediaUrl) {
-    if(data.mediaType === 'video') {
-      // Détecter si c'est une vidéo YouTube
-      const youtubeMatch = data.mediaUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\?\/]+)/);
-      if(youtubeMatch) {
-        const videoId = youtubeMatch[1];
-        mediaEl.innerHTML = `
-          <iframe 
-            width="100%" 
-            height="400" 
-            src="https://www.youtube.com/embed/${videoId}" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen
-            style="display:block"
-          ></iframe>
-        `;
-      } else {
-        // Vidéo directe
-        mediaEl.innerHTML = `
-          <video 
-            controls 
-            style="width:100%;height:auto;display:block"
-            poster=""
-          >
-            <source src="${data.mediaUrl}" type="video/mp4">
-            Votre navigateur ne supporte pas la vidéo.
-          </video>
-        `;
-      }
-    } else {
-      // Image
-      mediaEl.innerHTML = `
-        <img 
-          src="${data.mediaUrl}" 
-          alt="Présentation produit ${type}" 
-          style="width:100%;height:auto;display:block"
-          onerror="this.parentElement.innerHTML='<p style=color:var(--gray)>Image non disponible</p>'"
-        />
-      `;
-    }
-  } else {
-    mediaEl.innerHTML = '<p style="color:var(--gray)">Aucun média configuré</p>';
-  }
-}
-
-// Sauvegarder les présentations
-
 // Sauvegarder les paramètres sur le backend
 async function saveSettingsToBackend(settings) {
   if(!USE_BACKEND) {
@@ -4013,11 +3901,202 @@ function applySettings() {
     el.innerHTML = text.slice(0, mid) + '<span>' + text.slice(mid) + '</span>';
   });
   
-  // Mode maintenance
-  if(state.settings.maintenance && !state.adminAuth) {
-    showMaintenancePage();
+}
+
+// ============================================================
+// GESTION DES PRÉSENTATIONS PRODUITS
+// ============================================================
+
+// Charger les présentations depuis le backend
+async function loadPresentations() {
+  try {
+    // Charger présentation Clubs
+    const clubsRes = await fetch(`${API_URL}/presentations/clubs`);
+    if (clubsRes.ok) {
+      const clubsData = await clubsRes.json();
+      
+      // Mettre à jour l'affichage
+      const clubsTitle = document.getElementById('clubs-pres-title');
+      const clubsDesc = document.getElementById('clubs-pres-desc');
+      const clubsMedia = document.getElementById('clubs-pres-media');
+      
+      if (clubsTitle) clubsTitle.textContent = clubsData.title;
+      if (clubsDesc) clubsDesc.textContent = clubsData.description;
+      
+      if (clubsMedia) {
+        if (clubsData.mediaType === 'video') {
+          const videoId = extractVideoId(clubsData.mediaUrl);
+          if (videoId) {
+            clubsMedia.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+          }
+        } else {
+          clubsMedia.innerHTML = `<img src="${clubsData.mediaUrl}" alt="Présentation produit clubs" style="width:100%;height:100%;object-fit:cover"/>`;
+        }
+      }
+      
+      // Remplir les champs admin
+      const clubsTitleInput = document.getElementById('clubsPresTitle');
+      const clubsDescInput = document.getElementById('clubsPresDesc');
+      const clubsMediaTypeInput = document.getElementById('clubsPresMediaType');
+      const clubsMediaUrlInput = document.getElementById('clubsPresMediaUrl');
+      const clubsVideoUrlInput = document.getElementById('clubsPresVideoUrl');
+      
+      if (clubsTitleInput) clubsTitleInput.value = clubsData.title;
+      if (clubsDescInput) clubsDescInput.value = clubsData.description;
+      if (clubsMediaTypeInput) clubsMediaTypeInput.value = clubsData.mediaType;
+      if (clubsData.mediaType === 'video') {
+        if (clubsVideoUrlInput) clubsVideoUrlInput.value = clubsData.mediaUrl;
+        toggleMediaInput('clubs');
+      } else {
+        if (clubsMediaUrlInput) clubsMediaUrlInput.value = clubsData.mediaUrl;
+      }
+    }
+    
+    // Charger présentation Particuliers
+    const particuliersRes = await fetch(`${API_URL}/presentations/particuliers`);
+    if (particuliersRes.ok) {
+      const particuliersData = await particuliersRes.json();
+      
+      // Mettre à jour l'affichage
+      const particuliersTitle = document.getElementById('particuliers-pres-title');
+      const particuliersDesc = document.getElementById('particuliers-pres-desc');
+      const particuliersMedia = document.getElementById('particuliers-pres-media');
+      
+      if (particuliersTitle) particuliersTitle.textContent = particuliersData.title;
+      if (particuliersDesc) particuliersDesc.textContent = particuliersData.description;
+      
+      if (particuliersMedia) {
+        if (particuliersData.mediaType === 'video') {
+          const videoId = extractVideoId(particuliersData.mediaUrl);
+          if (videoId) {
+            particuliersMedia.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+          }
+        } else {
+          particuliersMedia.innerHTML = `<img src="${particuliersData.mediaUrl}" alt="Présentation produit particuliers" style="width:100%;height:100%;object-fit:cover"/>`;
+        }
+      }
+      
+      // Remplir les champs admin
+      const particuliersTitleInput = document.getElementById('particuliersPresTitle');
+      const particuliersDescInput = document.getElementById('particuliersPresDesc');
+      const particuliersMediaTypeInput = document.getElementById('particuliersPresMediaType');
+      const particuliersMediaUrlInput = document.getElementById('particuliersPresMediaUrl');
+      const particuliersVideoUrlInput = document.getElementById('particuliersPresVideoUrl');
+      
+      if (particuliersTitleInput) particuliersTitleInput.value = particuliersData.title;
+      if (particuliersDescInput) particuliersDescInput.value = particuliersData.description;
+      if (particuliersMediaTypeInput) particuliersMediaTypeInput.value = particuliersData.mediaType;
+      if (particuliersData.mediaType === 'video') {
+        if (particuliersVideoUrlInput) particuliersVideoUrlInput.value = particuliersData.mediaUrl;
+        toggleMediaInput('particuliers');
+      } else {
+        if (particuliersMediaUrlInput) particuliersMediaUrlInput.value = particuliersData.mediaUrl;
+      }
+    }
+  } catch (error) {
+    console.error('Erreur chargement présentations:', error);
   }
 }
+
+// Extraire l'ID d'une vidéo YouTube ou Vimeo
+function extractVideoId(url) {
+  // YouTube
+  const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\?\/]+)/);
+  if (youtubeMatch) return youtubeMatch[1];
+  
+  // Vimeo
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) return vimeoMatch[1];
+  
+  return null;
+}
+
+// Basculer entre image et vidéo
+function toggleMediaInput(type) {
+  const mediaType = document.getElementById(`${type}PresMediaType`).value;
+  const imageInput = document.getElementById(`${type}ImageInput`);
+  const videoInput = document.getElementById(`${type}VideoInput`);
+  
+  if (mediaType === 'video') {
+    imageInput.style.display = 'none';
+    videoInput.style.display = 'block';
+  } else {
+    imageInput.style.display = 'block';
+    videoInput.style.display = 'none';
+  }
+}
+
+// Sauvegarder présentation Clubs
+async function savePresentationClubs() {
+  const title = document.getElementById('clubsPresTitle').value.trim();
+  const description = document.getElementById('clubsPresDesc').value.trim();
+  const mediaType = document.getElementById('clubsPresMediaType').value;
+  const mediaUrl = mediaType === 'video' 
+    ? document.getElementById('clubsPresVideoUrl').value.trim()
+    : document.getElementById('clubsPresMediaUrl').value.trim();
+  
+  if (!title || !description || !mediaUrl) {
+    showToast('Veuillez remplir tous les champs', true);
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/presentations/clubs`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description, mediaType, mediaUrl })
+    });
+    
+    if (!response.ok) throw new Error('Erreur sauvegarde');
+    
+    showToast('✓ Présentation Clubs mise à jour !');
+    
+    // Recharger les présentations
+    await loadPresentations();
+    
+  } catch (error) {
+    console.error('Erreur sauvegarde présentation Clubs:', error);
+    showToast('Erreur lors de la sauvegarde', true);
+  }
+}
+
+// Sauvegarder présentation Particuliers
+async function savePresentationParticuliers() {
+  const title = document.getElementById('particuliersPresTitle').value.trim();
+  const description = document.getElementById('particuliersPresDesc').value.trim();
+  const mediaType = document.getElementById('particuliersPresMediaType').value;
+  const mediaUrl = mediaType === 'video' 
+    ? document.getElementById('particuliersPresVideoUrl').value.trim()
+    : document.getElementById('particuliersPresMediaUrl').value.trim();
+  
+  if (!title || !description || !mediaUrl) {
+    showToast('Veuillez remplir tous les champs', true);
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/presentations/particuliers`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description, mediaType, mediaUrl })
+    });
+    
+    if (!response.ok) throw new Error('Erreur sauvegarde');
+    
+    showToast('✓ Présentation Particuliers mise à jour !');
+    
+    // Recharger les présentations
+    await loadPresentations();
+    
+  } catch (error) {
+    console.error('Erreur sauvegarde présentation Particuliers:', error);
+    showToast('Erreur lors de la sauvegarde', true);
+  }
+}
+
+// ============================================================
+// AUTRES FONCTIONS
+// ============================================================
 
 function loadSettings() {
   // Charger les paramètres dans les champs
@@ -4038,113 +4117,6 @@ function loadSettings() {
   document.getElementById('togMaintenance').checked = state.settings.maintenance;
   document.getElementById('togNotifications').checked = state.settings.notifications;
   document.getElementById('togBackup').checked = state.settings.autoBackup;
-}
-
-// ============================================================
-// GESTION DES PRÉSENTATIONS PRODUITS
-// ============================================================
-
-// Charger les présentations dans l'admin
-async function loadPresentationsAdmin() {
-  if(!USE_BACKEND) {
-    // Mode local - charger depuis localStorage
-    const saved = localStorage.getItem('bz-presentations');
-    if(saved) {
-      const data = JSON.parse(saved);
-      fillPresentationFields(data);
-    } else {
-      // Valeurs par défaut
-      fillPresentationFields({
-        clubs: {
-          text: '<p>BackZo révolutionne le flocage sportif avec sa technologie amovible unique. Parfait pour les clubs qui veulent optimiser leur budget tout en offrant une identification professionnelle à chaque joueur.</p><p>Notre système permet de réaffecter les maillots facilement, sans investissement supplémentaire à chaque changement d\'effectif.</p>',
-          mediaUrl: '1.jpg',
-          mediaType: 'image'
-        },
-        particuliers: {
-          text: '<p>Personnalisez votre maillot avec notre flocage amovible premium. Choisissez parmi plus de 60 couleurs et créez votre BackZo unique en quelques clics.</p><p>Livraison rapide partout en France, paiement 100% sécurisé avec Stripe.</p>',
-          mediaUrl: '2.jpg',
-          mediaType: 'image'
-        }
-      });
-    }
-    return;
-  }
-  
-  try {
-    const response = await fetch(`${API_URL}/presentations`);
-    if (!response.ok) throw new Error('Erreur chargement');
-    
-    const data = await response.json();
-    fillPresentationFields(data);
-    
-    console.log('✓ Présentations chargées dans l\'admin');
-  } catch (error) {
-    console.warn('Erreur chargement présentations:', error);
-    showToast('Erreur de chargement', true);
-  }
-}
-
-// Remplir les champs du formulaire
-function fillPresentationFields(data) {
-  if(data.clubs) {
-    document.getElementById('clubsText').value = data.clubs.text || '';
-    document.getElementById('clubsMediaUrl').value = data.clubs.mediaUrl || '';
-    document.getElementById('clubsMediaType').value = data.clubs.mediaType || 'image';
-  }
-  
-  if(data.particuliers) {
-    document.getElementById('particuliersText').value = data.particuliers.text || '';
-    document.getElementById('particuliersMediaUrl').value = data.particuliers.mediaUrl || '';
-    document.getElementById('particuliersMediaType').value = data.particuliers.mediaType || 'image';
-  }
-}
-
-// Sauvegarder les présentations
-async function savePresentations() {
-  const data = {
-    clubs: {
-      text: document.getElementById('clubsText').value,
-      mediaUrl: document.getElementById('clubsMediaUrl').value,
-      mediaType: document.getElementById('clubsMediaType').value
-    },
-    particuliers: {
-      text: document.getElementById('particuliersText').value,
-      mediaUrl: document.getElementById('particuliersMediaUrl').value,
-      mediaType: document.getElementById('particuliersMediaType').value
-    }
-  };
-  
-  if(!USE_BACKEND) {
-    // Mode local - sauvegarder dans localStorage
-    localStorage.setItem('bz-presentations', JSON.stringify(data));
-    showToast('✓ Présentations enregistrées localement');
-    
-    // Mettre à jour l'affichage
-    displayPresentation('clubs', data.clubs);
-    displayPresentation('particuliers', data.particuliers);
-    return;
-  }
-  
-  try {
-    const response = await fetch(`${API_URL}/presentations`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    
-    if (!response.ok) throw new Error('Erreur sauvegarde');
-    
-    showToast('✓ Présentations enregistrées !');
-    
-    // Mettre à jour l'affichage sur les pages
-    displayPresentation('clubs', data.clubs);
-    displayPresentation('particuliers', data.particuliers);
-    
-    console.log('✓ Présentations sauvegardées');
-  } catch (error) {
-    console.error('Erreur sauvegarde présentations:', error);
-    showToast('Erreur lors de la sauvegarde', true);
-  }
 }
 
 function showMaintenancePage() {
