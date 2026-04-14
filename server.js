@@ -1229,6 +1229,105 @@ app.post('/api/settings', async (req, res) => {
 });
 
 // ============================================================
+// ROUTES PRÉSENTATIONS PRODUITS
+// ============================================================
+
+// Récupérer les présentations
+app.get('/api/presentations', async (req, res) => {
+  try {
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        const presentations = await db.collection('presentations').findOne({ _id: 'global' });
+        if (presentations) {
+          delete presentations._id;
+          return res.json(presentations);
+        }
+      } catch (error) {
+        console.warn('Erreur lecture présentations MongoDB:', error.message);
+      }
+    }
+    
+    // Valeurs par défaut
+    res.json({
+      clubs: {
+        text: '<p>BackZo révolutionne le flocage sportif avec sa technologie amovible unique. Parfait pour les clubs qui veulent optimiser leur budget tout en offrant une identification professionnelle à chaque joueur.</p><p>Notre système permet de réaffecter les maillots facilement, sans investissement supplémentaire à chaque changement d\'effectif.</p>',
+        mediaUrl: '1.jpg',
+        mediaType: 'image'
+      },
+      particuliers: {
+        text: '<p>Personnalisez votre maillot avec notre flocage amovible premium. Choisissez parmi plus de 60 couleurs et créez votre BackZo unique en quelques clics.</p><p>Livraison rapide partout en France, paiement 100% sécurisé avec Stripe.</p>',
+        mediaUrl: '2.jpg',
+        mediaType: 'image'
+      }
+    });
+  } catch (error) {
+    console.error('Erreur récupération présentations:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Sauvegarder les présentations (admin)
+app.post('/api/presentations', async (req, res) => {
+  try {
+    const presentations = {
+      clubs: req.body.clubs || {},
+      particuliers: req.body.particuliers || {},
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        await db.collection('presentations').updateOne(
+          { _id: 'global' },
+          { $set: presentations },
+          { upsert: true }
+        );
+        
+        console.log('✓ Présentations sauvegardées dans MongoDB');
+        
+        return res.json({
+          success: true,
+          presentations: presentations
+        });
+      } catch (error) {
+        console.error('Erreur sauvegarde présentations MongoDB:', error.message);
+        
+        if (process.env.VERCEL) {
+          throw new Error('Impossible de sauvegarder sans MongoDB sur Vercel');
+        }
+      }
+    }
+    
+    // Sur Vercel sans MongoDB, erreur
+    if (process.env.VERCEL) {
+      throw new Error('MongoDB non disponible sur Vercel');
+    }
+    
+    // Mode local sans MongoDB - pas de sauvegarde persistante
+    console.warn('⚠️  Présentations non sauvegardées (pas de MongoDB)');
+    res.json({
+      success: true,
+      presentations: presentations,
+      warning: 'Sauvegarde temporaire uniquement (pas de MongoDB)'
+    });
+    
+  } catch (error) {
+    console.error('Erreur sauvegarde présentations:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================
 // ROUTES UTILITAIRES
 // ============================================================
 
