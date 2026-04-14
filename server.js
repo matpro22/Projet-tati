@@ -916,28 +916,69 @@ app.post('/api/products', async (req, res) => {
 // Modifier un produit (admin)
 app.put('/api/products/:id', async (req, res) => {
   try {
+    const productId = req.params.id;
+    const updateData = {
+      ...req.body,
+      updatedAt: new Date().toISOString()
+    };
+    
+    console.log('📝 Mise à jour produit:', productId);
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    // Mise à jour dans MongoDB
+    if (USE_MONGODB && db) {
+      try {
+        const result = await db.collection('products').findOneAndUpdate(
+          { id: productId },
+          { $set: updateData },
+          { returnDocument: 'after' }
+        );
+        
+        if (!result.value) {
+          return res.status(404).json({ error: 'Produit non trouvé' });
+        }
+        
+        console.log('✓ Produit mis à jour dans MongoDB');
+        return res.json({
+          success: true,
+          product: result.value
+        });
+      } catch (error) {
+        console.error('❌ Erreur mise à jour MongoDB:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.status(500).json({ error: 'Erreur mise à jour MongoDB' });
+        }
+      }
+    }
+    
+    // Mode fichier JSON (seulement en local)
+    if (process.env.VERCEL) {
+      return res.status(500).json({ error: 'MongoDB non disponible' });
+    }
+    
     const products = await readData('products', PRODUCTS_FILE);
-    const index = products.findIndex(p => p.id === req.params.id);
+    const index = products.findIndex(p => p.id === productId);
     
     if (index === -1) {
       return res.status(404).json({ error: 'Produit non trouvé' });
     }
     
-    // Mettre à jour le produit
-    products[index] = {
-      ...products[index],
-      ...req.body,
-      updatedAt: new Date().toISOString()
-    };
-    
+    products[index] = { ...products[index], ...updateData };
     await writeData('products', PRODUCTS_FILE, products);
     
+    console.log('✓ Produit mis à jour dans fichier JSON');
     res.json({
       success: true,
       product: products[index]
     });
     
   } catch (error) {
+    console.error('❌ Erreur mise à jour produit:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -945,8 +986,42 @@ app.put('/api/products/:id', async (req, res) => {
 // Supprimer un produit (admin)
 app.delete('/api/products/:id', async (req, res) => {
   try {
+    const productId = req.params.id;
+    
+    console.log('🗑️  Suppression produit:', productId);
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    // Suppression dans MongoDB
+    if (USE_MONGODB && db) {
+      try {
+        const result = await db.collection('products').deleteOne({ id: productId });
+        
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ error: 'Produit non trouvé' });
+        }
+        
+        console.log('✓ Produit supprimé de MongoDB');
+        return res.json({ success: true });
+      } catch (error) {
+        console.error('❌ Erreur suppression MongoDB:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.status(500).json({ error: 'Erreur suppression MongoDB' });
+        }
+      }
+    }
+    
+    // Mode fichier JSON (seulement en local)
+    if (process.env.VERCEL) {
+      return res.status(500).json({ error: 'MongoDB non disponible' });
+    }
+    
     const products = await readData('products', PRODUCTS_FILE);
-    const filteredProducts = products.filter(p => p.id !== req.params.id);
+    const filteredProducts = products.filter(p => p.id !== productId);
     
     if (products.length === filteredProducts.length) {
       return res.status(404).json({ error: 'Produit non trouvé' });
@@ -954,9 +1029,11 @@ app.delete('/api/products/:id', async (req, res) => {
     
     await writeData('products', PRODUCTS_FILE, filteredProducts);
     
+    console.log('✓ Produit supprimé du fichier JSON');
     res.json({ success: true });
     
   } catch (error) {
+    console.error('❌ Erreur suppression produit:', error.message);
     res.status(500).json({ error: error.message });
   }
 });

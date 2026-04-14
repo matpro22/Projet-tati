@@ -2632,14 +2632,21 @@ function sendOrderConfirmation(id) {
 }
 function renderProductsTable() {
   const tbody=document.getElementById('productsTableBody'); if(!tbody) return;
-  tbody.innerHTML=PRODUCTS.map(p=>`
+  
+  // Utiliser window.PRODUCTS si disponible (depuis le backend), sinon PRODUCTS local
+  const products = window.PRODUCTS || PRODUCTS;
+  
+  tbody.innerHTML=products.map(p=>`
     <tr>
       <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700">${p.name}</td>
       <td><span class="status-badge status-processing">${p.category}</span></td>
       <td style="color:var(--green)">${p.price.toFixed(2).replace('.',',')} €</td>
       <td>${p.stock}</td>
-      <td><span class="status-badge status-delivered">Actif</span></td>
-      <td><button class="admin-action-btn" onclick="showToast('Édition produit — fonctionnalité à connecter')">Éditer</button></td>
+      <td><span class="status-badge ${p.active !== false ? 'status-delivered' : 'status-cancelled'}">${p.active !== false ? 'Actif' : 'Inactif'}</span></td>
+      <td>
+        <button class="admin-action-btn" onclick="showEditProductModal('${p.id}')">✏️ Éditer</button>
+        <button class="admin-action-btn del" onclick="deleteProduct('${p.id}')">🗑️</button>
+      </td>
     </tr>`).join('');
 }
 function renderQuotesTable() {
@@ -2742,6 +2749,149 @@ async function submitNewProduct() {
     }
   } else {
     showToast('Mode local - Connectez le backend pour ajouter des produits');
+  }
+}
+
+// Afficher le modal d'édition de produit
+function showEditProductModal(productId) {
+  const products = window.PRODUCTS || PRODUCTS;
+  const product = products.find(p => p.id === productId);
+  
+  if (!product) {
+    showToast('Produit non trouvé', true);
+    return;
+  }
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal-ov open';
+  modal.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-head">
+        <div class="modal-tit">ÉDITER <span>PRODUIT</span></div>
+        <button class="modal-cls" onclick="this.closest('.modal-ov').remove()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <div>
+            <label class="bz-lbl" for="editProdName">Nom du produit *</label>
+            <input class="bz-inp" id="editProdName" type="text" value="${product.name}" required/>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div>
+              <label class="bz-lbl" for="editProdPrice">Prix (€) *</label>
+              <input class="bz-inp" id="editProdPrice" type="number" step="0.01" value="${product.price}" required/>
+            </div>
+            <div>
+              <label class="bz-lbl" for="editProdStock">Stock</label>
+              <input class="bz-inp" id="editProdStock" type="number" value="${product.stock || 0}"/>
+            </div>
+          </div>
+          <div>
+            <label class="bz-lbl" for="editProdCategory">Catégorie *</label>
+            <select class="bz-sel" id="editProdCategory">
+              <option value="particuliers" ${product.category === 'particuliers' ? 'selected' : ''}>Particuliers</option>
+              <option value="clubs" ${product.category === 'clubs' ? 'selected' : ''}>Clubs</option>
+            </select>
+          </div>
+          <div>
+            <label class="bz-lbl" for="editProdDesc">Description</label>
+            <textarea class="bz-inp" id="editProdDesc" style="min-height:80px;resize:vertical">${product.desc || ''}</textarea>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem">
+            <label class="bz-lbl" style="margin:0">Produit actif</label>
+            <label class="toggle">
+              <input type="checkbox" id="editProdActive" ${product.active !== false ? 'checked' : ''}/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <button class="save-btn" onclick="submitEditProduct('${productId}')">Enregistrer les modifications →</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+// Soumettre les modifications du produit
+async function submitEditProduct(productId) {
+  const name = document.getElementById('editProdName').value.trim();
+  const price = parseFloat(document.getElementById('editProdPrice').value);
+  const stock = parseInt(document.getElementById('editProdStock').value) || 0;
+  const category = document.getElementById('editProdCategory').value;
+  const desc = document.getElementById('editProdDesc').value.trim();
+  const active = document.getElementById('editProdActive').checked;
+  
+  if (!name || !price || !category) {
+    showToast('Veuillez remplir tous les champs obligatoires', true);
+    return;
+  }
+  
+  if(USE_BACKEND) {
+    try {
+      const response = await fetch(`${API_URL}/products/${productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, price, stock, category, desc, active })
+      });
+      
+      if (!response.ok) throw new Error('Erreur modification produit');
+      
+      showToast('✓ Produit modifié avec succès !');
+      document.querySelector('.modal-ov').remove();
+      await loadProductsFromBackend();
+      renderProductsTable();
+      
+      // Mettre à jour aussi l'affichage de la boutique si on est dessus
+      const grid = document.getElementById('productsGrid');
+      if (grid) renderProducts('all');
+      
+    } catch (error) {
+      console.error('Erreur modification produit:', error);
+      showToast('Erreur lors de la modification du produit', true);
+    }
+  } else {
+    // Mode local - modifier dans PRODUCTS
+    const index = PRODUCTS.findIndex(p => p.id === productId);
+    if (index !== -1) {
+      PRODUCTS[index] = { ...PRODUCTS[index], name, price, stock, category, desc, active };
+      showToast('✓ Produit modifié (mode local)');
+      document.querySelector('.modal-ov').remove();
+      renderProductsTable();
+      
+      const grid = document.getElementById('productsGrid');
+      if (grid) renderProducts('all');
+    }
+  }
+}
+
+// Supprimer un produit
+async function deleteProduct(productId) {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+    return;
+  }
+  
+  if(USE_BACKEND) {
+    try {
+      const response = await fetch(`${API_URL}/products/${productId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) throw new Error('Erreur suppression produit');
+      
+      showToast('✓ Produit supprimé avec succès !');
+      await loadProductsFromBackend();
+      renderProductsTable();
+      
+      // Mettre à jour aussi l'affichage de la boutique
+      const grid = document.getElementById('productsGrid');
+      if (grid) renderProducts('all');
+      
+    } catch (error) {
+      console.error('Erreur suppression produit:', error);
+      showToast('Erreur lors de la suppression du produit', true);
+    }
+  } else {
+    showToast('Mode local - Connectez le backend pour supprimer des produits');
   }
 }
 
