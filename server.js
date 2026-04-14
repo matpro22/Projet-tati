@@ -1082,7 +1082,7 @@ app.get('/api/orders/:id', async (req, res) => {
 });
 
 // Mettre à jour le statut d'une commande (admin)
-app.patch('/api/orders/:id/status', async (req, res) => {
+app.put('/api/orders/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
     const orderId = req.params.id;
