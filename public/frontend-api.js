@@ -5,7 +5,7 @@
 
 // Configuration de l'API
 const API_URL = window.location.hostname === 'localhost' 
-  ? 'http://projet-tati.vercel.app:3000/api' 
+  ? 'http://localhost:3000/api' 
   : '/api';
 
 // ============================================================
@@ -401,3 +401,68 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn('⚠️ Backend non accessible. Mode local activé.');
     });
 });
+
+// ============================================================
+// FONCTIONS EMAIL
+// ============================================================
+
+// Envoyer un devis par email via le backend
+async function sendQuoteEmail(clientEmail, clientName, quoteId, total, items) {
+  try {
+    const response = await fetch(`${API_URL}/send-quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientEmail,
+        clientName,
+        quoteId,
+        total,
+        items
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      showToast('✓ Devis envoyé par email');
+      return true;
+    } else {
+      showToast('✗ ' + (data.error || 'Erreur envoi devis'), true);
+      return false;
+    }
+  } catch (error) {
+    console.error('Erreur envoi devis:', error);
+    showToast('✗ Erreur de connexion', true);
+    return false;
+  }
+}
+
+// Envoyer une notification de commande via le backend
+async function sendOrderNotification(customerEmail, customerName, orderId, status) {
+  try {
+    const response = await fetch(`${API_URL}/send-order-notification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerEmail,
+        customerName,
+        orderId,
+        status
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      showToast('✓ Notification envoyée');
+      return true;
+    } else {
+      showToast('✗ ' + (data.error || 'Erreur envoi notification'), true);
+      return false;
+    }
+  } catch (error) {
+    console.error('Erreur envoi notification:', error);
+    showToast('✗ Erreur de connexion', true);
+    return false;
+  }
+}

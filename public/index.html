@@ -1720,7 +1720,9 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
 // 4. Le backend sera accessible sur http://localhost:3000
 // 5. Mettez USE_BACKEND à true ci-dessous
 
-const API_URL = 'https://projet-tati.vercel.app/api';
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://projet-tati.vercel.app/api' 
+  : '/api';
 const USE_BACKEND = true; // Mettre à true pour utiliser le backend
 
 // MODE LOCAL (USE_BACKEND = false):
@@ -2681,16 +2683,26 @@ function downloadDevis() {
   // Save quote
   saveDevis();
 }
-function sendDevisByEmail() {
-  const client=document.getElementById('dvClientEmail')?.value;
-  const clientName=document.getElementById('dvClientName')?.value||'Client';
-  if(!client){showToast('Renseignez l\'email client',true);return;}
-  const total=document.getElementById('dvTotalTTC')?.textContent||'—';
-  const subject=encodeURIComponent('Devis BackZo — '+document.getElementById('dvNum')?.textContent);
-  const body=encodeURIComponent(`Bonjour ${clientName},\n\nVeuillez trouver ci-joint votre devis BackZo.\n\nMontant total : ${total}\nTVA non applicable, article 293 B du CGI\n\nPour toute question : team@backzo.eu\n\nCordialement,\nL'équipe BackZo`);
-  window.location.href=`mailto:${client}?subject=${subject}&body=${body}`;
-  saveDevis();
-  showToast('Email ouvert dans votre client mail');
+async function sendDevisByEmail() {
+  const client = document.getElementById('dvClientEmail')?.value;
+  const clientName = document.getElementById('dvClientName')?.value || 'Client';
+  if (!client) {
+    showToast('Renseignez l\'email client', true);
+    return;
+  }
+  const total = document.getElementById('dvTotalTTC')?.textContent || '—';
+  const quoteId = document.getElementById('dvNum')?.textContent || 'DEV-0000';
+  
+  // Récupérer les détails du devis si disponibles
+  const items = document.getElementById('dvItems')?.innerHTML || '';
+  
+  showToast('Envoi du devis en cours...');
+  
+  const success = await sendQuoteEmail(client, clientName, quoteId, total, items);
+  
+  if (success) {
+    saveDevis();
+  }
 }
 function saveDevis() {
   const quote = {
@@ -2774,14 +2786,125 @@ async function sendContactForm() {
 // ============================================================
 // CTA CLUBS
 // ============================================================
-function sendClubCTA() {
-  const email=document.getElementById('ctaEmail').value.trim();
-  const msg=document.getElementById('ctaMsg');
-  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.className='cta-msg err';msg.textContent='Adresse email invalide';return;}
-  const subject=encodeURIComponent('Demande de devis BackZo — '+email);
-  const body=encodeURIComponent('Bonjour,\n\nNous souhaitons obtenir un devis pour la personnalisation des maillots de notre club.\n\nEmail de contact : '+email+'\n\nMerci !');
-  window.location.href='mailto:team@backzo.eu?subject='+subject+'&body='+body;
-  msg.className='cta-msg ok';msg.textContent='✓ Votre client mail s\'ouvre — envoyez le message !';
+async function sendClubCTA() {
+  const email = document.getElementById('ctaEmail').value.trim();
+  const msg = document.getElementById('ctaMsg');
+  const btn = document.querySelector('.cta-sub-btn');
+  
+  // Validation
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    msg.className = 'cta-msg err';
+    msg.textContent = 'Adresse email invalide';
+    return;
+  }
+  
+  // Désactiver le bouton pendant l'envoi
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Envoi...';
+  }
+  msg.className = 'cta-msg';
+  msg.style.color = 'var(--gray)';
+  msg.textContent = 'Envoi en cours...';
+  
+  try {
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Demande de devis club',
+        email: email,
+        subject: 'Demande de devis BackZo',
+        message: `Bonjour,\n\nNous souhaitons obtenir un devis pour la personnalisation des maillots de notre club.\n\nEmail de contact : ${email}\n\nMerci !`
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      msg.className = 'cta-msg ok';
+      msg.textContent = '✓ ' + data.message;
+      document.getElementById('ctaEmail').value = '';
+    } else {
+      msg.className = 'cta-msg err';
+      msg.textContent = '✗ ' + (data.error || 'Erreur lors de l\'envoi');
+    }
+  } catch (error) {
+    console.error('Erreur:', error);
+    msg.className = 'cta-msg err';
+    msg.textContent = '✗ Erreur de connexion. Veuillez réessayer.';
+  } finally {
+    // Réactiver le bouton
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Envoyer →';
+    }
+  }
+}
+
+// ============================================================
+// EMAIL HELPERS
+// ============================================================
+
+// Envoyer un devis par email via le backend
+async function sendQuoteEmail(clientEmail, clientName, quoteId, total, items) {
+  try {
+    const response = await fetch(`${API_URL}/send-quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientEmail,
+        clientName,
+        quoteId,
+        total,
+        items
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      showToast('✓ Devis envoyé par email');
+      return true;
+    } else {
+      showToast('✗ ' + (data.error || 'Erreur envoi devis'), true);
+      return false;
+    }
+  } catch (error) {
+    console.error('Erreur envoi devis:', error);
+    showToast('✗ Erreur de connexion', true);
+    return false;
+  }
+}
+
+// Envoyer une notification de commande via le backend
+async function sendOrderNotification(customerEmail, customerName, orderId, status) {
+  try {
+    const response = await fetch(`${API_URL}/send-order-notification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerEmail,
+        customerName,
+        orderId,
+        status
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      showToast('✓ Notification envoyée');
+      return true;
+    } else {
+      showToast('✗ ' + (data.error || 'Erreur envoi notification'), true);
+      return false;
+    }
+  } catch (error) {
+    console.error('Erreur envoi notification:', error);
+    showToast('✗ Erreur de connexion', true);
+    return false;
+  }
 }
 
 // ============================================================
@@ -2928,12 +3051,21 @@ async function deleteOrderOnBackend(orderId) {
     showToast('Erreur lors de la suppression: ' + error.message, true);
   }
 }
-function sendOrderConfirmation(id) {
-  const order=state.orders.find(o=>o.id===id);
-  if(!order||!order.customer?.email){showToast('Pas d\'email pour cette commande',true);return;}
-  const subject=encodeURIComponent('Mise à jour commande BackZo '+id);
-  const body=encodeURIComponent(`Bonjour ${order.customer.firstName},\n\nVotre commande ${id} a été mise à jour.\nStatut : ${{pending:'En attente',processing:'En traitement',shipped:'Expédié',delivered:'Livré',cancelled:'Annulé'}[order.status]}\n\nPour toute question : team@backzo.eu\n\nL'équipe BackZo`);
-  window.location.href=`mailto:${order.customer.email}?subject=${subject}&body=${body}`;
+async function sendOrderConfirmation(id) {
+  const order = state.orders.find(o => o.id === id);
+  if (!order || !order.customer?.email) {
+    showToast('Pas d\'email pour cette commande', true);
+    return;
+  }
+  
+  showToast('Envoi de la notification...');
+  
+  await sendOrderNotification(
+    order.customer.email,
+    order.customer.firstName || 'Client',
+    id,
+    order.status
+  );
 }
 
 // Afficher les détails d'une commande
@@ -3254,13 +3386,19 @@ function renderQuotesTable() {
       <td>${q.client}</td>
       <td style="color:var(--green)">${q.total}</td>
       <td style="color:var(--gray);font-size:.8rem">${new Date(q.date).toLocaleDateString('fr-FR')}</td>
-      <td><button class="admin-action-btn" onclick="sendQuoteEmail('${q.id}')">📧 Renvoyer</button><button class="admin-action-btn del" onclick="deleteQuote('${q.id}')">🗑</button></td>
+      <td><button class="admin-action-btn" onclick="resendQuoteFromTable('${q.id}')">📧 Renvoyer</button><button class="admin-action-btn del" onclick="deleteQuote('${q.id}')">🗑</button></td>
     </tr>`).join('');
 }
-function sendQuoteEmail(id) {
-  const q=state.quotes.find(x=>x.id===id);
-  if(!q||!q.email){showToast('Email non disponible',true);return;}
-  window.location.href=`mailto:${q.email}?subject=${encodeURIComponent('Devis BackZo '+id)}&body=${encodeURIComponent('Bonjour,\nVeuillez trouver votre devis BackZo '+id+'\nMontant : '+q.total+'\n\nL\'équipe BackZo')}`;
+async function resendQuoteFromTable(id) {
+  const q = state.quotes.find(x => x.id === id);
+  if (!q || !q.email) {
+    showToast('Email non disponible', true);
+    return;
+  }
+  
+  showToast('Envoi du devis...');
+  
+  await sendQuoteEmail(q.email, q.client, id, q.total, '');
 }
 function deleteQuote(id) {
   state.quotes=state.quotes.filter(q=>q.id!==id);
@@ -5628,6 +5766,5 @@ document.addEventListener('keydown',e=>{
   }
 });
 </script>
-<script src="/frontend-api.js"></script>
 </body>
 </html>

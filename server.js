@@ -840,6 +840,161 @@ Date: ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}
   }
 });
 
+// ============================================================
+// ENDPOINT: Envoyer un devis par email
+// ============================================================
+app.post('/api/send-quote', async (req, res) => {
+  try {
+    const { clientEmail, clientName, quoteId, total, items } = req.body;
+    
+    if (!clientEmail || !quoteId || !total) {
+      return res.status(400).json({ error: 'Données manquantes' });
+    }
+    
+    if (!emailTransporter) {
+      console.log('Devis généré (email non configuré):', { clientEmail, quoteId });
+      return res.json({ 
+        success: true, 
+        message: 'Devis généré. Email non configuré.' 
+      });
+    }
+    
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || 'team@backzo.eu',
+      to: clientEmail,
+      subject: `Devis BackZo — ${quoteId}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+          <div style="background: #000; color: #b8ff57; padding: 20px; text-align: center;">
+            <h1 style="margin: 0; font-size: 32px; letter-spacing: 2px;">BACK<span style="color: #fff;">ZO</span></h1>
+            <p style="margin: 10px 0 0; font-size: 14px; color: #999;">Votre devis personnalisé</p>
+          </div>
+          
+          <div style="background: #fff; padding: 30px; margin-top: 20px; border-radius: 8px;">
+            <h2 style="color: #000; margin-top: 0;">Bonjour ${clientName || 'Cher client'},</h2>
+            
+            <p style="color: #333; line-height: 1.6;">Veuillez trouver ci-dessous votre devis BackZo.</p>
+            
+            <div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-left: 4px solid #b8ff57;">
+              <h3 style="margin: 0 0 10px; color: #000;">Devis N° ${quoteId}</h3>
+              <p style="margin: 0; font-size: 24px; color: #b8ff57; font-weight: bold;">${total}</p>
+              <p style="margin: 5px 0 0; font-size: 12px; color: #666;">TVA non applicable, article 293 B du CGI</p>
+            </div>
+            
+            ${items ? `
+            <h3 style="color: #000; margin-top: 30px;">Détails :</h3>
+            <div style="color: #333; line-height: 1.8;">
+              ${items}
+            </div>
+            ` : ''}
+            
+            <p style="color: #333; line-height: 1.6; margin-top: 30px;">Pour toute question, n'hésitez pas à nous contacter à <a href="mailto:team@backzo.eu" style="color: #b8ff57;">team@backzo.eu</a></p>
+            
+            <p style="color: #333; line-height: 1.6; margin-top: 20px;">Cordialement,<br/>L'équipe BackZo</p>
+          </div>
+          
+          <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+            <p style="margin: 0;">BackZo — Flocage amovible premium</p>
+            <p style="margin: 5px 0 0;">Date : ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}</p>
+          </div>
+        </div>
+      `
+    };
+    
+    await emailTransporter.sendMail(mailOptions);
+    
+    console.log('✓ Devis envoyé à:', clientEmail);
+    
+    res.json({ 
+      success: true, 
+      message: 'Devis envoyé avec succès' 
+    });
+    
+  } catch (error) {
+    console.error('Erreur envoi devis:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de l\'envoi du devis' 
+    });
+  }
+});
+
+// ============================================================
+// ENDPOINT: Envoyer une notification de commande
+// ============================================================
+app.post('/api/send-order-notification', async (req, res) => {
+  try {
+    const { customerEmail, customerName, orderId, status } = req.body;
+    
+    if (!customerEmail || !orderId || !status) {
+      return res.status(400).json({ error: 'Données manquantes' });
+    }
+    
+    if (!emailTransporter) {
+      console.log('Notification commande (email non configuré):', { customerEmail, orderId });
+      return res.json({ 
+        success: true, 
+        message: 'Notification générée. Email non configuré.' 
+      });
+    }
+    
+    const statusLabels = {
+      pending: 'En attente',
+      processing: 'En traitement',
+      shipped: 'Expédié',
+      delivered: 'Livré',
+      cancelled: 'Annulé'
+    };
+    
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || 'team@backzo.eu',
+      to: customerEmail,
+      subject: `Mise à jour commande BackZo ${orderId}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+          <div style="background: #000; color: #b8ff57; padding: 20px; text-align: center;">
+            <h1 style="margin: 0; font-size: 32px; letter-spacing: 2px;">BACK<span style="color: #fff;">ZO</span></h1>
+            <p style="margin: 10px 0 0; font-size: 14px; color: #999;">Mise à jour de votre commande</p>
+          </div>
+          
+          <div style="background: #fff; padding: 30px; margin-top: 20px; border-radius: 8px;">
+            <h2 style="color: #000; margin-top: 0;">Bonjour ${customerName || 'Cher client'},</h2>
+            
+            <p style="color: #333; line-height: 1.6;">Votre commande a été mise à jour.</p>
+            
+            <div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-left: 4px solid #b8ff57;">
+              <h3 style="margin: 0 0 10px; color: #000;">Commande N° ${orderId}</h3>
+              <p style="margin: 0; font-size: 18px; color: #b8ff57; font-weight: bold;">Statut : ${statusLabels[status] || status}</p>
+            </div>
+            
+            <p style="color: #333; line-height: 1.6; margin-top: 30px;">Pour toute question, n'hésitez pas à nous contacter à <a href="mailto:team@backzo.eu" style="color: #b8ff57;">team@backzo.eu</a></p>
+            
+            <p style="color: #333; line-height: 1.6; margin-top: 20px;">Cordialement,<br/>L'équipe BackZo</p>
+          </div>
+          
+          <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+            <p style="margin: 0;">BackZo — Flocage amovible premium</p>
+          </div>
+        </div>
+      `
+    };
+    
+    await emailTransporter.sendMail(mailOptions);
+    
+    console.log('✓ Notification commande envoyée à:', customerEmail);
+    
+    res.json({ 
+      success: true, 
+      message: 'Notification envoyée avec succès' 
+    });
+    
+  } catch (error) {
+    console.error('Erreur envoi notification:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de l\'envoi de la notification' 
+    });
+  }
+});
+
 // Webhook Stripe pour les événements
 app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
