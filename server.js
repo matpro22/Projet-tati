@@ -1143,6 +1143,56 @@ app.patch('/api/orders/:id/status', async (req, res) => {
   }
 });
 
+// Supprimer une commande (admin)
+app.delete('/api/orders/:id', async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    
+    console.log('🗑️ Suppression commande:', orderId);
+    
+    // Suppression dans MongoDB ou fichier JSON
+    if (USE_MONGODB && db) {
+      try {
+        const result = await db.collection('orders').deleteOne({ id: orderId });
+        
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ error: 'Commande non trouvée' });
+        }
+        
+        console.log('✓ Commande supprimée de MongoDB');
+        return res.json({
+          success: true,
+          message: 'Commande supprimée avec succès'
+        });
+      } catch (error) {
+        console.error('❌ Erreur suppression MongoDB:', error.message);
+        // Fallback vers fichier JSON
+      }
+    }
+    
+    // Mode fichier JSON (ou fallback)
+    const orders = await readData('orders', ORDERS_FILE);
+    const index = orders.findIndex(o => o.id === orderId);
+    
+    if (index === -1) {
+      return res.status(404).json({ error: 'Commande non trouvée' });
+    }
+    
+    orders.splice(index, 1);
+    await writeData('orders', ORDERS_FILE, orders);
+    
+    console.log('✓ Commande supprimée du fichier JSON');
+    res.json({
+      success: true,
+      message: 'Commande supprimée avec succès'
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur suppression commande:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ============================================================
 // ROUTES PARAMÈTRES
 // ============================================================

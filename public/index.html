@@ -2781,10 +2781,45 @@ function updateOrderStatus(id, status) {
 }
 function deleteOrder(id) {
   if(!confirm('Supprimer la commande '+id+' ?')) return;
-  state.orders=state.orders.filter(o=>o.id!==id);
-  localStorage.setItem('bz-orders',JSON.stringify(state.orders));
-  renderAdminDashboard(); renderOrdersTable();
-  showToast('Commande supprimée');
+  
+  if (USE_BACKEND) {
+    // Supprimer via le backend
+    deleteOrderOnBackend(id);
+  } else {
+    // Mode local uniquement
+    state.orders=state.orders.filter(o=>o.id!==id);
+    localStorage.setItem('bz-orders',JSON.stringify(state.orders));
+    renderAdminDashboard(); renderOrdersTable();
+    showToast('Commande supprimée');
+  }
+}
+
+async function deleteOrderOnBackend(orderId) {
+  try {
+    showToast('🗑️ Suppression en cours...');
+    
+    const response = await fetch(`${API_URL}/orders/${orderId}`, {
+      method: 'DELETE'
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erreur lors de la suppression');
+    }
+    
+    // Mettre à jour l'état local
+    state.orders = state.orders.filter(o => o.id !== orderId);
+    
+    // Rafraîchir l'affichage
+    renderAdminDashboard();
+    renderOrdersTable();
+    
+    showToast('✓ Commande supprimée avec succès');
+    
+  } catch (error) {
+    console.error('Erreur suppression commande:', error);
+    showToast('Erreur lors de la suppression: ' + error.message, true);
+  }
 }
 function sendOrderConfirmation(id) {
   const order=state.orders.find(o=>o.id===id);
