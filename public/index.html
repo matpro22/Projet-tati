@@ -1721,8 +1721,8 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
 // 5. Mettez USE_BACKEND à true ci-dessous
 
 const API_URL = window.location.hostname === 'localhost' 
-  ? 'http://projet-tati.vercel.app/api' 
-  : '/api';
+  ? 'http://localhost:3000/api' 
+  : 'https://projet-tati.vercel.app/api';
 const USE_BACKEND = true; // Mettre à true pour utiliser le backend
 
 // MODE LOCAL (USE_BACKEND = false):
@@ -2145,7 +2145,7 @@ let cardElement = null;
 async function initStripe() {
   try {
     // Récupérer la clé publique depuis l'API
-    const response = await fetch('/api/stripe-config');
+    const response = await fetch(`${API_URL}/stripe-config`);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -2751,7 +2751,7 @@ async function sendContactForm() {
   res.textContent = 'Envoi du message...';
   
   try {
-    const response = await fetch('/api/contact', {
+    const response = await fetch(`${API_URL}/contact`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, subject, message })
@@ -2808,7 +2808,7 @@ async function sendClubCTA() {
   msg.textContent = 'Envoi en cours...';
   
   try {
-    const response = await fetch('/api/contact', {
+    const response = await fetch(`${API_URL}/contact`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

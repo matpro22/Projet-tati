@@ -26,7 +26,19 @@ if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.startsWith('s
 }
 
 // Middleware
-app.use(cors());
+// Configuration CORS pour autoriser le frontend
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:8080',
+    'https://backzo.eu',
+    'https://www.backzo.eu',
+    'https://projet-tati.vercel.app'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static('public'));
 
