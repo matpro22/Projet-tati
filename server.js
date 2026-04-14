@@ -158,19 +158,42 @@ async function connectMongoDB() {
   connectionPromise = (async () => {
     try {
       console.log('🔄 Connexion à MongoDB...');
-      mongoClient = new MongoClient(process.env.MONGODB_URI, {
-        serverSelectionTimeoutMS: 5000,
-        connectTimeoutMS: 5000
+      
+      // Préparer l'URI avec les bons paramètres
+      let uri = process.env.MONGODB_URI;
+      
+      // S'assurer que l'URI contient les bons paramètres
+      if (!uri.includes('retryWrites')) {
+        uri += (uri.includes('?') ? '&' : '?') + 'retryWrites=true';
+      }
+      if (!uri.includes('w=majority')) {
+        uri += '&w=majority';
+      }
+      
+      mongoClient = new MongoClient(uri, {
+        serverSelectionTimeoutMS: 10000, // Augmenté à 10 secondes
+        connectTimeoutMS: 10000,
+        socketTimeoutMS: 45000,
+        maxPoolSize: 10,
+        minPoolSize: 1
       });
+      
       await mongoClient.connect();
+      
+      // Vérifier la connexion
+      await mongoClient.db('admin').command({ ping: 1 });
+      
       db = mongoClient.db('backzo');
       console.log('✓ MongoDB connecté');
       isConnecting = false;
       return true;
     } catch (error) {
       console.error('✗ Erreur connexion MongoDB:', error.message);
+      console.error('   Stack:', error.stack);
       console.log('ℹ️  Fallback vers fichiers JSON');
       isConnecting = false;
+      mongoClient = null;
+      db = null;
       return false;
     }
   })();
