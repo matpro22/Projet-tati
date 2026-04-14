@@ -215,7 +215,7 @@ async function initDB() {
         const defaultProducts = [
           {
             id: 'patch-s',
-            name: 'Flocage Amovible — Taille S',
+            name: 'BackZo — Taille S',
             price: 13,
             category: 'particuliers',
             desc: 'Patch 25×6 cm. Idéal pour maillots individuels.',
@@ -225,7 +225,7 @@ async function initDB() {
           },
           {
             id: 'patch-l',
-            name: 'Flocage Amovible — Taille L',
+            name: 'BackZo — Taille L',
             price: 13,
             category: 'particuliers',
             desc: 'Patch 27×7 cm. Format large pour plus de visibilité.',
@@ -302,7 +302,7 @@ async function initDB() {
         const defaultProducts = [
           {
             id: 'patch-s',
-            name: 'Flocage Amovible — Taille S',
+            name: 'BackZo — Taille S',
             price: 13,
             category: 'particuliers',
             desc: 'Patch 25×6 cm. Idéal pour maillots individuels.',
@@ -311,7 +311,7 @@ async function initDB() {
           },
           {
             id: 'patch-l',
-            name: 'Flocage Amovible — Taille L',
+            name: 'BackZo — Taille L',
             price: 13,
             category: 'particuliers',
             desc: 'Patch 27×7 cm. Format large pour plus de visibilité.',
