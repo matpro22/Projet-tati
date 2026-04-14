@@ -1483,7 +1483,10 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
       <div id="tab-products" style="display:none">
         <div class="admin-head">
           <div class="admin-tit">PRODUITS</div>
-          <button class="btn-pri" onclick="showAddProductModal()" style="font-size:.85rem;padding:.7rem 1.5rem">+ Ajouter</button>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn-sec" onclick="initDatabase()" style="font-size:.85rem;padding:.7rem 1.5rem" title="Initialiser la base de données avec les produits par défaut">🔄 Initialiser DB</button>
+            <button class="btn-pri" onclick="showAddProductModal()" style="font-size:.85rem;padding:.7rem 1.5rem">+ Ajouter</button>
+          </div>
         </div>
         <div style="overflow-x:auto"><table class="admin-table"><thead><tr><th>Nom</th><th>Catégorie</th><th>Prix</th><th>Stock</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="productsTableBody"></tbody></table></div>
       </div>
@@ -2892,6 +2895,41 @@ async function deleteProduct(productId) {
     }
   } else {
     showToast('Mode local - Connectez le backend pour supprimer des produits');
+  }
+}
+
+// Initialiser la base de données avec les produits par défaut
+async function initDatabase() {
+  if (!confirm('Initialiser la base de données avec les produits par défaut ?\n\nCela créera les produits s\'ils n\'existent pas déjà.')) {
+    return;
+  }
+  
+  if(USE_BACKEND) {
+    try {
+      showToast('🔄 Initialisation en cours...');
+      
+      const response = await fetch(`${API_URL}/init-db`, {
+        method: 'POST'
+      });
+      
+      if (!response.ok) throw new Error('Erreur initialisation DB');
+      
+      const result = await response.json();
+      
+      showToast('✓ Base de données initialisée !');
+      await loadProductsFromBackend();
+      renderProductsTable();
+      
+      // Mettre à jour aussi l'affichage de la boutique
+      const grid = document.getElementById('productsGrid');
+      if (grid) renderProducts('all');
+      
+    } catch (error) {
+      console.error('Erreur initialisation DB:', error);
+      showToast('Erreur lors de l\'initialisation', true);
+    }
+  } else {
+    showToast('Mode local - Connectez le backend pour initialiser la DB');
   }
 }
 

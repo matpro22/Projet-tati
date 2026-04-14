@@ -932,15 +932,28 @@ app.put('/api/products/:id', async (req, res) => {
     // Mise à jour dans MongoDB
     if (USE_MONGODB && db) {
       try {
+        // Vérifier si le produit existe
+        let product = await db.collection('products').findOne({ id: productId });
+        
+        // Si le produit n'existe pas, initialiser la collection avec les produits par défaut
+        if (!product) {
+          console.log('⚠️  Produit non trouvé, initialisation de la collection...');
+          await initDB();
+          
+          // Réessayer de trouver le produit
+          product = await db.collection('products').findOne({ id: productId });
+          
+          if (!product) {
+            return res.status(404).json({ error: 'Produit non trouvé même après initialisation' });
+          }
+        }
+        
+        // Mettre à jour le produit
         const result = await db.collection('products').findOneAndUpdate(
           { id: productId },
           { $set: updateData },
           { returnDocument: 'after' }
         );
-        
-        if (!result.value) {
-          return res.status(404).json({ error: 'Produit non trouvé' });
-        }
         
         console.log('✓ Produit mis à jour dans MongoDB');
         return res.json({
@@ -951,7 +964,7 @@ app.put('/api/products/:id', async (req, res) => {
         console.error('❌ Erreur mise à jour MongoDB:', error.message);
         
         if (process.env.VERCEL) {
-          return res.status(500).json({ error: 'Erreur mise à jour MongoDB' });
+          return res.status(500).json({ error: 'Erreur mise à jour MongoDB: ' + error.message });
         }
       }
     }
@@ -1175,8 +1188,26 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     stripe: !!process.env.STRIPE_SECRET_KEY,
-    database: USE_MONGODB ? 'MongoDB' : 'JSON Files'
+    database: USE_MONGODB ? 'MongoDB' : 'JSON Files',
+    mongoConnected: !!db
   });
+});
+
+// Initialiser la base de données manuellement
+app.post('/api/init-db', async (req, res) => {
+  try {
+    console.log('🔄 Initialisation manuelle de la base de données...');
+    await initDB();
+    
+    res.json({
+      success: true,
+      message: 'Base de données initialisée',
+      mongoConnected: !!db
+    });
+  } catch (error) {
+    console.error('❌ Erreur initialisation DB:', error.message);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Stats pour le dashboard
