@@ -1692,6 +1692,11 @@ async function initPage() {
   // Charger les paramètres depuis le backend en premier
   await loadSettingsFromBackend();
   
+  // Charger les produits depuis le backend (important pour avoir les prix à jour)
+  if(USE_BACKEND) {
+    await loadProductsFromBackend();
+  }
+  
   // Appliquer les paramètres (même si chargés depuis localStorage)
   applySettings();
   
@@ -1701,7 +1706,7 @@ async function initPage() {
   updateDevisPreview();
   updateSummary();
   
-  // Synchroniser les prix du panier au chargement
+  // Synchroniser les prix du panier au chargement (après avoir chargé les produits)
   syncCartPrices();
   
   const adminDateEl = document.getElementById('adminDate');
@@ -1748,9 +1753,11 @@ async function checkBackendHealth() {
       // Charger les paramètres depuis le backend
       await loadSettingsFromBackend();
       
-      // Charger les produits depuis le backend si disponible
+      // Charger les produits depuis le backend (pour tous les utilisateurs)
+      await loadProductsFromBackend();
+      
+      // Charger les commandes seulement pour l'admin
       if(state.adminAuth) {
-        await loadProductsFromBackend();
         await loadOrdersFromBackend();
       }
     } else {
@@ -1852,6 +1859,7 @@ function updateCartBadge() {
 function syncCartPrices() {
   const products = window.PRODUCTS || PRODUCTS;
   let updated = false;
+  let priceChanges = [];
   
   state.cart = state.cart.map(item => {
     // Trouver le produit correspondant
@@ -1860,8 +1868,13 @@ function syncCartPrices() {
     // Si le produit existe et que le prix a changé
     if (product && product.price !== item.price) {
       console.log(`Prix mis à jour pour ${item.name}: ${item.price}€ → ${product.price}€`);
+      priceChanges.push({
+        name: item.name,
+        oldPrice: item.price,
+        newPrice: product.price
+      });
       updated = true;
-      return { ...item, price: product.price };
+      return { ...item, price: product.price, name: product.name };
     }
     
     return item;
@@ -1869,7 +1882,15 @@ function syncCartPrices() {
   
   if (updated) {
     saveCart();
-    renderCart();
+    
+    // Afficher un message si des prix ont changé
+    if (priceChanges.length > 0) {
+      const message = priceChanges.length === 1 
+        ? `Le prix de ${priceChanges[0].name} a été mis à jour`
+        : `${priceChanges.length} prix ont été mis à jour`;
+      showToast(message);
+    }
+    
     console.log('✓ Prix du panier synchronisés');
   }
 }
@@ -1900,7 +1921,7 @@ function renderCart() {
       </div>
     </div>`).join('');
   const total=getCartTotal();
-  const shipping = total>=50?0:5.90;
+  const shipping = total>=state.settings.freeShippingFrom?0:state.settings.shipping;
   foot.innerHTML=`
     <div class="cart-total-row"><span>Sous-total</span><span>${total.toFixed(2).replace('.',',')} €</span></div>
     <div class="cart-total-row"><span>Livraison</span><span>${shipping===0?'<span style="color:var(--green)">Gratuite</span>':shipping.toFixed(2).replace('.',',')+'&nbsp;€'}</span></div>
@@ -2975,6 +2996,11 @@ async function loadProductsFromBackend() {
     
     const products = await response.json();
     window.PRODUCTS = products;
+    
+    console.log('✓ Produits chargés depuis MongoDB:', products.length, 'produits');
+    products.forEach(p => {
+      console.log(`  - ${p.name}: ${p.price}€`);
+    });
     
     // Synchroniser les prix du panier avec les nouveaux prix
     syncCartPrices();
