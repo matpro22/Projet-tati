@@ -79,49 +79,282 @@ async function sendOrderConfirmationEmail(order) {
   }
   
   const itemsList = order.items.map(item => 
-    `<li>${item.name} (${item.size}) - ${item.quantity}x - ${item.price}€</li>`
+    `<li style="padding: 8px 0; border-bottom: 1px solid #eee;">${item.name} ${item.size ? `(${item.size})` : ''} - ${item.quantity}x - ${item.price}€</li>`
   ).join('');
+  
+  // Email pour le client
+  const customerMailOptions = {
+    from: process.env.EMAIL_FROM || 'team@backzo.eu',
+    to: order.customer.email,
+    subject: `✅ Confirmation de commande ${order.id} - BackZo`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+        <div style="background: #000; color: #b8ff57; padding: 20px; text-align: center;">
+          <h1 style="margin: 0; font-size: 32px; letter-spacing: 2px;">BACK<span style="color: #fff;">ZO</span></h1>
+          <p style="margin: 10px 0 0; font-size: 14px; color: #999;">Confirmation de commande</p>
+        </div>
+        
+        <div style="background: #fff; padding: 30px; margin-top: 20px; border-radius: 8px;">
+          <h2 style="color: #000; margin-top: 0;">Merci pour votre commande !</h2>
+          <p style="color: #333; line-height: 1.6;">Bonjour ${order.customer.firstName} ${order.customer.lastName},</p>
+          <p style="color: #333; line-height: 1.6;">Votre commande a été confirmée et payée avec succès. Nous la préparons avec soin.</p>
+          
+          <div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-left: 4px solid #b8ff57; border-radius: 4px;">
+            <h3 style="margin: 0 0 15px; color: #000;">Détails de la commande</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #666;">Numéro de commande :</td>
+                <td style="padding: 8px 0; color: #000; font-weight: bold;">${order.id}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;">Date :</td>
+                <td style="padding: 8px 0; color: #000;">${new Date(order.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;">Statut :</td>
+                <td style="padding: 8px 0; color: #b8ff57; font-weight: bold;">✓ En cours de traitement</td>
+              </tr>
+            </table>
+          </div>
+          
+          <h3 style="color: #000; margin-top: 30px; margin-bottom: 15px;">Articles commandés</h3>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            ${itemsList}
+          </ul>
+          
+          <div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <table style="width: 100%;">
+              <tr>
+                <td style="padding: 5px 0; color: #666;">Sous-total :</td>
+                <td style="padding: 5px 0; text-align: right; color: #000;">${(order.total - order.shipping).toFixed(2).replace('.', ',')} €</td>
+              </tr>
+              <tr>
+                <td style="padding: 5px 0; color: #666;">Livraison :</td>
+                <td style="padding: 5px 0; text-align: right; color: #000;">${order.shipping.toFixed(2).replace('.', ',')} €</td>
+              </tr>
+              <tr style="border-top: 2px solid #ddd;">
+                <td style="padding: 10px 0 5px; color: #000; font-size: 18px; font-weight: bold;">Total TTC :</td>
+                <td style="padding: 10px 0 5px; text-align: right; color: #b8ff57; font-size: 20px; font-weight: bold;">${order.total.toFixed(2).replace('.', ',')} €</td>
+              </tr>
+            </table>
+          </div>
+          
+          <h3 style="color: #000; margin-top: 30px; margin-bottom: 10px;">Adresse de livraison</h3>
+          <div style="background: #f9f9f9; padding: 15px; border-radius: 4px;">
+            <p style="margin: 0; color: #333; line-height: 1.6;">
+              ${order.customer.firstName} ${order.customer.lastName}<br>
+              ${order.customer.address}<br>
+              ${order.customer.zip} ${order.customer.city}
+            </p>
+          </div>
+          
+          <div style="background: #fff9e6; border-left: 4px solid #ffcc00; padding: 15px; margin: 30px 0; border-radius: 4px;">
+            <p style="margin: 0; color: #666; font-size: 14px;">
+              📦 <strong>Suivi de commande :</strong> Vous recevrez un email de confirmation dès que votre commande sera expédiée.
+            </p>
+          </div>
+          
+          <p style="color: #333; line-height: 1.6; margin-top: 30px;">
+            Pour toute question concernant votre commande, n'hésitez pas à nous contacter à 
+            <a href="mailto:${process.env.EMAIL_FROM || 'team@backzo.eu'}" style="color: #b8ff57; text-decoration: none;">${process.env.EMAIL_FROM || 'team@backzo.eu'}</a>
+          </p>
+          
+          <p style="color: #333; line-height: 1.6; margin-top: 20px;">
+            Merci de votre confiance,<br/>
+            <strong>L'équipe BackZo</strong>
+          </p>
+        </div>
+        
+        <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+          <p style="margin: 0;">BackZo — Flocage amovible premium pour clubs et particuliers</p>
+          <p style="margin: 5px 0 0;">www.backzo.eu</p>
+        </div>
+      </div>
+    `
+  };
+  
+  // Email pour l'admin
+  const adminMailOptions = {
+    from: process.env.EMAIL_FROM || 'team@backzo.eu',
+    to: process.env.EMAIL_TO || 'team@backzo.eu',
+    subject: `🔔 Nouvelle commande ${order.id} - BackZo`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+        <div style="background: #000; color: #b8ff57; padding: 20px; text-align: center;">
+          <h1 style="margin: 0; font-size: 32px; letter-spacing: 2px;">BACK<span style="color: #fff;">ZO</span></h1>
+          <p style="margin: 10px 0 0; font-size: 14px; color: #999;">Nouvelle commande reçue</p>
+        </div>
+        
+        <div style="background: #fff; padding: 30px; margin-top: 20px; border-radius: 8px;">
+          <h2 style="color: #000; margin-top: 0;">🎉 Nouvelle commande !</h2>
+          
+          <div style="background: #e6ffe6; border-left: 4px solid #00cc00; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0; color: #006600; font-weight: bold;">
+              Commande ${order.id} - ${order.total.toFixed(2)} €
+            </p>
+          </div>
+          
+          <h3 style="color: #000; margin-top: 30px; margin-bottom: 15px;">Informations client</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; color: #666; width: 40%;">Nom :</td>
+              <td style="padding: 8px 0; color: #000; font-weight: bold;">${order.customer.firstName} ${order.customer.lastName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #666;">Email :</td>
+              <td style="padding: 8px 0;"><a href="mailto:${order.customer.email}" style="color: #b8ff57; text-decoration: none;">${order.customer.email}</a></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #666;">Adresse :</td>
+              <td style="padding: 8px 0; color: #000;">${order.customer.address}, ${order.customer.zip} ${order.customer.city}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #666;">Date :</td>
+              <td style="padding: 8px 0; color: #000;">${new Date(order.date).toLocaleString('fr-FR')}</td>
+            </tr>
+          </table>
+          
+          <h3 style="color: #000; margin-top: 30px; margin-bottom: 15px;">Articles commandés</h3>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            ${itemsList}
+          </ul>
+          
+          <div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <table style="width: 100%;">
+              <tr>
+                <td style="padding: 5px 0; color: #666;">Sous-total :</td>
+                <td style="padding: 5px 0; text-align: right; color: #000;">${(order.total - order.shipping).toFixed(2).replace('.', ',')} €</td>
+              </tr>
+              <tr>
+                <td style="padding: 5px 0; color: #666;">Livraison :</td>
+                <td style="padding: 5px 0; text-align: right; color: #000;">${order.shipping.toFixed(2).replace('.', ',')} €</td>
+              </tr>
+              <tr style="border-top: 2px solid #ddd;">
+                <td style="padding: 10px 0 5px; color: #000; font-size: 18px; font-weight: bold;">Total TTC :</td>
+                <td style="padding: 10px 0 5px; text-align: right; color: #00cc00; font-size: 20px; font-weight: bold;">${order.total.toFixed(2).replace('.', ',')} €</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background: #fff9e6; border-left: 4px solid #ffcc00; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0; color: #666; font-size: 14px;">
+              ⚡ <strong>Action requise :</strong> Préparez cette commande et mettez à jour son statut dans l'interface admin.
+            </p>
+          </div>
+        </div>
+        
+        <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+          <p style="margin: 0;">BackZo Admin - Gestion des commandes</p>
+        </div>
+      </div>
+    `
+  };
+  
+  // Envoyer les deux emails
+  await emailTransporter.sendMail(customerMailOptions);
+  await emailTransporter.sendMail(adminMailOptions);
+}
+
+// Fonction pour envoyer un email de mise à jour de statut
+async function sendOrderStatusUpdateEmail(order, newStatus, oldStatus) {
+  if (!emailTransporter) {
+    throw new Error('Email non configuré');
+  }
+  
+  const statusInfo = {
+    pending: {
+      label: 'En attente',
+      color: '#ffcc00',
+      icon: '⏳',
+      message: 'Votre commande est en attente de traitement.'
+    },
+    processing: {
+      label: 'En cours de traitement',
+      color: '#3399ff',
+      icon: '⚙️',
+      message: 'Votre commande est en cours de préparation.'
+    },
+    shipped: {
+      label: 'Expédiée',
+      color: '#ff9900',
+      icon: '📦',
+      message: 'Votre commande a été expédiée et est en route vers vous !'
+    },
+    delivered: {
+      label: 'Livrée',
+      color: '#00cc00',
+      icon: '✅',
+      message: 'Votre commande a été livrée. Nous espérons que vous en êtes satisfait !'
+    },
+    cancelled: {
+      label: 'Annulée',
+      color: '#ff0000',
+      icon: '❌',
+      message: 'Votre commande a été annulée.'
+    }
+  };
+  
+  const status = statusInfo[newStatus] || statusInfo.processing;
   
   const mailOptions = {
     from: process.env.EMAIL_FROM || 'team@backzo.eu',
     to: order.customer.email,
-    subject: `Confirmation de commande ${order.id} - BackZo`,
+    subject: `${status.icon} Mise à jour de votre commande ${order.id} - BackZo`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2d5016;">Merci pour votre commande !</h2>
-        <p>Bonjour ${order.customer.firstName} ${order.customer.lastName},</p>
-        <p>Votre commande a été confirmée et payée avec succès.</p>
-        
-        <div style="background: #f5f5f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Détails de la commande</h3>
-          <p><strong>Numéro de commande :</strong> ${order.id}</p>
-          <p><strong>Date :</strong> ${new Date(order.date).toLocaleDateString('fr-FR')}</p>
-          <p><strong>Statut :</strong> En cours de traitement</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+        <div style="background: #000; color: #b8ff57; padding: 20px; text-align: center;">
+          <h1 style="margin: 0; font-size: 32px; letter-spacing: 2px;">BACK<span style="color: #fff;">ZO</span></h1>
+          <p style="margin: 10px 0 0; font-size: 14px; color: #999;">Mise à jour de commande</p>
         </div>
         
-        <h3>Articles commandés</h3>
-        <ul style="list-style: none; padding: 0;">
-          ${itemsList}
-        </ul>
-        
-        <div style="background: #f5f5f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 5px 0;"><strong>Sous-total :</strong> ${(order.total - order.shipping).toFixed(2)}€</p>
-          <p style="margin: 5px 0;"><strong>Livraison :</strong> ${order.shipping.toFixed(2)}€</p>
-          <p style="margin: 5px 0; font-size: 1.2em;"><strong>Total :</strong> ${order.total.toFixed(2)}€</p>
+        <div style="background: #fff; padding: 30px; margin-top: 20px; border-radius: 8px;">
+          <h2 style="color: #000; margin-top: 0;">Bonjour ${order.customer.firstName} ${order.customer.lastName},</h2>
+          <p style="color: #333; line-height: 1.6;">Le statut de votre commande a été mis à jour.</p>
+          
+          <div style="background: ${status.color}15; border-left: 4px solid ${status.color}; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0 0 10px; color: #666; font-size: 14px;">Commande ${order.id}</p>
+            <p style="margin: 0; color: ${status.color}; font-size: 24px; font-weight: bold;">
+              ${status.icon} ${status.label}
+            </p>
+            <p style="margin: 15px 0 0; color: #333; line-height: 1.6;">
+              ${status.message}
+            </p>
+          </div>
+          
+          ${newStatus === 'shipped' ? `
+          <div style="background: #e6f7ff; border-left: 4px solid #3399ff; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0; color: #0066cc; font-size: 14px;">
+              📍 <strong>Suivi de livraison :</strong> Votre colis devrait arriver sous 2-3 jours ouvrés.
+            </p>
+          </div>
+          ` : ''}
+          
+          ${newStatus === 'delivered' ? `
+          <div style="background: #e6ffe6; border-left: 4px solid #00cc00; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0 0 10px; color: #006600; font-size: 14px;">
+              ⭐ <strong>Votre avis compte !</strong>
+            </p>
+            <p style="margin: 0; color: #333; font-size: 13px;">
+              Nous espérons que vous êtes satisfait de votre commande. N'hésitez pas à nous faire part de vos retours !
+            </p>
+          </div>
+          ` : ''}
+          
+          <p style="color: #333; line-height: 1.6; margin-top: 30px;">
+            Pour toute question, contactez-nous à 
+            <a href="mailto:${process.env.EMAIL_FROM || 'team@backzo.eu'}" style="color: #b8ff57; text-decoration: none;">${process.env.EMAIL_FROM || 'team@backzo.eu'}</a>
+          </p>
+          
+          <p style="color: #333; line-height: 1.6; margin-top: 20px;">
+            Cordialement,<br/>
+            <strong>L'équipe BackZo</strong>
+          </p>
         </div>
         
-        <h3>Adresse de livraison</h3>
-        <p>
-          ${order.customer.firstName} ${order.customer.lastName}<br>
-          ${order.customer.address}<br>
-          ${order.customer.zip} ${order.customer.city}
-        </p>
-        
-        <p style="margin-top: 30px;">Vous recevrez un email de suivi dès que votre commande sera expédiée.</p>
-        
-        <p style="color: #888; font-size: 0.9em; margin-top: 40px;">
-          Si vous avez des questions, contactez-nous à ${process.env.EMAIL_FROM || 'team@backzo.eu'}
-        </p>
+        <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+          <p style="margin: 0;">BackZo — Flocage amovible premium</p>
+          <p style="margin: 5px 0 0;">www.backzo.eu</p>
+        </div>
       </div>
     `
   };
@@ -846,6 +1079,16 @@ Date: ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}
     
   } catch (error) {
     console.error('Erreur envoi email contact:', error);
+    
+    // Si c'est une erreur d'authentification, logger plus de détails
+    if (error.code === 'EAUTH') {
+      console.error('❌ Erreur d\'authentification email OVH');
+      console.error('   Vérifiez EMAIL_USER et EMAIL_PASS dans les variables d\'environnement Vercel');
+      console.error('   EMAIL_USER actuel:', process.env.EMAIL_USER);
+      console.error('   EMAIL_HOST actuel:', process.env.EMAIL_HOST);
+      console.error('   EMAIL_PORT actuel:', process.env.EMAIL_PORT);
+    }
+    
     res.status(500).json({ 
       error: 'Erreur lors de l\'envoi du message. Veuillez réessayer.' 
     });
@@ -1285,9 +1528,18 @@ app.put('/api/orders/:id/status', async (req, res) => {
     
     console.log('📝 Mise à jour statut commande:', orderId, '→', status);
     
+    let order = null;
+    let oldStatus = null;
+    
     // Mise à jour dans MongoDB ou fichier JSON
     if (USE_MONGODB && db) {
       try {
+        // Récupérer l'ancien statut
+        const oldOrder = await db.collection('orders').findOne({ id: orderId });
+        if (oldOrder) {
+          oldStatus = oldOrder.status;
+        }
+        
         const result = await db.collection('orders').findOneAndUpdate(
           { id: orderId },
           { 
@@ -1303,11 +1555,8 @@ app.put('/api/orders/:id/status', async (req, res) => {
           return res.status(404).json({ error: 'Commande non trouvée' });
         }
         
+        order = result.value;
         console.log('✓ Statut mis à jour dans MongoDB');
-        return res.json({
-          success: true,
-          order: result.value
-        });
       } catch (error) {
         console.error('❌ Erreur mise à jour MongoDB:', error.message);
         // Fallback vers fichier JSON
@@ -1315,22 +1564,38 @@ app.put('/api/orders/:id/status', async (req, res) => {
     }
     
     // Mode fichier JSON (ou fallback)
-    const orders = await readData('orders', ORDERS_FILE);
-    const index = orders.findIndex(o => o.id === orderId);
-    
-    if (index === -1) {
-      return res.status(404).json({ error: 'Commande non trouvée' });
+    if (!order) {
+      const orders = await readData('orders', ORDERS_FILE);
+      const index = orders.findIndex(o => o.id === orderId);
+      
+      if (index === -1) {
+        return res.status(404).json({ error: 'Commande non trouvée' });
+      }
+      
+      oldStatus = orders[index].status;
+      orders[index].status = status;
+      orders[index].updatedAt = new Date().toISOString();
+      
+      await writeData('orders', ORDERS_FILE, orders);
+      order = orders[index];
+      
+      console.log('✓ Statut mis à jour dans fichier JSON');
     }
     
-    orders[index].status = status;
-    orders[index].updatedAt = new Date().toISOString();
+    // Envoyer un email de notification au client si le statut a changé
+    if (emailTransporter && oldStatus !== status && order.customer && order.customer.email) {
+      try {
+        await sendOrderStatusUpdateEmail(order, status, oldStatus);
+        console.log('✓ Email de mise à jour envoyé au client:', order.customer.email);
+      } catch (emailError) {
+        console.warn('⚠️  Erreur envoi email de mise à jour:', emailError.message);
+        // Ne pas bloquer la réponse si l'email échoue
+      }
+    }
     
-    await writeData('orders', ORDERS_FILE, orders);
-    
-    console.log('✓ Statut mis à jour dans fichier JSON');
     res.json({
       success: true,
-      order: orders[index]
+      order: order
     });
     
   } catch (error) {
