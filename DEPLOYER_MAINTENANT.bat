@@ -13,10 +13,11 @@ echo.
 echo Voulez-vous deployer sur Vercel ?
 echo.
 echo Les modifications suivantes seront deployees :
-echo - Remplacement de chrome-aws-lambda par @sparticuz/chromium
-echo - Mise a jour de puppeteer-core
-echo - Amelioration de la detection d'environnement
-echo - Ajout de logs detailles
+echo - Downgrade @sparticuz/chromium vers 119.x (stable)
+echo - Downgrade puppeteer-core vers 21.x (compatible)
+echo - Arguments de lancement optimises pour Vercel
+echo - Configuration Chromium pour serverless
+echo - Correction erreur libnss3.so
 echo.
 set /p confirm="Continuer ? (O/N) : "
 
@@ -37,7 +38,7 @@ echo.
 echo ========================================
 echo   Commit...
 echo ========================================
-git commit -m "Fix: Generation PDF avec @sparticuz/chromium pour Vercel"
+git commit -m "Fix: Downgrade @sparticuz/chromium 119.x pour compatibilite Vercel"
 
 echo.
 echo ========================================
@@ -60,6 +61,12 @@ echo 4. Verifiez les logs du dernier deploiement
 echo.
 echo Logs attendus :
 echo   - @sparticuz/chromium charge pour production
-echo   - PDF genere avec succes
+echo   - PDF genere avec succes (50000 octets)
+echo   - Devis envoye a: client@example.com
+echo.
+echo Testez ensuite :
+echo   1. Creez un devis sur votre site
+echo   2. Envoyez par email
+echo   3. Verifiez le PDF recu
 echo.
 pause

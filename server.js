@@ -31,6 +31,11 @@ try {
     // En production (Vercel), utiliser @sparticuz/chromium
     chromium = require('@sparticuz/chromium');
     puppeteer = require('puppeteer-core');
+    
+    // Configuration pour Vercel - désactiver les fonctionnalités qui nécessitent des libs système
+    chromium.setHeadlessMode = true;
+    chromium.setGraphicsMode = false;
+    
     console.log('✓ @sparticuz/chromium chargé pour production');
   } else {
     // En local, utiliser puppeteer standard
@@ -1338,13 +1343,28 @@ app.post('/api/send-quote', async (req, res) => {
         
         let browser;
         if (isProduction && chromium && puppeteer) {
-          // Production: utiliser @sparticuz/chromium
+          // Production: utiliser @sparticuz/chromium avec configuration Vercel
           console.log('Lancement de @sparticuz/chromium...');
+          
+          const executablePath = await chromium.executablePath();
+          console.log('Executable path:', executablePath);
+          
           browser = await puppeteer.launch({
-            args: chromium.args,
+            args: [
+              ...chromium.args,
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-accelerated-2d-canvas',
+              '--no-first-run',
+              '--no-zygote',
+              '--single-process',
+              '--disable-gpu'
+            ],
             defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(),
-            headless: chromium.headless,
+            executablePath: executablePath,
+            headless: 'new',
+            ignoreHTTPSErrors: true,
           });
         } else if (puppeteerLocal) {
           // Local: utiliser puppeteer standard
