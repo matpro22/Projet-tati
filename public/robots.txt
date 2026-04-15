@@ -1,0 +1,61 @@
+# robots.txt pour BackZo
+# https://backzo.eu
+
+# Règles pour tous les robots
+User-agent: *
+
+# Pages autorisées (crawl)
+Allow: /
+Allow: /index.html
+Allow: /*.css
+Allow: /*.js
+Allow: /Media/
+
+# Pages interdites (no crawl)
+Disallow: /api/
+Disallow: /admin
+Disallow: /#admin
+Disallow: /data/
+Disallow: /*.json
+
+# Fichiers interdits
+Disallow: /.env
+Disallow: /.git
+Disallow: /node_modules/
+
+# Sitemap
+Sitemap: https://backzo.eu/sitemap.xml
+
+# Règles spécifiques pour Google
+User-agent: Googlebot
+Allow: /
+Allow: /Media/
+Disallow: /api/
+Disallow: /admin
+Disallow: /data/
+
+# Règles pour Googlebot Images
+User-agent: Googlebot-Image
+Allow: /Media/
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.png
+Allow: /*.gif
+Allow: /*.webp
+Disallow: /api/
+
+# Règles pour Bing
+User-agent: Bingbot
+Allow: /
+Allow: /Media/
+Disallow: /api/
+Disallow: /admin
+Disallow: /data/
+
+# Crawl-delay (délai entre les requêtes en secondes)
+Crawl-delay: 1
+
+# Informations supplémentaires
+# Site: https://backzo.eu
+# Contact: team@backzo.eu
+# Dernière mise à jour: 2026-04-15

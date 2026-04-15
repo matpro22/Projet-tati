@@ -1,0 +1,62 @@
+/* TEAM */
+  Développeur: BackZo Team
+  Contact: team@backzo.eu
+  Site: https://backzo.eu
+  Localisation: France
+
+/* THANKS */
+  Merci à tous nos clients et partenaires
+  Merci aux clubs sportifs qui nous font confiance
+
+/* SITE */
+  Dernière mise à jour: 2026-04-15
+  Langues: Français, English, Nederlands
+  Doctype: HTML5
+  IDE: Visual Studio Code
+  
+/* TECHNOLOGIES */
+  Backend: Node.js, Express
+  Base de données: MongoDB
+  Paiement: Stripe
+  Email: Nodemailer
+  Hébergement: Vercel
+  Authentification: JWT, bcrypt
+  
+/* FEATURES */
+  - Flocage amovible premium
+  - Personnalisation en ligne
+  - Paiement sécurisé
+  - Devis instantané
+  - Multi-langues (FR, EN, NL)
+  - Panel admin sécurisé
+  - Gestion des commandes
+  - Emails automatiques
+  
+/* STANDARDS */
+  HTML5, CSS3, JavaScript ES6+
+  Responsive Design
+  SEO Optimized
+  WCAG Accessibility Guidelines
+  RGPD Compliant
+  
+/* COMPONENTS */
+  Fonts: Bebas Neue, Barlow, Barlow Condensed
+  Icons: Unicode Emoji
+  Analytics: Google Analytics
+  Cookie Consent: Cookiebot
+  
+/* SOCIAL */
+  Email: team@backzo.eu
+  
+                            _.-._
+                           | | | |_
+                           | | | | |
+                           | | | | |
+                          _|_|_|_|_|_
+                         ((((((|))))))
+                          `----------'
+                          
+                    BackZo - Your Name Your Story
+                    Flocage amovible premium
+                    
+                    Made with ❤️ in France
