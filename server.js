@@ -242,7 +242,7 @@ async function sendOrderConfirmationEmail(order) {
               </tr>
               <tr>
                 <td style="padding: 8px 0; color: #666;">Statut :</td>
-                <td style="padding: 8px 0; color: #b8ff57; font-weight: bold;">✓ En cours de traitement</td>
+                <td style="padding: 8px 0; color: #223a00; font-weight: bold;">✓ En cours de traitement</td>
               </tr>
             </table>
           </div>
@@ -286,7 +286,7 @@ async function sendOrderConfirmationEmail(order) {
           
           <p style="color: #333; line-height: 1.6; margin-top: 30px;">
             Pour toute question concernant votre commande, n'hésitez pas à nous contacter à 
-            <a href="mailto:${process.env.EMAIL_FROM || 'team@backzo.eu'}" style="color: #b8ff57; text-decoration: none;">${process.env.EMAIL_FROM || 'team@backzo.eu'}</a>
+            <a href="mailto:${process.env.EMAIL_FROM || 'team@backzo.eu'}" style="color: #233b00; text-decoration: none;">${process.env.EMAIL_FROM || 'team@backzo.eu'}</a>
           </p>
           
           <p style="color: #333; line-height: 1.6; margin-top: 20px;">
