@@ -3,7 +3,7 @@
 <head>
 <link rel="icon" type="image/x-icon" href="favico.ico">
 <link rel="author" type="text/plain" href="humans.txt">
-<script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="6238fdb1-7e3a-4267-8750-6a80d2347fec" type="text/javascript" async></script>
+<!---<script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="6238fdb1-7e3a-4267-8750-6a80d2347fec" type="text/javascript" async></script>--->
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="description" content="BackZo premium pour clubs sportifs et particuliers. Personnalisez vos maillots avec notre technologie BackZo. Devis, commande et paiement sécurisé en ligne."/>
@@ -909,7 +909,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
           </div>
         </li>
       </ul>
-      <div class="foot-copy">© 2026 BackZo — <span data-i18n="footer.copyright">Tous droits réservés</span> <span style="opacity:0.3;margin-left:1rem;cursor:pointer" onclick="showPage('admin')">·</span></div>
+      <div class="foot-copy">2026 BackZo — <span data-i18n="footer.copyright">Tous droits réservés</span> <span style="opacity:0.3;margin-left:1rem;cursor:pointer" onclick="showPage('admin')">·</span></div>
     </div>
   </footer>
 </div>
@@ -3610,7 +3610,7 @@ async function submitEditProduct(productId) {
   
   if(USE_BACKEND) {
     try {
-      const response = await fetch(`${API_URL}/products/${productId}`, {
+      const response = await adminAuth.authenticatedFetch(`${API_URL}/products/${productId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, price, stock, category, desc, active })
@@ -3630,6 +3630,12 @@ async function submitEditProduct(productId) {
     } catch (error) {
       console.error('Erreur modification produit:', error);
       showToast('Erreur lors de la modification du produit', true);
+      
+      // Si erreur d'authentification, rediriger vers login
+      if (error.message && error.message.includes('Session expirée')) {
+        adminLogout();
+        showPage('admin');
+      }
     }
   } else {
     // Mode local - modifier dans PRODUCTS
@@ -3693,7 +3699,7 @@ async function initDatabase() {
     try {
       showToast('🔄 Initialisation en cours...');
       
-      const response = await fetch(`${API_URL}/init-db`, {
+      const response = await adminAuth.authenticatedFetch(`${API_URL}/init-db`, {
         method: 'POST'
       });
       
@@ -3729,14 +3735,14 @@ async function fixProductPrices() {
       showToast('🔄 Mise à jour des prix...');
       
       // Mettre à jour patch-s
-      const response1 = await fetch(`${API_URL}/products/patch-s`, {
+      const response1 = await adminAuth.authenticatedFetch(`${API_URL}/products/patch-s`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ price: 13 })
       });
       
       // Mettre à jour patch-l
-      const response2 = await fetch(`${API_URL}/products/patch-l`, {
+      const response2 = await adminAuth.authenticatedFetch(`${API_URL}/products/patch-l`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ price: 13 })
@@ -3787,7 +3793,7 @@ async function recreateParticularPatches() {
         active: true
       };
       
-      const response1 = await fetch(`${API_URL}/products`, {
+      const response1 = await adminAuth.authenticatedFetch(`${API_URL}/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patchS)
@@ -3804,7 +3810,7 @@ async function recreateParticularPatches() {
         active: true
       };
       
-      const response2 = await fetch(`${API_URL}/products`, {
+      const response2 = await adminAuth.authenticatedFetch(`${API_URL}/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patchL)
@@ -4280,7 +4286,7 @@ async function savePresentationClubs() {
   }
   
   try {
-    const response = await fetch(`${API_URL}/presentations/clubs`, {
+    const response = await adminAuth.authenticatedFetch(`${API_URL}/presentations/clubs`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, description, mediaType, mediaUrl })
@@ -4296,6 +4302,12 @@ async function savePresentationClubs() {
   } catch (error) {
     console.error('Erreur sauvegarde présentation Clubs:', error);
     showToast('Erreur lors de la sauvegarde', true);
+    
+    // Si erreur d'authentification, rediriger vers login
+    if (error.message && error.message.includes('Session expirée')) {
+      adminLogout();
+      showPage('admin');
+    }
   }
 }
 
@@ -4314,7 +4326,7 @@ async function savePresentationParticuliers() {
   }
   
   try {
-    const response = await fetch(`${API_URL}/presentations/particuliers`, {
+    const response = await adminAuth.authenticatedFetch(`${API_URL}/presentations/particuliers`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, description, mediaType, mediaUrl })
@@ -4330,6 +4342,12 @@ async function savePresentationParticuliers() {
   } catch (error) {
     console.error('Erreur sauvegarde présentation Particuliers:', error);
     showToast('Erreur lors de la sauvegarde', true);
+    
+    // Si erreur d'authentification, rediriger vers login
+    if (error.message && error.message.includes('Session expirée')) {
+      adminLogout();
+      showPage('admin');
+    }
   }
 }
 
