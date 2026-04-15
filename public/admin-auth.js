@@ -27,7 +27,7 @@ class AdminAuth {
   // Connexion admin
   async login(username, password) {
     try {
-      const response = await fetch(`${API_URL}/api/admin/login`, {
+      const response = await fetch(`${API_URL}/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -77,7 +77,7 @@ class AdminAuth {
     }
 
     try {
-      const response = await fetch(`${API_URL}/api/admin/verify`, {
+      const response = await fetch(`${API_URL}/admin/verify`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${this.token}`
