@@ -8,7 +8,10 @@
     "dev": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "check-env": "node check-vercel-env.js",
-    "test-email": "node test-email-config.js"
+    "test-email": "node test-email-config.js",
+    "generate-secret": "node generate-jwt-secret.js",
+    "test-auth": "node \"Fichier de test/test-auth-system.js\"",
+    "setup-auth": "node setup-admin-auth.js"
   },
   "keywords": [
     "stripe",
@@ -19,9 +22,11 @@
   "author": "BackZo",
   "license": "MIT",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.1.1",
     "nodemailer": "^8.0.5",
     "stripe": "^14.10.0"

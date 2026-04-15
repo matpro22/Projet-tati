@@ -11,9 +11,16 @@ const fs = require('fs').promises;
 const path = require('path');
 const { MongoClient, ObjectId } = require('mongodb');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Configuration de l'authentification admin
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD ? bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10) : bcrypt.hashSync('BackZo2024!', 10);
+const JWT_SECRET = process.env.JWT_SECRET || 'changez_ce_secret_en_production_avec_une_chaine_aleatoire_longue';
 
 // Initialiser Stripe seulement si la clé est configurée
 let stripe = null;
@@ -41,6 +48,119 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static('public'));
+
+// ============================================================
+// MIDDLEWARE D'AUTHENTIFICATION
+// ============================================================
+
+// Middleware pour vérifier le token JWT
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer TOKEN"
+
+  if (!token) {
+    return res.status(401).json({ error: 'Token manquant' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Token invalide ou expiré' });
+    }
+    req.user = user;
+    next();
+  });
+}
+
+// ============================================================
+// ROUTES D'AUTHENTIFICATION ADMIN
+// ============================================================
+
+// Route de connexion admin
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    console.log('🔐 Tentative de connexion admin:', username);
+
+    // Validation des champs
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Identifiant et mot de passe requis' });
+    }
+
+    // Vérifier l'identifiant
+    if (username !== ADMIN_USERNAME) {
+      console.log('❌ Identifiant incorrect');
+      return res.status(401).json({ error: 'Identifiant ou mot de passe incorrect' });
+    }
+
+    // Vérifier le mot de passe
+    const passwordMatch = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+    if (!passwordMatch) {
+      console.log('❌ Mot de passe incorrect');
+      return res.status(401).json({ error: 'Identifiant ou mot de passe incorrect' });
+    }
+
+    // Générer un token JWT valide 24h
+    const token = jwt.sign(
+      { username: username, role: 'admin' },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    console.log('✓ Connexion admin réussie');
+
+    res.json({
+      success: true,
+      token: token,
+      expiresIn: 86400 // 24h en secondes
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur connexion admin:', error.message);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// Route pour vérifier si le token est valide
+app.get('/api/admin/verify', authenticateToken, (req, res) => {
+  res.json({ valid: true, user: req.user });
+});
+
+// Route pour changer le mot de passe admin (protégée)
+app.post('/api/admin/change-password', authenticateToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Validation
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Mots de passe requis' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'Le nouveau mot de passe doit contenir au moins 8 caractères' });
+    }
+
+    // Vérifier le mot de passe actuel
+    const passwordMatch = await bcrypt.compare(currentPassword, ADMIN_PASSWORD_HASH);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: 'Mot de passe actuel incorrect' });
+    }
+
+    // Note: Pour changer le mot de passe de manière permanente,
+    // il faudrait mettre à jour la variable d'environnement ADMIN_PASSWORD
+    // Ce qui nécessite un redémarrage du serveur
+    console.log('⚠️  Pour changer le mot de passe de manière permanente, mettez à jour ADMIN_PASSWORD dans .env');
+    
+    res.json({ 
+      success: true, 
+      message: 'Pour changer le mot de passe de manière permanente, mettez à jour ADMIN_PASSWORD dans votre fichier .env et redémarrez le serveur' 
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur changement mot de passe:', error.message);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
 
 // ============================================================
 // CONFIGURATION EMAIL
@@ -1316,7 +1436,7 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 // Ajouter un nouveau produit (admin)
-app.post('/api/products', async (req, res) => {
+app.post('/api/products', authenticateToken, async (req, res) => {
   try {
     const { name, price, category, desc, stock } = req.body;
     
@@ -1353,7 +1473,7 @@ app.post('/api/products', async (req, res) => {
 });
 
 // Modifier un produit (admin)
-app.put('/api/products/:id', async (req, res) => {
+app.put('/api/products/:id', authenticateToken, async (req, res) => {
   try {
     const productId = req.params.id;
     const updateData = {
@@ -1436,7 +1556,7 @@ app.put('/api/products/:id', async (req, res) => {
 });
 
 // Supprimer un produit (admin)
-app.delete('/api/products/:id', async (req, res) => {
+app.delete('/api/products/:id', authenticateToken, async (req, res) => {
   try {
     const productId = req.params.id;
     
@@ -1495,7 +1615,7 @@ app.delete('/api/products/:id', async (req, res) => {
 // ============================================================
 
 // Récupérer toutes les commandes (admin)
-app.get('/api/orders', async (req, res) => {
+app.get('/api/orders', authenticateToken, async (req, res) => {
   try {
     const orders = await readData('orders', ORDERS_FILE);
     res.json(orders);
@@ -1521,7 +1641,7 @@ app.get('/api/orders/:id', async (req, res) => {
 });
 
 // Mettre à jour le statut d'une commande (admin)
-app.put('/api/orders/:id/status', async (req, res) => {
+app.put('/api/orders/:id/status', authenticateToken, async (req, res) => {
   try {
     const { status } = req.body;
     const orderId = req.params.id;
@@ -1625,7 +1745,7 @@ app.put('/api/orders/:id/status', async (req, res) => {
 });
 
 // Supprimer une commande (admin)
-app.delete('/api/orders/:id', async (req, res) => {
+app.delete('/api/orders/:id', authenticateToken, async (req, res) => {
   try {
     const orderId = req.params.id;
     
@@ -1729,7 +1849,7 @@ app.get('/api/presentations/:type', async (req, res) => {
 });
 
 // Mettre à jour une présentation (admin)
-app.put('/api/presentations/:type', async (req, res) => {
+app.put('/api/presentations/:type', authenticateToken, async (req, res) => {
   try {
     const type = req.params.type;
     const { title, description, mediaType, mediaUrl } = req.body;
@@ -1804,7 +1924,7 @@ app.get('/api/settings', async (req, res) => {
 });
 
 // Sauvegarder les paramètres (admin)
-app.post('/api/settings', async (req, res) => {
+app.post('/api/settings', authenticateToken, async (req, res) => {
   try {
     const settings = {
       ...req.body,
