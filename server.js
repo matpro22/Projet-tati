@@ -352,7 +352,7 @@ async function sendOrderStatusUpdateEmail(order, newStatus, oldStatus) {
         </div>
         
         <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-          <p style="margin: 0;">BackZo — Flocage amovible premium</p>
+          <p style="margin: 0;">BackZo — Your Name Your Story</p>
           <p style="margin: 5px 0 0;">www.backzo.eu</p>
         </div>
       </div>
