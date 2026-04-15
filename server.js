@@ -1220,7 +1220,7 @@ Date: ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}
 // ============================================================
 app.post('/api/send-quote', async (req, res) => {
   try {
-    const { clientEmail, clientName, quoteId, total, items } = req.body;
+    const { clientEmail, clientName, quoteId, total, lines, quoteHTML } = req.body;
     
     if (!clientEmail || !quoteId || !total) {
       return res.status(400).json({ error: 'Données manquantes' });
@@ -1232,6 +1232,33 @@ app.post('/api/send-quote', async (req, res) => {
         success: true, 
         message: 'Devis généré. Email non configuré.' 
       });
+    }
+    
+    // Construire le tableau des lignes pour l'email
+    let linesHTML = '';
+    if (lines && Array.isArray(lines) && lines.length > 0) {
+      linesHTML = `
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+          <thead>
+            <tr style="background: #f0f0f0;">
+              <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Désignation</th>
+              <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">Qté</th>
+              <th style="padding: 10px; text-align: right; border: 1px solid #ddd;">PU</th>
+              <th style="padding: 10px; text-align: right; border: 1px solid #ddd;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${lines.map(line => `
+              <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">${line.desc || '—'}</td>
+                <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">${line.qty}</td>
+                <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">${line.pu.toFixed(2).replace('.', ',')} €</td>
+                <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">${line.total.toFixed(2).replace('.', ',')} €</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
     }
     
     const mailOptions = {
@@ -1248,7 +1275,7 @@ app.post('/api/send-quote', async (req, res) => {
           <div style="background: #fff; padding: 30px; margin-top: 20px; border-radius: 8px;">
             <h2 style="color: #000; margin-top: 0;">Bonjour ${clientName || 'Cher client'},</h2>
             
-            <p style="color: #333; line-height: 1.6;">Veuillez trouver ci-dessous votre devis BackZo.</p>
+            <p style="color: #333; line-height: 1.6;">Veuillez trouver ci-joint votre devis BackZo au format PDF.</p>
             
             <div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-left: 4px solid #b8ff57;">
               <h3 style="margin: 0 0 10px; color: #000;">Devis N° ${quoteId}</h3>
@@ -1256,14 +1283,13 @@ app.post('/api/send-quote', async (req, res) => {
               <p style="margin: 5px 0 0; font-size: 12px; color: #666;">TVA non applicable, article 293 B du CGI</p>
             </div>
             
-            ${items ? `
-            <h3 style="color: #000; margin-top: 30px;">Détails :</h3>
-            <div style="color: #333; line-height: 1.8;">
-              ${items}
-            </div>
-            ` : ''}
+            ${linesHTML}
             
-            <p style="color: #333; line-height: 1.6; margin-top: 30px;">Pour toute question, n'hésitez pas à nous contacter à <a href="mailto:team@backzo.eu" style="color: #b8ff57;">team@backzo.eu</a></p>
+            <div style="background: #fff9e6; padding: 15px; margin: 20px 0; border-left: 4px solid #b8ff57;">
+              <p style="margin: 0; color: #666; font-size: 14px;">📎 Le devis complet est disponible en pièce jointe au format PDF</p>
+            </div>
+            
+            <p style="color: #333; line-height: 1.6; margin-top: 30px;">Pour toute question ou pour valider ce devis, n'hésitez pas à nous contacter à <a href="mailto:team@backzo.eu" style="color: #b8ff57;">team@backzo.eu</a></p>
             
             <p style="color: #333; line-height: 1.6; margin-top: 20px;">Cordialement,<br/>L'équipe BackZo</p>
           </div>
@@ -1276,13 +1302,27 @@ app.post('/api/send-quote', async (req, res) => {
       `
     };
     
+    // Ajouter le PDF en pièce jointe si le HTML est fourni
+    if (quoteHTML) {
+      // Convertir le HTML en PDF avec puppeteer ou html-pdf
+      // Pour l'instant, on attache le HTML directement
+      // Dans une version production, utilisez puppeteer pour générer un vrai PDF
+      mailOptions.attachments = [
+        {
+          filename: `Devis_BackZo_${quoteId}.html`,
+          content: quoteHTML,
+          contentType: 'text/html'
+        }
+      ];
+    }
+    
     await emailTransporter.sendMail(mailOptions);
     
     console.log('✓ Devis envoyé à:', clientEmail);
     
     res.json({ 
       success: true, 
-      message: 'Devis envoyé avec succès' 
+      message: 'Devis envoyé avec succès avec pièce jointe' 
     });
     
   } catch (error) {

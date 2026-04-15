@@ -102,7 +102,7 @@ section{padding:6rem 4rem}
 .section-tag::before{content:'';display:block;width:30px;height:1px;background:var(--green)}
 .section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,6vw,4.5rem);line-height:.95;letter-spacing:.02em;padding-left: 150px}
 .reveal{opacity:0;transform:translateY(25px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
-.reveal.vis{opacity:1;transform:none;padding-top: 46px;}
+.reveal.vis{opacity:1;transform:none;}
 
 /* MARQUEE */
 .marq{border-top:1px solid var(--lg);border-bottom:1px solid var(--lg);padding:1rem 0;overflow:hidden;background:var(--deep)}
@@ -2661,47 +2661,71 @@ function addDevisLine() {
 }
 function removeDevisLine(btn) { btn.parentElement.remove(); updateDevisPreview(); }
 function printDevis() {
-  const box=document.getElementById('devisPreviewBox');
-  const orig=document.body.innerHTML;
-  document.body.innerHTML=`<style>body{font-family:'Barlow',sans-serif;background:white;color:black;padding:2rem}h1,h2,h3{font-family:'Bebas Neue',sans-serif}.dv-company{font-size:2rem;font-weight:700}.dv-table{width:100%;border-collapse:collapse;margin:1rem 0}.dv-table th,.dv-table td{border:1px solid #ccc;padding:.5rem;text-align:left}.dv-table th{background:#f5f5f0}.dv-total-row{display:flex;justify-content:space-between;padding:.3rem 0}.dv-total-row.final{font-weight:700;font-size:1.1rem;border-top:2px solid black}</style>${box.innerHTML}`;
-  window.print();
-  document.body.innerHTML=orig;
-  location.reload();
+  const quoteData = getQuoteData();
+  if (!quoteData) {
+    showToast('Veuillez remplir les informations du devis', true);
+    return;
+  }
+  
+  const quoteContent = generateQuoteHTML(quoteData);
+  
+  // Ouvrir une nouvelle fenêtre pour l'impression
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(quoteContent);
+  printWindow.document.close();
+  
+  // Attendre que le contenu soit chargé puis lancer l'impression
+  printWindow.onload = function() {
+    printWindow.print();
+  };
 }
 function downloadDevis() {
-  if(typeof window.jspdf==='undefined'){showToast('Génération PDF…');return;}
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF();
-  const client=document.getElementById('dvClientName')?.value||'Client';
-  doc.setFontSize(24); doc.text('BACKZO',20,20);
-  doc.setFontSize(10); doc.text('team@backzo.eu | www.backzo.eu',20,28);
-  doc.line(20,32,190,32);
-  doc.setFontSize(14); doc.text('DEVIS '+document.getElementById('dvNum')?.textContent,20,42);
-  doc.setFontSize(10); doc.text('Client : '+client,20,52);
-  doc.text('Date : '+new Date().toLocaleDateString('fr-FR'),20,60);
-  doc.setFontSize(11); doc.text('TOTAL : '+document.getElementById('dvTotalTTC')?.textContent,20,80);
-  doc.setFontSize(8); doc.text('TVA non applicable, article 293 B du CGI',20,88);
-  doc.save('Devis-BackZo-'+Date.now()+'.pdf');
-  showToast('PDF téléchargé !');
-  // Save quote
+  const quoteData = getQuoteData();
+  if (!quoteData) {
+    showToast('Veuillez remplir les informations du devis', true);
+    return;
+  }
+  
+  showToast('Génération du PDF...');
+  
+  // Créer le HTML du devis
+  const quoteHTML = generateQuoteHTML(quoteData);
+  
+  // Ouvrir dans une nouvelle fenêtre pour permettre le téléchargement
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(quoteHTML);
+  printWindow.document.close();
+  
+  showToast('✓ Devis généré - Utilisez Ctrl+P pour sauvegarder en PDF');
+  
+  // Sauvegarder le devis
   saveDevis();
 }
 async function sendDevisByEmail() {
-  const client = document.getElementById('dvClientEmail')?.value;
-  const clientName = document.getElementById('dvClientName')?.value || 'Client';
-  if (!client) {
+  const quoteData = getQuoteData();
+  if (!quoteData) {
+    showToast('Veuillez remplir les informations du devis', true);
+    return;
+  }
+  
+  if (!quoteData.clientEmail) {
     showToast('Renseignez l\'email client', true);
     return;
   }
-  const total = document.getElementById('dvTotalTTC')?.textContent || '—';
-  const quoteId = document.getElementById('dvNum')?.textContent || 'DEV-0000';
-  
-  // Récupérer les détails du devis si disponibles
-  const items = document.getElementById('dvItems')?.innerHTML || '';
   
   showToast('Envoi du devis en cours...');
   
-  const success = await sendQuoteEmail(client, clientName, quoteId, total, items);
+  // Générer le HTML du devis pour l'email
+  const quoteHTML = generateQuoteHTML(quoteData);
+  
+  const success = await sendQuoteEmail(
+    quoteData.clientEmail,
+    quoteData.clientName,
+    quoteData.quoteId,
+    quoteData.total,
+    quoteData.lines,
+    quoteHTML
+  );
   
   if (success) {
     saveDevis();
@@ -2719,6 +2743,199 @@ function saveDevis() {
   localStorage.setItem('bz-quotes',JSON.stringify(state.quotes));
   devisNum++; localStorage.setItem('bz-devis-num',devisNum);
   renderAdminDashboard();
+}
+
+// Récupérer les données du devis
+function getQuoteData() {
+  const clientName = document.getElementById('dvClientName')?.value || '';
+  const clientEmail = document.getElementById('dvClientEmail')?.value || '';
+  const clientPhone = document.getElementById('dvClientPhone')?.value || '';
+  const clientAddr = document.getElementById('dvClientAddr')?.value || '';
+  const validUntil = document.getElementById('dvValidUntil')?.value || '';
+  const notes = document.getElementById('dvNotes')?.value || '';
+  const discount = parseFloat(document.getElementById('dvDiscount')?.value) || 0;
+  const quoteId = document.getElementById('dvNum')?.textContent || 'DEV-0000';
+  
+  // Récupérer les lignes
+  const lines = [];
+  let subtotal = 0;
+  
+  document.querySelectorAll('#devisLines .devis-line').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const desc = inputs[0]?.value || '';
+    const qty = parseFloat(inputs[1]?.value) || 0;
+    const pu = parseFloat(inputs[2]?.value) || 0;
+    const total = qty * pu;
+    
+    if (desc || qty || pu) {
+      lines.push({ desc, qty, pu, total });
+      subtotal += total;
+    }
+  });
+  
+  if (lines.length === 0) {
+    return null;
+  }
+  
+  const discountAmt = subtotal * discount / 100;
+  const total = subtotal - discountAmt;
+  
+  return {
+    quoteId,
+    clientName,
+    clientEmail,
+    clientPhone,
+    clientAddr,
+    validUntil,
+    notes,
+    lines,
+    subtotal,
+    discount,
+    discountAmt,
+    total,
+    date: new Date()
+  };
+}
+
+// Générer le HTML du devis (même style que les factures)
+function generateQuoteHTML(quoteData) {
+  return `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <title>Devis ${quoteData.quoteId} - BackZo</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; padding: 2rem; color: #333; }
+        .header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem; border-bottom: 3px solid #b8ff57; padding-bottom: 1rem; }
+        .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 2.5rem; font-weight: 900; color: #000; }
+        .logo span { color: #b8ff57; }
+        .quote-info { text-align: right; }
+        .quote-title { font-size: 1.8rem; font-weight: 700; color: #b8ff57; margin-bottom: .5rem; }
+        .section { margin-bottom: 2rem; }
+        .section-title { font-size: 1.2rem; font-weight: 700; color: #b8ff57; margin-bottom: 1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: .5rem; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .info-block { }
+        .info-row { margin-bottom: .5rem; }
+        .info-row strong { display: inline-block; min-width: 120px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th { background: #f0f0f0; padding: .8rem; text-align: left; border: 1px solid #ddd; font-weight: 700; }
+        td { padding: .8rem; border: 1px solid #ddd; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .total-row { background: #f0f0f0; font-weight: 700; }
+        .discount-row { background: #fff5f5; color: #ff5757; font-weight: 700; }
+        .grand-total { background: #b8ff57; color: #000; font-size: 1.1rem; }
+        .footer { margin-top: 3rem; padding-top: 1rem; border-top: 2px solid #f0f0f0; text-align: center; color: #666; font-size: .9rem; }
+        .company-info { margin-top: 2rem; padding: 1rem; background: #f9f9f9; border-radius: 8px; }
+        .notes-section { margin-top: 2rem; padding: 1rem; background: #f9f9f9; border-radius: 8px; }
+        .valid-until { margin-top: 1rem; padding: .8rem; background: #fff9e6; border-left: 4px solid #b8ff57; font-weight: 700; }
+        @media print {
+          body { padding: 1rem; }
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div>
+          <div class="logo">BACK<span>ZO</span></div>
+          <div style="margin-top:.5rem;color:#666">Flocages amovibles personnalisés</div>
+        </div>
+        <div class="quote-info">
+          <div class="quote-title">DEVIS</div>
+          <div><strong>N°:</strong> ${quoteData.quoteId}</div>
+          <div><strong>Date:</strong> ${quoteData.date.toLocaleDateString('fr-FR')}</div>
+          ${quoteData.validUntil ? `<div><strong>Valable jusqu'au:</strong> ${new Date(quoteData.validUntil).toLocaleDateString('fr-FR')}</div>` : ''}
+        </div>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-block">
+          <div class="section-title">VENDEUR</div>
+          <div class="info-row"><strong>BackZo</strong></div>
+          <div class="info-row">Laurie SEABRA DA SILVA</div>
+          <div class="info-row">Email: team@backzo.eu</div>
+          <div class="info-row">SIRET: [À compléter]</div>
+        </div>
+        
+        <div class="info-block">
+          <div class="section-title">CLIENT</div>
+          <div class="info-row"><strong>${quoteData.clientName || '—'}</strong></div>
+          ${quoteData.clientEmail ? `<div class="info-row">${quoteData.clientEmail}</div>` : ''}
+          ${quoteData.clientPhone ? `<div class="info-row">${quoteData.clientPhone}</div>` : ''}
+          ${quoteData.clientAddr ? `<div class="info-row">${quoteData.clientAddr}</div>` : ''}
+        </div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">DÉTAIL DU DEVIS</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Désignation</th>
+              <th class="text-center">Quantité</th>
+              <th class="text-right">Prix unitaire</th>
+              <th class="text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${quoteData.lines.map(line => `
+              <tr>
+                <td>${line.desc || '—'}</td>
+                <td class="text-center">${line.qty}</td>
+                <td class="text-right">${line.pu.toFixed(2).replace('.', ',')} €</td>
+                <td class="text-right">${line.total.toFixed(2).replace('.', ',')} €</td>
+              </tr>
+            `).join('')}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="text-right total-row">Sous-total:</td>
+              <td class="text-right total-row">${quoteData.subtotal.toFixed(2).replace('.', ',')} €</td>
+            </tr>
+            ${quoteData.discount > 0 ? `
+            <tr class="discount-row">
+              <td colspan="3" class="text-right">Remise (${quoteData.discount}%):</td>
+              <td class="text-right">-${quoteData.discountAmt.toFixed(2).replace('.', ',')} €</td>
+            </tr>
+            ` : ''}
+            <tr class="grand-total">
+              <td colspan="3" class="text-right">TOTAL TTC:</td>
+              <td class="text-right">${quoteData.total.toFixed(2).replace('.', ',')} €</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      
+      ${quoteData.notes ? `
+      <div class="notes-section">
+        <div class="section-title">NOTES & CONDITIONS</div>
+        <div style="white-space: pre-wrap;">${quoteData.notes}</div>
+      </div>
+      ` : ''}
+      
+      ${quoteData.validUntil ? `
+      <div class="valid-until">
+        ⏰ Ce devis est valable jusqu'au ${new Date(quoteData.validUntil).toLocaleDateString('fr-FR')}
+      </div>
+      ` : ''}
+      
+      <div class="company-info">
+        <div style="font-weight:700;margin-bottom:.5rem">Informations légales</div>
+        <div>BackZo - Laurie SEABRA DA SILVA</div>
+        <div>Email: team@backzo.eu</div>
+        <div>TVA non applicable, article 293 B du CGI</div>
+      </div>
+      
+      <div class="footer">
+        <div>Merci pour votre confiance !</div>
+        <div style="margin-top:.5rem">BackZo - Flocages amovibles personnalisés</div>
+      </div>
+    </body>
+    </html>
+  `;
 }
 
 // ============================================================
@@ -2850,7 +3067,7 @@ async function sendClubCTA() {
 // ============================================================
 
 // Envoyer un devis par email via le backend
-async function sendQuoteEmail(clientEmail, clientName, quoteId, total, items) {
+async function sendQuoteEmail(clientEmail, clientName, quoteId, total, lines, quoteHTML) {
   try {
     const response = await fetch(`${API_URL}/send-quote`, {
       method: 'POST',
@@ -2859,15 +3076,16 @@ async function sendQuoteEmail(clientEmail, clientName, quoteId, total, items) {
         clientEmail,
         clientName,
         quoteId,
-        total,
-        items
+        total: typeof total === 'number' ? total.toFixed(2).replace('.', ',') + ' €' : total,
+        lines,
+        quoteHTML
       })
     });
     
     const data = await response.json();
     
     if (response.ok) {
-      showToast('✓ Devis envoyé par email');
+      showToast('✓ Devis envoyé par email avec pièce jointe PDF');
       return true;
     } else {
       showToast('✗ ' + (data.error || 'Erreur envoi devis'), true);
@@ -3440,7 +3658,22 @@ async function resendQuoteFromTable(id) {
   
   showToast('Envoi du devis...');
   
-  await sendQuoteEmail(q.email, q.client, id, q.total, '');
+  // Créer un devis simple pour le renvoi
+  const quoteData = {
+    quoteId: q.id,
+    clientName: q.client,
+    clientEmail: q.email,
+    total: typeof q.total === 'string' ? parseFloat(q.total.replace(/[^\d,]/g, '').replace(',', '.')) : q.total,
+    lines: [],
+    subtotal: 0,
+    discount: 0,
+    discountAmt: 0,
+    date: new Date(q.date)
+  };
+  
+  const quoteHTML = generateQuoteHTML(quoteData);
+  
+  await sendQuoteEmail(q.email, q.client, q.id, q.total, [], quoteHTML);
 }
 function deleteQuote(id) {
   state.quotes=state.quotes.filter(q=>q.id!==id);
