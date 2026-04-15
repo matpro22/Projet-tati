@@ -28,15 +28,10 @@ console.log('🔍 Environnement détecté:', {
 
 try {
   if (isProduction) {
-    // En production (Vercel), utiliser @sparticuz/chromium
-    chromium = require('@sparticuz/chromium');
+    // En production (Vercel), utiliser chrome-aws-lambda
+    chromium = require('chrome-aws-lambda');
     puppeteer = require('puppeteer-core');
-    
-    // Configuration pour Vercel - désactiver les fonctionnalités qui nécessitent des libs système
-    chromium.setHeadlessMode = true;
-    chromium.setGraphicsMode = false;
-    
-    console.log('✓ @sparticuz/chromium chargé pour production');
+    console.log('✓ chrome-aws-lambda chargé pour production');
   } else {
     // En local, utiliser puppeteer standard
     puppeteerLocal = require('puppeteer');
@@ -1336,46 +1331,19 @@ app.post('/api/send-quote', async (req, res) => {
     };
     
     // Générer le PDF avec Puppeteer si le HTML est fourni
-    if (quoteHTML && (puppeteerLocal || (chromium && puppeteer))) {
+    // Note: Sur Vercel, la génération PDF peut échouer à cause des dépendances système
+    // Le système utilise alors automatiquement le fallback HTML
+    if (quoteHTML && puppeteerLocal) {
+      // Génération PDF uniquement en local pour éviter les problèmes Vercel
       try {
         console.log('Génération du PDF...');
-        console.log('Mode:', isProduction ? 'Production (@sparticuz/chromium)' : 'Local (puppeteer)');
+        console.log('Mode: Local (puppeteer)');
         
-        let browser;
-        if (isProduction && chromium && puppeteer) {
-          // Production: utiliser @sparticuz/chromium avec configuration Vercel
-          console.log('Lancement de @sparticuz/chromium...');
-          
-          const executablePath = await chromium.executablePath();
-          console.log('Executable path:', executablePath);
-          
-          browser = await puppeteer.launch({
-            args: [
-              ...chromium.args,
-              '--no-sandbox',
-              '--disable-setuid-sandbox',
-              '--disable-dev-shm-usage',
-              '--disable-accelerated-2d-canvas',
-              '--no-first-run',
-              '--no-zygote',
-              '--single-process',
-              '--disable-gpu'
-            ],
-            defaultViewport: chromium.defaultViewport,
-            executablePath: executablePath,
-            headless: 'new',
-            ignoreHTTPSErrors: true,
-          });
-        } else if (puppeteerLocal) {
-          // Local: utiliser puppeteer standard
-          console.log('Lancement de puppeteer local...');
-          browser = await puppeteerLocal.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-          });
-        } else {
-          throw new Error('Aucun browser disponible');
-        }
+        console.log('Lancement de puppeteer local...');
+        const browser = await puppeteerLocal.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
         
         const page = await browser.newPage();
         await page.setContent(quoteHTML, { waitUntil: 'networkidle0' });
@@ -1405,7 +1373,6 @@ app.post('/api/send-quote', async (req, res) => {
         ];
       } catch (pdfError) {
         console.error('Erreur génération PDF:', pdfError.message);
-        console.error('Stack:', pdfError.stack);
         // En cas d'erreur, attacher le HTML comme fallback
         mailOptions.attachments = [
           {
@@ -1416,8 +1383,8 @@ app.post('/api/send-quote', async (req, res) => {
         ];
       }
     } else if (quoteHTML) {
-      // Si Puppeteer n'est pas disponible, attacher le HTML
-      console.log('⚠️ Puppeteer non disponible, envoi en HTML');
+      // Sur Vercel ou si Puppeteer n'est pas disponible, envoyer en HTML
+      console.log('ℹ️ Génération PDF désactivée sur Vercel, envoi en HTML');
       mailOptions.attachments = [
         {
           filename: `Devis_BackZo_${quoteId}.html`,
