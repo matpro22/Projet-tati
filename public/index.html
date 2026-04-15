@@ -100,7 +100,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--nav-h);display:
 section{padding:6rem 4rem}
 .section-tag{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--green);margin-bottom:1rem;display:flex;align-items:center;gap:.8rem}
 .section-tag::before{content:'';display:block;width:30px;height:1px;background:var(--green)}
-.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,6vw,4.5rem);line-height:.95;letter-spacing:.02em;padding-left: 150px}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,6vw,4.5rem);line-height:.95;letter-spacing:.02em}
 .reveal{opacity:0;transform:translateY(25px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
 .reveal.vis{opacity:1;transform:none;}
 
@@ -188,8 +188,21 @@ section{padding:6rem 4rem}
 .how-card:hover{background:#1c1c1c}
 .how-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--green);transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.16,1,.3,1)}
 .how-card:hover::before{transform:scaleX(1)}
-.how-num{font-family:'Bebas Neue',sans-serif;font-size:4.5rem;line-height:1;color:var(--lg);margin-bottom:1rem;transition:color .3s}
+.how-num{font-family:'Bebas Neue',sans-serif;font-size:4.5rem;line-height:1;color:var(--lg);margin-bottom:1rem;transition:color .3s;position:relative;z-index:1}
 .how-card:hover .how-num{color:var(--green)}
+.how-num::after{content:'';position:absolute;inset:-15px;background:radial-gradient(circle,rgba(184,255,87,.5) 0%,rgba(184,255,87,.2) 40%,transparent 70%);opacity:0;animation:numGlow 10s ease-in-out infinite;pointer-events:none;z-index:-1;filter:blur(8px)}
+.how-card:nth-child(1) .how-num{animation:numColor 10s ease-in-out infinite;animation-delay:0s}
+.how-card:nth-child(2) .how-num{animation:numColor 10s ease-in-out infinite;animation-delay:2s}
+.how-card:nth-child(3) .how-num{animation:numColor 10s ease-in-out infinite;animation-delay:4s}
+.how-card:nth-child(4) .how-num{animation:numColor 10s ease-in-out infinite;animation-delay:6s}
+.how-card:nth-child(5) .how-num{animation:numColor 10s ease-in-out infinite;animation-delay:8s}
+.how-card:nth-child(1) .how-num::after{animation-delay:0s}
+.how-card:nth-child(2) .how-num::after{animation-delay:2s}
+.how-card:nth-child(3) .how-num::after{animation-delay:4s}
+.how-card:nth-child(4) .how-num::after{animation-delay:6s}
+.how-card:nth-child(5) .how-num::after{animation-delay:8s}
+@keyframes numGlow{0%,100%{opacity:0;transform:scale(0.8)}10%,20%{opacity:1;transform:scale(1.3)}30%{opacity:0;transform:scale(0.8)}}
+@keyframes numColor{0%,100%{color:var(--lg);text-shadow:none}10%,20%{color:var(--green);text-shadow:0 0 20px rgba(184,255,87,.6),0 0 40px rgba(184,255,87,.4)}30%{color:var(--lg);text-shadow:none}}
 .how-tit{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.8rem}
 .how-desc{font-size:.92rem;line-height:1.7;color:var(--gray)}
 
@@ -372,18 +385,21 @@ section{padding:6rem 4rem}
 .dv-act-btn.main:hover{background:var(--green-dim);border-color:var(--green-dim)}
 
 /* CONTACT */
-.contact-wrap{max-width:800px;margin:0 auto}
-.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-top:3rem}
-.contact-info{display:flex;flex-direction:column;gap:2rem}
-.ci-item{display:flex;gap:1rem;align-items:flex-start}
-.ci-ico{width:44px;height:44px;background:var(--card);border:1px solid var(--lg);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;transition:border-color .3s}
-.ci-item:hover .ci-ico{border-color:var(--green)}
-.ci-tit{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem}
-.ci-txt{font-size:.88rem;color:var(--gray);line-height:1.6}
-.ci-txt a{color:var(--green);text-decoration:none}
-.contact-form{display:flex;flex-direction:column;gap:1rem}
-.contact-submit{width:100%;padding:1rem;background:var(--green);color:var(--black);font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;border:none;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);transition:background .2s}
-.contact-submit:hover{background:var(--green-dim)}
+.contact-wrap{max-width:1200px;margin:0 auto}
+.contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:4rem;margin-top:3rem;align-items:start}
+.contact-info{display:flex;flex-direction:column;gap:2.5rem}
+.ci-item{display:flex;gap:1.2rem;align-items:flex-start;padding:1.5rem;background:var(--card);border:1px solid var(--lg);border-left:3px solid var(--lg);transition:all .3s}
+.ci-item:hover{border-left-color:var(--green);background:rgba(184,255,87,.03);transform:translateX(4px)}
+.ci-ico{width:48px;height:48px;background:rgba(184,255,87,.08);border:1px solid rgba(184,255,87,.2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;transition:all .3s;border-radius:4px}
+.ci-item:hover .ci-ico{background:rgba(184,255,87,.15);border-color:var(--green);transform:scale(1.05)}
+.ci-tit{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;color:var(--white)}
+.ci-txt{font-size:.92rem;color:var(--gray);line-height:1.7}
+.ci-txt a{color:var(--green);text-decoration:none;transition:color .2s}
+.ci-txt a:hover{color:var(--green-dim)}
+.contact-form{display:flex;flex-direction:column;gap:1.5rem;background:var(--card);padding:2.5rem;border:1px solid var(--lg);border-radius:8px}
+.contact-form-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.05em;margin-bottom:1rem;color:var(--white)}
+.contact-submit{width:100%;padding:1.1rem;background:var(--green);color:var(--black);font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;border:none;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);transition:all .2s;margin-top:.5rem}
+.contact-submit:hover{background:var(--green-dim);transform:translateY(-2px);box-shadow:0 8px 16px rgba(184,255,87,.2)}
 
 /* ADMIN */
 .admin-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--black)}
@@ -873,14 +889,14 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
     <div class="marq-track">
       <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">FLOCAGE AMOVIBLE</span></div>
       <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.player">NOM DU JOUEUR</span></div>
-      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">60+ COULEURS</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">+40 COULEURS</span></div>
       <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">AMOVIBLE</span></div>
       <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.clubs">CLUBS SPORTIFS</span></div>
       <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.quote">DEVIS SUR MESURE</span></div>
       <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.payment">PAIEMENT SÉCURISÉ</span></div>
       <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">FLOCAGE AMOVIBLE</span></div>
       <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.player">NOM DU JOUEUR</span></div>
-      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">60+ COULEURS</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">+40 COULEURS</span></div>
       <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">AMOVIBLE</span></div>
       <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.clubs">CLUBS SPORTIFS</span></div>
       <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.quote">DEVIS SUR MESURE</span></div>
@@ -945,8 +961,8 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
   </div>
   <div class="marq" aria-hidden="true">
     <div class="marq-track">
-      <div class="marq-item"><span class="marq-dot">●</span>FLOCAGE AMOVIBLE</div><div class="marq-item"><span class="marq-dot">●</span>NOM DU JOUEUR</div><div class="marq-item"><span class="marq-dot">●</span>60+ COULEURS</div><div class="marq-item"><span class="marq-dot">●</span>DEVIS SUR MESURE</div><div class="marq-item"><span class="marq-dot">●</span>ENVELOPPE PRÉAFFRANCHIE</div><div class="marq-item"><span class="marq-dot">●</span>LIVRAISON SÉCURISÉE</div>
-      <div class="marq-item"><span class="marq-dot">●</span>FLOCAGE AMOVIBLE</div><div class="marq-item"><span class="marq-dot">●</span>NOM DU JOUEUR</div><div class="marq-item"><span class="marq-dot">●</span>60+ COULEURS</div><div class="marq-item"><span class="marq-dot">●</span>DEVIS SUR MESURE</div><div class="marq-item"><span class="marq-dot">●</span>ENVELOPPE PRÉAFFRANCHIE</div><div class="marq-item"><span class="marq-dot">●</span>LIVRAISON SÉCURISÉE</div>
+      <div class="marq-item"><span class="marq-dot">●</span>FLOCAGE AMOVIBLE</div><div class="marq-item"><span class="marq-dot">●</span>NOM DU JOUEUR</div><div class="marq-item"><span class="marq-dot">●</span>+40 COULEURS</div><div class="marq-item"><span class="marq-dot">●</span>DEVIS SUR MESURE</div><div class="marq-item"><span class="marq-dot">●</span>ENVELOPPE PRÉAFFRANCHIE</div><div class="marq-item"><span class="marq-dot">●</span>LIVRAISON SÉCURISÉE</div>
+      <div class="marq-item"><span class="marq-dot">●</span>FLOCAGE AMOVIBLE</div><div class="marq-item"><span class="marq-dot">●</span>NOM DU JOUEUR</div><div class="marq-item"><span class="marq-dot">●</span>+40 COULEURS</div><div class="marq-item"><span class="marq-dot">●</span>DEVIS SUR MESURE</div><div class="marq-item"><span class="marq-dot">●</span>ENVELOPPE PRÉAFFRANCHIE</div><div class="marq-item"><span class="marq-dot">●</span>LIVRAISON SÉCURISÉE</div>
     </div>
   </div>
   <!-- PRÉSENTATION PRODUIT CLUBS -->
@@ -959,7 +975,10 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
       </div>
       <div class="reveal" style="position:relative;overflow:hidden;border-radius:8px;border:1px solid var(--lg)">
         <div id="clubs-pres-media" style="width:100%;aspect-ratio:16/9;background:var(--deep);display:flex;align-items:center;justify-content:center">
-          <img src="1.jpg" alt="Présentation produit clubs" style="width:100%;height:100%;object-fit:cover"/>
+          <video autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover" id="clubs-video">
+            <source src="Media/Video1.mp4" type="video/mp4"/>
+            Votre navigateur ne supporte pas la lecture de vidéos.
+          </video>
         </div>
       </div>
     </div>
@@ -975,8 +994,14 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
       <div class="how-card reveal"><div class="how-num">05</div><div class="how-tit" data-i18n="clubs.how.step5.title">Posez &amp; retirez</div><p class="how-desc" data-i18n="clubs.how.step5.desc">Fixez le Backzo en quelques secondes avant le match. Retirez avant lavage et réutilisez-le.</p></div>
     </div>
   </section>
-  <section style="background:var(--black)">
-    <div class="av-layout">
+  <section style="background:var(--black);position:relative;overflow:hidden;padding:6rem 4rem">
+    <!-- Image de fond avec dégradé -->
+    <div style="position:absolute;top:0;right:0;bottom:0;width:55%;z-index:1;pointer-events:none">
+      <img src="Media/Image1.JPG" alt="Votre équipe" style="width:100%;height:100%;object-fit:cover;display:block"/>
+      <div style="position:absolute;inset:0;background:linear-gradient(to right, var(--black) 0%, rgba(10,10,10,0.95) 15%, rgba(10,10,10,0.7) 40%, transparent 70%)"></div>
+    </div>
+    
+    <div class="av-layout" style="position:relative;z-index:2">
       <div>
         <div class="section-tag">Pourquoi BackZo</div>
         <h2 class="section-title reveal">FAIT POUR<br/><span style="color:var(--green)">LES CLUBS</span></h2>
@@ -987,11 +1012,10 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
           <div class="av-item reveal"><div class="av-ico">🎨</div><div><div class="av-tit" data-i18n="clubs.why.feat4.title">Design premium</div><p class="av-desc" data-i18n="clubs.why.feat4.desc">Matériaux de qualité, couleurs vives et durables — un rendu professionnel qui valorise votre club.</p></div></div>
         </div>
       </div>
-      <div class="av-visual reveal">
-        <div class="av-big" data-i18n="clubs.visual.team">VOTRE<br/>ÉQUIPE</div>
-        <div class="av-tag t1" data-i18n="clubs.visual.removable">Amovible ✓</div>
-        <div class="av-tag t3" data-i18n="clubs.visual.premium">Premium ✓</div>
-        <div class="av-tag t2" data-i18n="clubs.visual.reusable">Réutilisable ✓</div>
+      <div style="position:relative;z-index:3">
+        <div class="av-tag t1" data-i18n="clubs.visual.removable" style="position:absolute;top:10%;left:5%;transform:rotate(-2deg);z-index:4">Amovible ✓</div>
+        <div class="av-tag t3" data-i18n="clubs.visual.premium" style="position:absolute;top:45%;left:50%;transform:translateX(-50%) rotate(-1deg);z-index:4">Premium ✓</div>
+        <div class="av-tag t2" data-i18n="clubs.visual.reusable" style="position:absolute;bottom:15%;right:5%;transform:rotate(1.5deg);z-index:4">Réutilisable ✓</div>
       </div>
     </div>
   </section>
@@ -1005,7 +1029,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
         <p class="pb-desc" data-i18n="clubs.options.removable.desc">Notre cœur de métier. Flocage thermo-amovible du nom de chaque joueur. Posé avant le match, retiré après — le maillot reste intact.</p>
         <div class="pb-items">
           <div class="pb-item"><span class="pb-dot"></span><span data-i18n="clubs.options.removable.feat1">Nom du joueur (dos du maillot)</span></div>
-          <div class="pb-item"><span class="pb-dot"></span><span data-i18n="clubs.options.removable.feat2">60+ couleurs disponibles</span></div>
+          <div class="pb-item"><span class="pb-dot"></span><span data-i18n="clubs.options.removable.feat2">+40 couleurs disponibles</span></div>
           <div class="pb-item"><span class="pb-dot"></span><span data-i18n="clubs.options.removable.feat3">Plusieurs typographies</span></div>
           <div class="pb-item"><span class="pb-dot"></span><span data-i18n="clubs.options.removable.feat4">Compatible tous maillots sport</span></div>
           <div class="pb-item"><span class="pb-dot"></span><span data-i18n="clubs.options.removable.feat5">Devis adapté à votre effectif</span></div>
@@ -1020,7 +1044,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
           <div class="pb-item"><span class="pb-dot gr"></span><span data-i18n="clubs.options.permanent.feat2">Numéro de maillot</span></div>
           <div class="pb-item"><span class="pb-dot gr"></span><span data-i18n="clubs.options.permanent.feat3">Sponsor</span></div>
           <div class="pb-item"><span class="pb-dot gr"></span><span data-i18n="clubs.options.permanent.feat4">Rendu haute définition</span></div>
-          <div class="pb-item"><span class="pb-dot gr"></span><span data-i18n="clubs.options.permanent.feat5">60+ couleurs disponibles</span></div>
+          <div class="pb-item"><span class="pb-dot gr"></span><span data-i18n="clubs.options.permanent.feat5">+40 couleurs disponibles</span></div>
         </div>
       </div>
     </div>
@@ -1029,7 +1053,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
     <div class="section-tag" data-i18n="section.colors">Palette officielle</div>
     <div class="color-grid-wrap">
       <div>
-        <h2 class="section-title reveal" data-i18n="colors.title">60+ COULEURS<br/><span style="color:var(--green)">DISPONIBLES</span></h2>
+        <h2 class="section-title reveal" data-i18n="colors.title">+40 COULEURS<br/><span style="color:var(--green)">DISPONIBLES</span></h2>
         <p style="color:var(--gray);font-size:.95rem;line-height:1.8;margin-top:1rem;max-width:380px" data-i18n="colors.subtitle">Notre palette complète couvre plus de 60 teintes — des couleurs vives aux tons sobres.</p>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-top:1.2rem;display:flex;align-items:center;gap:.5rem" data-i18n="colors.hover">⬆ Passez sur une couleur pour voir son code</div>
       </div>
@@ -1048,7 +1072,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
     </div>
   </section>
   <div class="stats reveal">
-    <div><div class="stat-num">60+</div><div class="stat-lbl" data-i18n="stats.colors">Couleurs de flocage</div></div>
+    <div><div class="stat-num">+40</div><div class="stat-lbl" data-i18n="stats.colors">Couleurs de Patch</div></div>
     <div><div class="stat-num">100%</div><div class="stat-lbl" data-i18n="stats.removable">Amovible &amp; réutilisable</div></div>
     <div><div class="stat-num">2</div><div class="stat-lbl" data-i18n="stats.types">Types de flocage</div></div>
   </div>
@@ -1080,8 +1104,8 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
   </div>
   <div class="marq" aria-hidden="true">
     <div class="marq-track">
-      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">FLOCAGE AMOVIBLE</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.s">TAILLE S : 25×6 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.l">TAILLE L : 27×7 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">60+ COULEURS</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.payment">PAIEMENT SÉCURISÉ</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.delivery.europe">LIVRAISON FRANCE & EUROPE</span></div>
-      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">FLOCAGE AMOVIBLE</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.s">TAILLE S : 25×6 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.l">TAILLE L : 27×7 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">60+ COULEURS</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.payment">PAIEMENT SÉCURISÉ</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.delivery.europe">LIVRAISON FRANCE & EUROPE</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">FLOCAGE AMOVIBLE</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.s">TAILLE S : 25×6 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.l">TAILLE L : 27×7 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">+40 COULEURS</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.payment">PAIEMENT SÉCURISÉ</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.delivery.europe">LIVRAISON FRANCE & EUROPE</span></div>
+      <div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.removable">FLOCAGE AMOVIBLE</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.s">TAILLE S : 25×6 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.size.l">TAILLE L : 27×7 cm</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.colors">+40 COULEURS</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.payment">PAIEMENT SÉCURISÉ</span></div><div class="marq-item"><span class="marq-dot">●</span><span data-i18n="marquee.delivery.europe">LIVRAISON FRANCE & EUROPE</span></div>
     </div>
   </div>
   <!-- PRÉSENTATION PRODUIT PARTICULIERS -->
@@ -1094,7 +1118,10 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
       </div>
       <div class="reveal" style="position:relative;overflow:hidden;border-radius:8px;border:1px solid var(--lg)">
         <div id="particuliers-pres-media" style="width:100%;aspect-ratio:16/9;background:var(--deep);display:flex;align-items:center;justify-content:center">
-          <img src="2.jpg" alt="Présentation produit particuliers" style="width:100%;height:100%;object-fit:cover"/>
+          <video autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover" id="particuliers-video">
+            <source src="Media/video2.mp4" type="video/mp4"/>
+            Votre navigateur ne supporte pas la lecture de vidéos.
+          </video>
         </div>
       </div>
     </div>
@@ -1233,7 +1260,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
     <h2 class="section-title reveal" data-i18n="individual.why.title">LA DIFFÉRENCE<br/><span style="color:var(--green)">BACKZO</span></h2>
     <div class="p-av-grid">
       <div class="p-av-card reveal"><div class="p-av-ico">🔄</div><div class="p-av-tit" data-i18n="individual.why.feat1.title">Amovible</div><p class="p-av-desc" data-i18n="individual.why.feat1.desc">Posez avant le match, retirez après. Votre maillot reste intact et lavable normalement.</p></div>
-      <div class="p-av-card reveal"><div class="p-av-ico">🎨</div><div class="p-av-tit" data-i18n="individual.why.feat2.title">60+ couleurs</div><p class="p-av-desc" data-i18n="individual.why.feat2.desc">Une palette complète pour assortir les couleurs de votre équipe ou vos envies personnelles.</p></div>
+      <div class="p-av-card reveal"><div class="p-av-ico">🎨</div><div class="p-av-tit" data-i18n="individual.why.feat2.title">+40 couleurs</div><p class="p-av-desc" data-i18n="individual.why.feat2.desc">Une palette complète pour assortir les couleurs de votre équipe ou vos envies personnelles.</p></div>
       <div class="p-av-card reveal"><div class="p-av-ico">📐</div><div class="p-av-tit" data-i18n="individual.why.feat3.title">2 tailles</div><p class="p-av-desc" data-i18n="individual.why.feat3.desc">Format S (25×6 cm) ou L (27×7 cm) selon votre maillot et vos préférences.</p></div>
       <div class="p-av-card reveal"><div class="p-av-ico">🚚</div><div class="p-av-tit" data-i18n="individual.why.feat4.title">Livraison France & Europe</div><p class="p-av-desc" data-i18n="individual.why.feat4.desc">Livraison 7€. Au-delà de 2 patchs : forfait 10€. Livraison partout en France et en Europe.</p></div>
     </div>
@@ -1354,47 +1381,80 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
 
 <!-- ==================== PAGE CONTACT ==================== -->
 <div id="page-contact" class="page">
-  <div style="padding:calc(var(--nav-h)+4rem) 4rem 3rem;background:var(--deep)">
-    <div class="section-tag">Nous joindre</div>
-    <h1 class="section-title reveal">NOUS <span style="color:var(--green)">CONTACTER</span></h1>
+  <div style="min-height:50vh;display:flex;align-items:center;padding:calc(var(--nav-h) + 4rem) 4rem 4rem;background:var(--deep);position:relative;overflow:hidden">
+    <div class="hero-grid" style="opacity:.3"></div>
+    <div style="max-width:1200px;margin:0 auto;width:100%;position:relative;z-index:2">
+      <div class="section-tag reveal">Nous joindre</div>
+      <h1 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,8vw,6rem);line-height:.92;letter-spacing:.02em;margin-top:1rem" class="reveal">
+        PARLONS DE<br/>VOTRE <span style="color:var(--green)">PROJET</span>
+      </h1>
+      <p style="font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);margin-top:1.5rem;max-width:600px;line-height:1.7" class="reveal">
+        Une question ? Un devis ? Notre équipe vous répond sous 48h. Remplissez le formulaire ou contactez-nous directement.
+      </p>
+    </div>
   </div>
-  <section style="background:var(--black)">
+  <section style="background:var(--black);padding:5rem 4rem">
     <div class="contact-wrap">
       <div class="contact-grid">
         <div class="contact-info">
           <div class="ci-item reveal">
             <div class="ci-ico">📧</div>
-            <div><div class="ci-tit">Email</div><p class="ci-txt"><a href="mailto:team@backzo.eu">team@backzo.eu</a><br/>Réponse garantie sous 48H</p></div>
+            <div>
+              <div class="ci-tit">Email</div>
+              <p class="ci-txt">
+                <a href="mailto:team@backzo.eu">team@backzo.eu</a><br/>
+                Réponse garantie sous 48H
+              </p>
+            </div>
           </div>
           <div class="ci-item reveal">
             <div class="ci-ico">📍</div>
-            <div><div class="ci-tit">Localisation</div><p class="ci-txt">ANTHON 38280 FRANCE</p></div>
+            <div>
+              <div class="ci-tit">Localisation</div>
+              <p class="ci-txt">ANTHON 38280<br/>FRANCE</p>
+            </div>
           </div>
           <div class="ci-item reveal">
             <div class="ci-ico">⏰</div>
-            <div><div class="ci-tit">Délai de réponse</div><p class="ci-txt">Lun-Ven : 9h-18h<br/>Réponse garantie sous 48h</p></div>
+            <div>
+              <div class="ci-tit">Horaires</div>
+              <p class="ci-txt">
+                Lundi - Vendredi<br/>
+                9h00 - 18h00
+              </p>
+            </div>
           </div>
-          <div class="ci-item reveal">
-            <div class="ci-tit" style="margin-bottom:1rem">Suivez-nous</div>
-            <div class="social-links">
-              <a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener" class="social-link" aria-label="TikTok">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                </svg>
-              </a>
-              <a href="https://www.instagram.com/backzo.eu" target="_blank" rel="noopener" class="social-link" aria-label="Instagram">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-              </a>
+          <div class="ci-item reveal" style="border:none;background:transparent;padding:1rem 0">
+            <div style="width:100%">
+              <div class="ci-tit" style="margin-bottom:1.2rem">Suivez-nous</div>
+              <div class="social-links" style="gap:1rem">
+                <a href="https://www.tiktok.com/@back_zo" target="_blank" rel="noopener" class="social-link" aria-label="TikTok" style="width:44px;height:44px;background:var(--card);border:1px solid var(--lg);display:flex;align-items:center;justify-content:center;transition:all .3s">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                  </svg>
+                </a>
+                <a href="https://www.instagram.com/backzo.eu" target="_blank" rel="noopener" class="social-link" aria-label="Instagram" style="width:44px;height:44px;background:var(--card);border:1px solid var(--lg);display:flex;align-items:center;justify-content:center;transition:all .3s">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  </svg>
+                </a>
+              </div>
             </div>
           </div>
         </div>
         <div>
           <div class="contact-form reveal">
-            <div><label class="bz-lbl" for="ctName">Nom complet *</label><input class="bz-inp" id="ctName" type="text" placeholder="Jean Dupont" required/></div>
-            <div><label class="bz-lbl" for="ctEmail">Email *</label><input class="bz-inp" id="ctEmail" type="email" placeholder="jean@email.fr" required/></div>
-            <div><label class="bz-lbl" for="ctSubject">Sujet</label>
+            <div class="contact-form-title">Envoyez-nous un message</div>
+            <div>
+              <label class="bz-lbl" for="ctName">Nom complet *</label>
+              <input class="bz-inp" id="ctName" type="text" placeholder="Jean Dupont" required/>
+            </div>
+            <div>
+              <label class="bz-lbl" for="ctEmail">Email *</label>
+              <input class="bz-inp" id="ctEmail" type="email" placeholder="jean@email.fr" required/>
+            </div>
+            <div>
+              <label class="bz-lbl" for="ctSubject">Sujet</label>
               <select class="bz-sel" id="ctSubject">
                 <option value="devis">Demande de devis</option>
                 <option value="commande">Question sur une commande</option>
@@ -1402,7 +1462,10 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
                 <option value="autre">Autre</option>
               </select>
             </div>
-            <div><label class="bz-lbl" for="ctMsg">Message *</label><textarea class="bz-inp" id="ctMsg" style="min-height:120px;resize:vertical" placeholder="Décrivez votre projet, votre équipe, vos besoins..." required></textarea></div>
+            <div>
+              <label class="bz-lbl" for="ctMsg">Message *</label>
+              <textarea class="bz-inp" id="ctMsg" style="min-height:140px;resize:vertical" placeholder="Décrivez votre projet, votre équipe, vos besoins..." required></textarea>
+            </div>
             <button class="contact-submit" onclick="sendContactForm()">Envoyer le message →</button>
             <div id="ctResult" style="margin-top:.8rem;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;min-height:1.2em" role="status"></div>
           </div>
@@ -1632,8 +1695,8 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
             </div>
             <div id="clubsVideoInput" style="display:none">
               <label class="bz-lbl" for="clubsPresVideoUrl">URL de la vidéo</label>
-              <input class="bz-inp" id="clubsPresVideoUrl" type="text" placeholder="https://www.youtube.com/watch?v=..."/>
-              <p style="font-size:.78rem;color:var(--gray);margin-top:.3rem">Formats supportés : YouTube, Vimeo</p>
+              <input class="bz-inp" id="clubsPresVideoUrl" type="text" placeholder="https://www.youtube.com/watch?v=... ou Media/Video1.mp4"/>
+              <p style="font-size:.78rem;color:var(--gray);margin-top:.3rem">Formats supportés : YouTube, Vimeo, ou vidéos locales (Media/Video1.mp4)</p>
             </div>
             <button class="save-btn" onclick="savePresentationClubs()">Enregistrer présentation Clubs →</button>
           </div>
@@ -1665,8 +1728,8 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
             </div>
             <div id="particuliersVideoInput" style="display:none">
               <label class="bz-lbl" for="particuliersPresVideoUrl">URL de la vidéo</label>
-              <input class="bz-inp" id="particuliersPresVideoUrl" type="text" placeholder="https://www.youtube.com/watch?v=..."/>
-              <p style="font-size:.78rem;color:var(--gray);margin-top:.3rem">Formats supportés : YouTube, Vimeo</p>
+              <input class="bz-inp" id="particuliersPresVideoUrl" type="text" placeholder="https://www.youtube.com/watch?v=... ou Media/video2.mp4"/>
+              <p style="font-size:.78rem;color:var(--gray);margin-top:.3rem">Formats supportés : YouTube, Vimeo, ou vidéos locales (Media/video2.mp4)</p>
             </div>
             <button class="save-btn" onclick="savePresentationParticuliers()">Enregistrer présentation Particuliers →</button>
           </div>
@@ -4379,9 +4442,11 @@ async function loadPresentations() {
           const videoInfo = extractVideoId(clubsData.mediaUrl);
           if (videoInfo) {
             if (videoInfo.type === 'youtube') {
-              clubsMedia.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoInfo.id}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
+              clubsMedia.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoInfo.id}?autoplay=1&loop=1&mute=1&playlist=${videoInfo.id}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
             } else if (videoInfo.type === 'vimeo') {
-              clubsMedia.innerHTML = `<iframe width="100%" height="100%" src="https://player.vimeo.com/video/${videoInfo.id}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
+              clubsMedia.innerHTML = `<iframe width="100%" height="100%" src="https://player.vimeo.com/video/${videoInfo.id}?autoplay=1&loop=1&muted=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
+            } else if (videoInfo.type === 'local') {
+              clubsMedia.innerHTML = `<video autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover" id="clubs-video"><source src="${clubsData.mediaUrl}" type="video/mp4"/>Votre navigateur ne supporte pas la lecture de vidéos.</video>`;
             }
           } else {
             clubsMedia.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--card);color:var(--gray)">❌ URL vidéo invalide</div>`;
@@ -4427,9 +4492,11 @@ async function loadPresentations() {
           const videoInfo = extractVideoId(particuliersData.mediaUrl);
           if (videoInfo) {
             if (videoInfo.type === 'youtube') {
-              particuliersMedia.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoInfo.id}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
+              particuliersMedia.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoInfo.id}?autoplay=1&loop=1&mute=1&playlist=${videoInfo.id}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
             } else if (videoInfo.type === 'vimeo') {
-              particuliersMedia.innerHTML = `<iframe width="100%" height="100%" src="https://player.vimeo.com/video/${videoInfo.id}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
+              particuliersMedia.innerHTML = `<iframe width="100%" height="100%" src="https://player.vimeo.com/video/${videoInfo.id}?autoplay=1&loop=1&muted=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="border:none;border-radius:8px"></iframe>`;
+            } else if (videoInfo.type === 'local') {
+              particuliersMedia.innerHTML = `<video autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover" id="particuliers-video"><source src="${particuliersData.mediaUrl}" type="video/mp4"/>Votre navigateur ne supporte pas la lecture de vidéos.</video>`;
             }
           } else {
             particuliersMedia.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--card);color:var(--gray)">❌ URL vidéo invalide</div>`;
@@ -4461,9 +4528,14 @@ async function loadPresentations() {
   }
 }
 
-// Extraire l'ID d'une vidéo YouTube ou Vimeo
+// Extraire l'ID d'une vidéo YouTube ou Vimeo, ou détecter une vidéo locale
 function extractVideoId(url) {
   if (!url) return null;
+  
+  // Vérifier si c'est une vidéo locale (commence par Media/ ou contient .mp4, .webm, .ogg)
+  if (url.startsWith('Media/') || /\.(mp4|webm|ogg)$/i.test(url)) {
+    return { type: 'local', id: url };
+  }
   
   // YouTube - différents formats
   const youtubePatterns = [
@@ -4828,7 +4900,7 @@ const LANGS = {
     'individual.why.title': 'LA DIFFÉRENCE BACKZO',
     'individual.why.feat1.title': 'Amovible',
     'individual.why.feat1.desc': 'Posez avant le match, retirez après. Votre maillot reste intact et lavable normalement.',
-    'individual.why.feat2.title': '60+ couleurs',
+    'individual.why.feat2.title': '+40 couleurs',
     'individual.why.feat2.desc': 'Une palette complète pour assortir les couleurs de votre équipe ou vos envies personnelles.',
     'individual.why.feat3.title': '2 tailles',
     'individual.why.feat3.desc': 'Format S (25×6 cm) ou L (27×7 cm) selon votre maillot et vos préférences.',
@@ -4868,7 +4940,7 @@ const LANGS = {
     // Marquee
     'marquee.removable': 'FLOCAGE AMOVIBLE',
     'marquee.player': 'NOM DU JOUEUR',
-    'marquee.colors': '60+ COULEURS',
+    'marquee.colors': '+40 COULEURS',
     'marquee.clubs': 'CLUBS SPORTIFS',
     'marquee.quote': 'DEVIS SUR MESURE',
     'marquee.payment': 'PAIEMENT SÉCURISÉ',
@@ -4879,7 +4951,7 @@ const LANGS = {
     'marquee.delivery.europe': 'LIVRAISON FRANCE & EUROPE',
     
     // Stats
-    'stats.colors': 'Couleurs de flocage',
+    'stats.colors': 'Couleurs de Patch',
     'stats.removable': 'Amovible & réutilisable',
     'stats.types': 'Types de flocage',
     
@@ -4988,7 +5060,7 @@ const LANGS = {
     'admin.logout': 'Déconnexion',
     
     // Couleurs
-    'colors.title': '60+ COULEURS DISPONIBLES',
+    'colors.title': '+40 COULEURS DISPONIBLES',
     'colors.subtitle': 'Notre palette complète couvre plus de 60 teintes — des couleurs vives aux tons sobres.',
     'colors.hover': '⬆ Passez sur une couleur pour voir son code',
     'colors.white': 'Blanc',
@@ -5018,7 +5090,7 @@ const LANGS = {
     'clubs.options.removable.title': 'Flocage amovible',
     'clubs.options.removable.desc': 'Notre cœur de métier. Flocage thermo-amovible du nom de chaque joueur. Posé avant le match, retiré après — le maillot reste intact.',
     'clubs.options.removable.feat1': 'Nom du joueur (dos du maillot)',
-    'clubs.options.removable.feat2': '60+ couleurs disponibles',
+    'clubs.options.removable.feat2': '+40 couleurs disponibles',
     'clubs.options.removable.feat3': 'Plusieurs typographies',
     'clubs.options.removable.feat4': 'Compatible tous maillots sport',
     'clubs.options.removable.feat5': 'Devis adapté à votre effectif',
@@ -5029,7 +5101,7 @@ const LANGS = {
     'clubs.options.permanent.feat2': 'Numéro de maillot',
     'clubs.options.permanent.feat3': 'Sponsor',
     'clubs.options.permanent.feat4': 'Rendu haute définition',
-    'clubs.options.permanent.feat5': '60+ couleurs disponibles'
+    'clubs.options.permanent.feat5': '+40 couleurs disponibles'
   },
   
   en: { 
@@ -5126,7 +5198,7 @@ const LANGS = {
     'individual.why.title': 'THE BACKZO DIFFERENCE',
     'individual.why.feat1.title': 'Removable',
     'individual.why.feat1.desc': 'Apply before the match, remove after. Your jersey stays intact and washable normally.',
-    'individual.why.feat2.title': '60+ colors',
+    'individual.why.feat2.title': '+40 colors',
     'individual.why.feat2.desc': 'A complete palette to match your team colors or personal preferences.',
     'individual.why.feat3.title': '2 sizes',
     'individual.why.feat3.desc': 'S format (25×6 cm) or L (27×7 cm) depending on your jersey and preferences.',
@@ -5166,7 +5238,7 @@ const LANGS = {
     // Marquee
     'marquee.removable': 'REMOVABLE PATCH',
     'marquee.player': 'PLAYER NAME',
-    'marquee.colors': '60+ COLORS',
+    'marquee.colors': '+40 COLORS',
     'marquee.clubs': 'SPORTS CLUBS',
     'marquee.quote': 'CUSTOM QUOTE',
     'marquee.payment': 'SECURE PAYMENT',
@@ -5286,7 +5358,7 @@ const LANGS = {
     'admin.logout': 'Logout',
     
     // Colors
-    'colors.title': '60+ COLORS AVAILABLE',
+    'colors.title': '+40 COLORS AVAILABLE',
     'colors.subtitle': 'Our complete palette covers more than 60 shades — from bright colors to sober tones.',
     'colors.hover': '⬆ Hover over a color to see its code',
     'colors.white': 'White',
@@ -5316,7 +5388,7 @@ const LANGS = {
     'clubs.options.removable.title': 'Removable patch',
     'clubs.options.removable.desc': 'Our core business. Thermo-removable patch with each player\'s name. Applied before the match, removed after — the jersey stays intact.',
     'clubs.options.removable.feat1': 'Player name (back of jersey)',
-    'clubs.options.removable.feat2': '60+ colors available',
+    'clubs.options.removable.feat2': '+40 colors available',
     'clubs.options.removable.feat3': 'Multiple fonts',
     'clubs.options.removable.feat4': 'Compatible with all sports jerseys',
     'clubs.options.removable.feat5': 'Quote adapted to your team',
@@ -5327,7 +5399,7 @@ const LANGS = {
     'clubs.options.permanent.feat2': 'Jersey number',
     'clubs.options.permanent.feat3': 'Sponsor',
     'clubs.options.permanent.feat4': 'High-definition finish',
-    'clubs.options.permanent.feat5': '60+ colors available'
+    'clubs.options.permanent.feat5': '+40 colors available'
   },
   
   nl: { 
@@ -5424,7 +5496,7 @@ const LANGS = {
     'individual.why.title': 'HET BACKZO VERSCHIL',
     'individual.why.feat1.title': 'Verwijderbaar',
     'individual.why.feat1.desc': 'Aanbrengen voor de wedstrijd, verwijderen erna. Uw shirt blijft intact en normaal wasbaar.',
-    'individual.why.feat2.title': '60+ kleuren',
+    'individual.why.feat2.title': '+40 kleuren',
     'individual.why.feat2.desc': 'Een compleet palet om uw teamkleuren of persoonlijke voorkeuren te matchen.',
     'individual.why.feat3.title': '2 maten',
     'individual.why.feat3.desc': 'S formaat (25×6 cm) of L (27×7 cm) afhankelijk van uw shirt en voorkeuren.',
@@ -5464,7 +5536,7 @@ const LANGS = {
     // Marquee
     'marquee.removable': 'VERWIJDERBARE PATCH',
     'marquee.player': 'SPELERSNAAM',
-    'marquee.colors': '60+ KLEUREN',
+    'marquee.colors': '+40 KLEUREN',
     'marquee.clubs': 'SPORTCLUBS',
     'marquee.quote': 'OFFERTE OP MAAT',
     'marquee.payment': 'VEILIGE BETALING',
@@ -5584,7 +5656,7 @@ const LANGS = {
     'admin.logout': 'Uitloggen',
     
     // Kleuren
-    'colors.title': '60+ KLEUREN BESCHIKBAAR',
+    'colors.title': '+40 KLEUREN BESCHIKBAAR',
     'colors.subtitle': 'Ons complete palet omvat meer dan 60 tinten — van felle kleuren tot sobere tinten.',
     'colors.hover': '⬆ Beweeg over een kleur om de code te zien',
     'colors.white': 'Wit',
@@ -5614,7 +5686,7 @@ const LANGS = {
     'clubs.options.removable.title': 'Verwijderbare patch',
     'clubs.options.removable.desc': 'Onze kernactiviteit. Thermo-verwijderbare patch met de naam van elke speler. Aangebracht voor de wedstrijd, verwijderd erna — het shirt blijft intact.',
     'clubs.options.removable.feat1': 'Spelersnaam (achterkant shirt)',
-    'clubs.options.removable.feat2': '60+ kleuren beschikbaar',
+    'clubs.options.removable.feat2': '+40 kleuren beschikbaar',
     'clubs.options.removable.feat3': 'Meerdere lettertypen',
     'clubs.options.removable.feat4': 'Compatibel met alle sportshirts',
     'clubs.options.removable.feat5': 'Offerte aangepast aan uw team',
@@ -5625,7 +5697,7 @@ const LANGS = {
     'clubs.options.permanent.feat2': 'Shirtnummer',
     'clubs.options.permanent.feat3': 'Sponsor',
     'clubs.options.permanent.feat4': 'High-definition afwerking',
-    'clubs.options.permanent.feat5': '60+ kleuren beschikbaar'
+    'clubs.options.permanent.feat5': '+40 kleuren beschikbaar'
   }
 };
 function toggleLang() {
@@ -5738,9 +5810,9 @@ function applyTranslations(code) {
     'CRÉER UN DEVIS': 'quote.title',
     'CREATE A QUOTE': 'quote.title',
     'OFFERTE MAKEN': 'quote.title',
-    '60+ COULEURS DISPONIBLES': 'colors.title',
-    '60+ COLORS AVAILABLE': 'colors.title',
-    '60+ KLEUREN BESCHIKBAAR': 'colors.title',
+    '+40 COULEURS DISPONIBLES': 'colors.title',
+    '+40 COLORS AVAILABLE': 'colors.title',
+    '+40 KLEUREN BESCHIKBAAR': 'colors.title',
     
     // Labels
     'Choisissez la taille': 'individual.config.step1',
@@ -5930,9 +6002,9 @@ function applyTranslations(code) {
     'NOM DU JOUEUR': 'marquee.player',
     'PLAYER NAME': 'marquee.player',
     'SPELERSNAAM': 'marquee.player',
-    '60+ COULEURS': 'marquee.colors',
-    '60+ COLORS': 'marquee.colors',
-    '60+ KLEUREN': 'marquee.colors',
+    '+40 COULEURS': 'marquee.colors',
+    '+40 COLORS': 'marquee.colors',
+    '+40 KLEUREN': 'marquee.colors',
     'AMOVIBLE': 'marquee.removable',
     'REMOVABLE': 'marquee.removable',
     'VERWIJDERBAAR': 'marquee.removable',
