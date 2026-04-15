@@ -18,14 +18,20 @@ const jwt = require('jsonwebtoken');
 let chromium;
 let puppeteer;
 let puppeteerLocal;
-const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
+const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+
+console.log('🔍 Environnement détecté:', {
+  NODE_ENV: process.env.NODE_ENV,
+  VERCEL: process.env.VERCEL,
+  isProduction: isProduction
+});
 
 try {
   if (isProduction) {
-    // En production (Vercel), utiliser chrome-aws-lambda
-    chromium = require('chrome-aws-lambda');
+    // En production (Vercel), utiliser @sparticuz/chromium
+    chromium = require('@sparticuz/chromium');
     puppeteer = require('puppeteer-core');
-    console.log('✓ chrome-aws-lambda chargé pour production');
+    console.log('✓ @sparticuz/chromium chargé pour production');
   } else {
     // En local, utiliser puppeteer standard
     puppeteerLocal = require('puppeteer');
@@ -33,7 +39,7 @@ try {
   }
 } catch (error) {
   console.log('⚠️ Puppeteer non disponible, génération PDF désactivée');
-  console.log('   Pour activer le PDF en local: npm install puppeteer');
+  console.log('   Erreur:', error.message);
 }
 
 const app = express();
@@ -1328,23 +1334,27 @@ app.post('/api/send-quote', async (req, res) => {
     if (quoteHTML && (puppeteerLocal || (chromium && puppeteer))) {
       try {
         console.log('Génération du PDF...');
+        console.log('Mode:', isProduction ? 'Production (@sparticuz/chromium)' : 'Local (puppeteer)');
         
         let browser;
         if (isProduction && chromium && puppeteer) {
-          // Production: utiliser chrome-aws-lambda
+          // Production: utiliser @sparticuz/chromium
+          console.log('Lancement de @sparticuz/chromium...');
           browser = await puppeteer.launch({
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath,
+            executablePath: await chromium.executablePath(),
             headless: chromium.headless,
-            ignoreHTTPSErrors: true,
           });
         } else if (puppeteerLocal) {
           // Local: utiliser puppeteer standard
+          console.log('Lancement de puppeteer local...');
           browser = await puppeteerLocal.launch({
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
           });
+        } else {
+          throw new Error('Aucun browser disponible');
         }
         
         const page = await browser.newPage();
@@ -1363,7 +1373,7 @@ app.post('/api/send-quote', async (req, res) => {
         
         await browser.close();
         
-        console.log('✓ PDF généré avec succès');
+        console.log('✓ PDF généré avec succès (' + pdfBuffer.length + ' octets)');
         
         // Attacher le PDF à l'email
         mailOptions.attachments = [
@@ -1374,7 +1384,8 @@ app.post('/api/send-quote', async (req, res) => {
           }
         ];
       } catch (pdfError) {
-        console.error('Erreur génération PDF:', pdfError);
+        console.error('Erreur génération PDF:', pdfError.message);
+        console.error('Stack:', pdfError.stack);
         // En cas d'erreur, attacher le HTML comme fallback
         mailOptions.attachments = [
           {
