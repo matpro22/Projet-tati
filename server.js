@@ -13,7 +13,16 @@ const { MongoClient, ObjectId } = require('mongodb');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const puppeteer = require('puppeteer');
+
+// Puppeteer pour Vercel/AWS Lambda
+let chromium;
+let puppeteer;
+try {
+  chromium = require('chrome-aws-lambda');
+  puppeteer = require('puppeteer-core');
+} catch (error) {
+  console.log('⚠️ chrome-aws-lambda non disponible, génération PDF désactivée');
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1304,13 +1313,16 @@ app.post('/api/send-quote', async (req, res) => {
     };
     
     // Générer le PDF avec Puppeteer si le HTML est fourni
-    if (quoteHTML) {
+    if (quoteHTML && chromium && puppeteer) {
       try {
-        console.log('Génération du PDF avec Puppeteer...');
+        console.log('Génération du PDF avec chrome-aws-lambda...');
         
         const browser = await puppeteer.launch({
-          headless: 'new',
-          args: ['--no-sandbox', '--disable-setuid-sandbox']
+          args: chromium.args,
+          defaultViewport: chromium.defaultViewport,
+          executablePath: await chromium.executablePath,
+          headless: chromium.headless,
+          ignoreHTTPSErrors: true,
         });
         
         const page = await browser.newPage();
@@ -1350,6 +1362,16 @@ app.post('/api/send-quote', async (req, res) => {
           }
         ];
       }
+    } else if (quoteHTML) {
+      // Si chrome-aws-lambda n'est pas disponible, attacher le HTML
+      console.log('⚠️ chrome-aws-lambda non disponible, envoi en HTML');
+      mailOptions.attachments = [
+        {
+          filename: `Devis_BackZo_${quoteId}.html`,
+          content: quoteHTML,
+          contentType: 'text/html'
+        }
+      ];
     }
     
     await emailTransporter.sendMail(mailOptions);
