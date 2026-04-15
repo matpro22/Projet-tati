@@ -169,33 +169,45 @@ Le devis inclut maintenant :
 
 ## 📝 Notes importantes
 
-### Pièce jointe HTML vs PDF
-Actuellement, la pièce jointe est au format HTML. Pour une version production, il est recommandé d'utiliser une bibliothèque comme `puppeteer` ou `html-pdf-node` pour générer de vrais fichiers PDF.
+### Génération de PDF avec Puppeteer
 
-### Installation de puppeteer (optionnel)
+Le système utilise maintenant Puppeteer pour générer de vrais fichiers PDF. 
+
+**Installation requise :**
 ```bash
 npm install puppeteer
 ```
 
-Puis modifier le backend pour générer un vrai PDF :
+Ou utilisez le script automatique : `install-puppeteer.bat`
+
+**Fonctionnement :**
+- Puppeteer lance un navigateur headless
+- Convertit le HTML en PDF format A4 haute qualité
+- Attache le PDF à l'email
+- Fallback automatique vers HTML si Puppeteer échoue
+
+**Configuration Puppeteer :**
 ```javascript
-const puppeteer = require('puppeteer');
+const browser = await puppeteer.launch({
+  headless: 'new',
+  args: ['--no-sandbox', '--disable-setuid-sandbox']
+});
 
-// Dans l'endpoint /api/send-quote
-const browser = await puppeteer.launch();
-const page = await browser.newPage();
-await page.setContent(quoteHTML);
-const pdfBuffer = await page.pdf({ format: 'A4' });
-await browser.close();
-
-mailOptions.attachments = [
-  {
-    filename: `Devis_BackZo_${quoteId}.pdf`,
-    content: pdfBuffer,
-    contentType: 'application/pdf'
-  }
-];
+const pdfBuffer = await page.pdf({
+  format: 'A4',
+  printBackground: true,
+  margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' }
+});
 ```
+
+### Déploiement sur Vercel
+
+Pour Vercel, utilisez `chrome-aws-lambda` :
+```bash
+npm install chrome-aws-lambda puppeteer-core
+```
+
+Voir `DOCS/INSTALLATION_PDF_DEVIS.md` pour plus de détails.
 
 ## ✅ Tests recommandés
 

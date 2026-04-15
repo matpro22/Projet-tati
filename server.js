@@ -13,6 +13,7 @@ const { MongoClient, ObjectId } = require('mongodb');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const puppeteer = require('puppeteer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1302,18 +1303,53 @@ app.post('/api/send-quote', async (req, res) => {
       `
     };
     
-    // Ajouter le PDF en pièce jointe si le HTML est fourni
+    // Générer le PDF avec Puppeteer si le HTML est fourni
     if (quoteHTML) {
-      // Convertir le HTML en PDF avec puppeteer ou html-pdf
-      // Pour l'instant, on attache le HTML directement
-      // Dans une version production, utilisez puppeteer pour générer un vrai PDF
-      mailOptions.attachments = [
-        {
-          filename: `Devis_BackZo_${quoteId}.html`,
-          content: quoteHTML,
-          contentType: 'text/html'
-        }
-      ];
+      try {
+        console.log('Génération du PDF avec Puppeteer...');
+        
+        const browser = await puppeteer.launch({
+          headless: 'new',
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        
+        const page = await browser.newPage();
+        await page.setContent(quoteHTML, { waitUntil: 'networkidle0' });
+        
+        const pdfBuffer = await page.pdf({
+          format: 'A4',
+          printBackground: true,
+          margin: {
+            top: '20px',
+            right: '20px',
+            bottom: '20px',
+            left: '20px'
+          }
+        });
+        
+        await browser.close();
+        
+        console.log('✓ PDF généré avec succès');
+        
+        // Attacher le PDF à l'email
+        mailOptions.attachments = [
+          {
+            filename: `Devis_BackZo_${quoteId}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf'
+          }
+        ];
+      } catch (pdfError) {
+        console.error('Erreur génération PDF:', pdfError);
+        // En cas d'erreur, attacher le HTML comme fallback
+        mailOptions.attachments = [
+          {
+            filename: `Devis_BackZo_${quoteId}.html`,
+            content: quoteHTML,
+            contentType: 'text/html'
+          }
+        ];
+      }
     }
     
     await emailTransporter.sendMail(mailOptions);
@@ -1322,7 +1358,7 @@ app.post('/api/send-quote', async (req, res) => {
     
     res.json({ 
       success: true, 
-      message: 'Devis envoyé avec succès avec pièce jointe' 
+      message: 'Devis envoyé avec succès avec pièce jointe PDF' 
     });
     
   } catch (error) {

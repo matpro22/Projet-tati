@@ -1,0 +1,35 @@
+═══════════════════════════════════════════════════════════════
+  INSTALLATION RAPIDE - SYSTÈME DE DEVIS PDF
+═══════════════════════════════════════════════════════════════
+
+ÉTAPE 1 : INSTALLER PUPPETEER
+───────────────────────────────────────────────────────────────
+
+  Windows :
+  → Double-cliquez sur "install-puppeteer.bat"
+
+  Ligne de commande :
+  → npm install puppeteer
+
+
+ÉTAPE 2 : DÉMARRER LE SERVEUR
+───────────────────────────────────────────────────────────────
+
+  → npm start
+
+
+ÉTAPE 3 : TESTER
+───────────────────────────────────────────────────────────────
+
+  1. Ouvrir http://localhost:3000
+  2. Se connecter à l'admin
+  3. Créer un devis de test
+  4. L'envoyer par email
+  5. Vérifier la réception du PDF
+
+
+═══════════════════════════════════════════════════════════════
+  C'EST TOUT ! LE SYSTÈME EST PRÊT.
+═══════════════════════════════════════════════════════════════
+
+Documentation complète : README_DEVIS_PDF.md
