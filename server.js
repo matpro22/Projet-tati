@@ -14,14 +14,26 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Puppeteer pour Vercel/AWS Lambda
+// Puppeteer pour génération PDF
 let chromium;
 let puppeteer;
+let puppeteerLocal;
+const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
+
 try {
-  chromium = require('chrome-aws-lambda');
-  puppeteer = require('puppeteer-core');
+  if (isProduction) {
+    // En production (Vercel), utiliser chrome-aws-lambda
+    chromium = require('chrome-aws-lambda');
+    puppeteer = require('puppeteer-core');
+    console.log('✓ chrome-aws-lambda chargé pour production');
+  } else {
+    // En local, utiliser puppeteer standard
+    puppeteerLocal = require('puppeteer');
+    console.log('✓ puppeteer chargé pour développement local');
+  }
 } catch (error) {
-  console.log('⚠️ chrome-aws-lambda non disponible, génération PDF désactivée');
+  console.log('⚠️ Puppeteer non disponible, génération PDF désactivée');
+  console.log('   Pour activer le PDF en local: npm install puppeteer');
 }
 
 const app = express();
@@ -1313,17 +1325,27 @@ app.post('/api/send-quote', async (req, res) => {
     };
     
     // Générer le PDF avec Puppeteer si le HTML est fourni
-    if (quoteHTML && chromium && puppeteer) {
+    if (quoteHTML && (puppeteerLocal || (chromium && puppeteer))) {
       try {
-        console.log('Génération du PDF avec chrome-aws-lambda...');
+        console.log('Génération du PDF...');
         
-        const browser = await puppeteer.launch({
-          args: chromium.args,
-          defaultViewport: chromium.defaultViewport,
-          executablePath: await chromium.executablePath,
-          headless: chromium.headless,
-          ignoreHTTPSErrors: true,
-        });
+        let browser;
+        if (isProduction && chromium && puppeteer) {
+          // Production: utiliser chrome-aws-lambda
+          browser = await puppeteer.launch({
+            args: chromium.args,
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath,
+            headless: chromium.headless,
+            ignoreHTTPSErrors: true,
+          });
+        } else if (puppeteerLocal) {
+          // Local: utiliser puppeteer standard
+          browser = await puppeteerLocal.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+          });
+        }
         
         const page = await browser.newPage();
         await page.setContent(quoteHTML, { waitUntil: 'networkidle0' });
@@ -1363,8 +1385,8 @@ app.post('/api/send-quote', async (req, res) => {
         ];
       }
     } else if (quoteHTML) {
-      // Si chrome-aws-lambda n'est pas disponible, attacher le HTML
-      console.log('⚠️ chrome-aws-lambda non disponible, envoi en HTML');
+      // Si Puppeteer n'est pas disponible, attacher le HTML
+      console.log('⚠️ Puppeteer non disponible, envoi en HTML');
       mailOptions.attachments = [
         {
           filename: `Devis_BackZo_${quoteId}.html`,
