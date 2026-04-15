@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="fr" id="html-root">
 <head>
+<link rel="icon" type="image/x-icon" href="favico.ico">
+<script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="6238fdb1-7e3a-4267-8750-6a80d2347fec" type="text/javascript" async></script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<meta name="description" content="BackZo — Flocage amovible premium pour clubs sportifs et particuliers. Personnalisez vos maillots avec notre technologie thermo-amovible. Devis, commande et paiement sécurisé en ligne."/>
+<meta name="description" content="BackZo premium pour clubs sportifs et particuliers. Personnalisez vos maillots avec notre technologie BackZo. Devis, commande et paiement sécurisé en ligne."/>
 <meta name="keywords" content="flocage amovible, personnalisation maillot, club sportif, BackZo, flocage maillot"/>
-<meta property="og:title" content="BackZo — Flocage Amovible Premium"/>
-<meta property="og:description" content="Personnalisez vos maillots de sport avec notre flocage amovible premium. Pour clubs et particuliers."/>
+<meta property="og:title" content="BackZo — Your Name Your Story"/>
+<meta property="og:description" content="Personnalisez vos maillots de sport avec notre Backzo premium. Pour clubs et particuliers."/>
 <meta property="og:type" content="website"/>
-<title>BackZo — Flocage Amovible · Clubs &amp; Particuliers</title>
+<title>BackZo · Clubs &amp; Particuliers</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1535,7 +1537,7 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
         <div class="admin-head">
           <div class="admin-tit">PRODUITS</div>
           <div style="display:flex;gap:.5rem">
-            <button class="btn-sec" onclick="fixProductPrices()" style="font-size:.85rem;padding:.7rem 1.5rem;background:var(--orange)" title="Mettre à jour les prix à 13€">� Corriger prix</button>
+            <button class="btn-sec" onclick="fixProductPrices()" style="font-size:.85rem;padding:.7rem 1.5rem;background:var(--orange)" title="Mettre à jour les prix à 13€">  Corriger prix</button>
             <button class="btn-sec" onclick="initDatabase()" style="font-size:.85rem;padding:.7rem 1.5rem" title="Initialiser la base de données avec les produits par défaut">🔄 Initialiser DB</button>
             <button class="btn-pri" onclick="showAddProductModal()" style="font-size:.85rem;padding:.7rem 1.5rem">+ Ajouter</button>
             <button class="btn-sec" onclick="recreateParticularPatches()" style="font-size:.85rem;padding:.7rem 1.5rem;background:var(--green)" title="Recréer les patchs Taille S et L">Recréer patchs</button>
@@ -3000,8 +3002,8 @@ function renderOrdersTable(tbodyId='allOrdersBody', limit=null) {
       </select></td>
       <td style="color:var(--gray);font-size:.8rem">${new Date(o.date).toLocaleDateString('fr-FR')}</td>
       <td>
-        <button class="admin-action-btn" onclick="showOrderDetails('${o.id}')" style="background:var(--blue)">�️ Détails</button>
-        <button class="admin-action-btn" onclick="sendOrderConfirmation('${o.id}')">� Email</button>
+        <button class="admin-action-btn" onclick="showOrderDetails('${o.id}')" style="background:var(--blue)"> ️ Détails</button>
+        <button class="admin-action-btn" onclick="sendOrderConfirmation('${o.id}')">  Email</button>
         <button class="admin-action-btn del" onclick="deleteOrder('${o.id}')">🗑 Suppr.</button>
       </td>
     </tr>`).join('');
@@ -5765,6 +5767,14 @@ document.addEventListener('keydown',e=>{
     document.body.style.overflow='';
   }
 });
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TKQWNX00M5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-TKQWNX00M5');
 </script>
 </body>
 </html>
