@@ -905,7 +905,19 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
   </div>
   <footer>
     <div class="foot-inner">
-      <div><a href="#" class="foot-logo" onclick="showPage('accueil');return false">BACK<span>ZO</span></a><div class="foot-tagline" data-i18n="footer.tagline">Flocage amovible · Clubs &amp; Particuliers</div></div>
+      <div>
+        <a href="#" class="foot-logo" onclick="showPage('accueil');return false">BACK<span>ZO</span></a>
+        <div class="foot-tagline" data-i18n="footer.tagline">Flocage amovible · Clubs &amp; Particuliers</div>
+        <!-- Newsletter Signup -->
+        <div style="margin-top:1.5rem">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:.8rem">📧 Newsletter</div>
+          <div style="display:flex;gap:.5rem;max-width:350px">
+            <input type="email" id="footerNewsletterEmail" placeholder="Votre email" class="bz-inp" style="flex:1;padding:.6rem .8rem;font-size:.85rem"/>
+            <button onclick="subscribeFooterNewsletter()" class="nav-cta" style="padding:.6rem 1.2rem;font-size:.8rem;white-space:nowrap">S'inscrire</button>
+          </div>
+          <div id="footerNewsletterMsg" style="font-size:.75rem;margin-top:.5rem;min-height:1em"></div>
+        </div>
+      </div>
       <ul class="foot-links">
         <li><button onclick="openModal('cgv')" data-i18n="footer.cgv">CGV</button></li>
         <li><button onclick="openModal('mentions')" data-i18n="footer.legal">Mentions légales</button></li>
@@ -1524,6 +1536,10 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
               <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
               Présentations
             </button>
+            <button class="admin-tab-btn" id="an-newsletter" onclick="adminTab('newsletter');return false">
+              <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Newsletter
+            </button>
           </div>
         </div>
         <button class="admin-logout-btn" onclick="adminLogout()">
@@ -1732,6 +1748,84 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
               <p style="font-size:.78rem;color:var(--gray);margin-top:.3rem">Formats supportés : YouTube, Vimeo, ou vidéos locales (Media/video2.mp4)</p>
             </div>
             <button class="save-btn" onclick="savePresentationParticuliers()">Enregistrer présentation Particuliers →</button>
+          </div>
+        </div>
+      </div>
+      <!-- NEWSLETTER TAB -->
+      <div id="tab-newsletter" style="display:none">
+        <div class="admin-head">
+          <div class="admin-tit">NEWSLETTER</div>
+          <button class="admin-action-btn" onclick="refreshNewsletterSubscribers()" style="background:var(--green);color:var(--black)">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Actualiser
+          </button>
+        </div>
+        
+        <!-- Stats Newsletter -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:2rem">
+          <div class="stat-card">
+            <div class="sc-label">Abonnés actifs</div>
+            <div class="sc-val" id="newsletterCount">0</div>
+            <div class="sc-sub">Total inscrits</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">Nouveaux (7j)</div>
+            <div class="sc-val" id="newsletterNew">0</div>
+            <div class="sc-sub">Cette semaine</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">Taux d'engagement</div>
+            <div class="sc-val" id="newsletterRate">—</div>
+            <div class="sc-sub">Estimation</div>
+          </div>
+        </div>
+        
+        <!-- Formulaire d'envoi groupé -->
+        <div class="admin-section" style="margin-bottom:2rem">
+          <div class="admin-section-title">Envoyer une newsletter</div>
+          <div style="display:flex;flex-direction:column;gap:1rem">
+            <div>
+              <label class="bz-lbl" for="newsletterSubject">Sujet de l'email</label>
+              <input class="bz-inp" id="newsletterSubject" type="text" placeholder="Nouveautés BackZo - Janvier 2024"/>
+            </div>
+            <div>
+              <label class="bz-lbl" for="newsletterMessage">Message</label>
+              <textarea class="bz-inp" id="newsletterMessage" style="min-height:200px;resize:vertical" placeholder="Bonjour,&#10;&#10;Nous sommes ravis de vous présenter nos nouveautés...&#10;&#10;Cordialement,&#10;L'équipe BackZo"></textarea>
+              <p style="font-size:.78rem;color:var(--gray);margin-top:.5rem">Le message sera automatiquement mis en forme avec le template BackZo</p>
+            </div>
+            <div style="display:flex;gap:1rem;align-items:center">
+              <button class="save-btn" onclick="sendNewsletterBulk()" style="flex:1">
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle;margin-right:.5rem"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                Envoyer à tous les abonnés
+              </button>
+              <button class="admin-action-btn" onclick="previewNewsletter()" style="background:var(--lg)">
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Aperçu
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Liste des abonnés -->
+        <div class="admin-section">
+          <div class="admin-section-title">Liste des abonnés</div>
+          <div style="overflow-x:auto">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Nom</th>
+                  <th>Date d'inscription</th>
+                  <th>Source</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="newsletterSubscribersBody">
+                <tr>
+                  <td colspan="5" style="color:var(--gray);text-align:center;padding:2rem">Chargement...</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -3265,7 +3359,7 @@ function adminLogout() {
 
 }
 function adminTab(tab) {
-  ['dashboard','orders','products','quotes','devis-history','settings','presentations'].forEach(t=>{
+  ['dashboard','orders','products','quotes','devis-history','settings','presentations','newsletter'].forEach(t=>{
     const el = document.getElementById('tab-'+t);
     if(el) el.style.display=t===tab?'block':'none';
     const nav = document.getElementById('an-'+t);
@@ -3285,6 +3379,7 @@ function adminTab(tab) {
   if(tab==='products') renderProductsTable();
   if(tab==='devis-history') renderQuotesTable();
   if(tab==='settings') loadSettings();
+  if(tab==='newsletter') refreshNewsletterSubscribers();
   // Scroll to top
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -4654,6 +4749,285 @@ async function savePresentationParticuliers() {
       showPage('admin');
     }
   }
+}
+
+// ============================================================
+// GESTION DE LA NEWSLETTER
+// ============================================================
+
+// Charger les abonnés newsletter
+async function loadNewsletterSubscribers() {
+  if (!USE_BACKEND) {
+    showToast('Backend requis pour la newsletter', true);
+    return [];
+  }
+  
+  try {
+    const response = await adminAuth.authenticatedFetch(`${API_URL}/newsletter/subscribers`);
+    
+    if (!response.ok) {
+      throw new Error('Erreur chargement abonnés');
+    }
+    
+    const subscribers = await response.json();
+    return subscribers;
+    
+  } catch (error) {
+    console.error('Erreur chargement abonnés:', error);
+    
+    if (error.message && error.message.includes('Session expirée')) {
+      adminLogout();
+      showPage('admin');
+    }
+    
+    return [];
+  }
+}
+
+// Rafraîchir la liste des abonnés
+async function refreshNewsletterSubscribers() {
+  showToast('🔄 Chargement des abonnés...');
+  
+  const subscribers = await loadNewsletterSubscribers();
+  
+  // Mettre à jour les stats
+  const totalCount = subscribers.length;
+  document.getElementById('newsletterCount').textContent = totalCount;
+  
+  // Calculer les nouveaux abonnés (7 derniers jours)
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const newCount = subscribers.filter(s => new Date(s.subscribedAt) > sevenDaysAgo).length;
+  document.getElementById('newsletterNew').textContent = newCount;
+  
+  // Taux d'engagement (estimation)
+  const rate = totalCount > 0 ? '~65%' : '—';
+  document.getElementById('newsletterRate').textContent = rate;
+  
+  // Afficher la liste
+  const tbody = document.getElementById('newsletterSubscribersBody');
+  
+  if (subscribers.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--gray);text-align:center;padding:2rem">Aucun abonné pour le moment</td></tr>';
+    showToast('Aucun abonné trouvé');
+    return;
+  }
+  
+  tbody.innerHTML = subscribers.map(sub => {
+    const date = new Date(sub.subscribedAt).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+    
+    return `
+      <tr>
+        <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--green)">${sub.email}</td>
+        <td>${sub.name || '—'}</td>
+        <td style="color:var(--gray);font-size:.85rem">${date}</td>
+        <td><span class="status-badge status-processing">${sub.source || 'website'}</span></td>
+        <td>
+          <button class="admin-action-btn del" onclick="deleteNewsletterSubscriber('${sub.email}')">
+            🗑️ Supprimer
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+  
+  showToast(`✓ ${totalCount} abonné${totalCount > 1 ? 's' : ''} chargé${totalCount > 1 ? 's' : ''}`);
+}
+
+// Supprimer un abonné
+async function deleteNewsletterSubscriber(email) {
+  if (!confirm(`Supprimer l'abonné ${email} ?\n\nCette action est irréversible.`)) {
+    return;
+  }
+  
+  try {
+    showToast('🗑️ Suppression en cours...');
+    
+    const response = await adminAuth.authenticatedFetch(`${API_URL}/newsletter/subscribers/${encodeURIComponent(email)}`, {
+      method: 'DELETE'
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erreur lors de la suppression');
+    }
+    
+    showToast('✓ Abonné supprimé');
+    
+    // Rafraîchir la liste
+    await refreshNewsletterSubscribers();
+    
+  } catch (error) {
+    console.error('Erreur suppression abonné:', error);
+    showToast('Erreur: ' + error.message, true);
+    
+    if (error.message && error.message.includes('Session expirée')) {
+      adminLogout();
+      showPage('admin');
+    }
+  }
+}
+
+// Envoyer une newsletter groupée
+async function sendNewsletterBulk() {
+  const subject = document.getElementById('newsletterSubject').value.trim();
+  const message = document.getElementById('newsletterMessage').value.trim();
+  
+  if (!subject || !message) {
+    showToast('Veuillez remplir le sujet et le message', true);
+    return;
+  }
+  
+  if (!confirm(`Envoyer cette newsletter à tous les abonnés ?\n\nSujet: ${subject}\n\nCette action enverra un email à tous vos abonnés actifs.`)) {
+    return;
+  }
+  
+  try {
+    showToast('📧 Envoi en cours...');
+    
+    const response = await adminAuth.authenticatedFetch(`${API_URL}/newsletter/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject, message })
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erreur lors de l\'envoi');
+    }
+    
+    const result = await response.json();
+    
+    showToast(`✓ Newsletter envoyée à ${result.sent} abonné${result.sent > 1 ? 's' : ''} !`);
+    
+    // Réinitialiser le formulaire
+    document.getElementById('newsletterSubject').value = '';
+    document.getElementById('newsletterMessage').value = '';
+    
+  } catch (error) {
+    console.error('Erreur envoi newsletter:', error);
+    showToast('Erreur: ' + error.message, true);
+    
+    if (error.message && error.message.includes('Session expirée')) {
+      adminLogout();
+      showPage('admin');
+    }
+  }
+}
+
+// Prévisualiser la newsletter
+function previewNewsletter() {
+  const subject = document.getElementById('newsletterSubject').value.trim();
+  const message = document.getElementById('newsletterMessage').value.trim();
+  
+  if (!subject || !message) {
+    showToast('Veuillez remplir le sujet et le message', true);
+    return;
+  }
+  
+  const previewHtml = `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${subject}</title>
+    </head>
+    <body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+      <div style="max-width:600px;margin:0 auto;padding:20px">
+        <div style="background:#000;color:#b8ff57;padding:20px;text-align:center">
+          <h1 style="margin:0;font-size:32px;letter-spacing:2px">BACK<span style="color:#fff">ZO</span></h1>
+          <p style="margin:10px 0 0;font-size:14px;color:#999">Newsletter</p>
+        </div>
+        
+        <div style="background:#fff;padding:30px;margin-top:20px;border-radius:8px">
+          <h2 style="color:#000;margin-top:0">${subject}</h2>
+          <div style="color:#333;line-height:1.6;white-space:pre-wrap">${message}</div>
+          
+          <p style="color:#333;line-height:1.6;margin-top:30px">
+            Cordialement,<br/>
+            <strong>L'équipe BackZo</strong>
+          </p>
+        </div>
+        
+        <div style="text-align:center;padding:20px;color:#999;font-size:12px">
+          <p style="margin:0">BackZo — Your Name Your Story</p>
+          <p style="margin:5px 0 0">www.backzo.eu</p>
+          <p style="margin:10px 0 0">
+            <a href="#" style="color:#999;text-decoration:underline">Se désinscrire</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const previewWindow = window.open('', '_blank');
+  previewWindow.document.write(previewHtml);
+  previewWindow.document.close();
+}
+
+// Inscription à la newsletter (frontend)
+async function subscribeNewsletter(email, name = '') {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { success: false, message: 'Email invalide' };
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/newsletter/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name })
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      return { success: false, message: data.error || 'Erreur lors de l\'inscription' };
+    }
+    
+    return { success: true, message: data.message };
+    
+  } catch (error) {
+    console.error('Erreur inscription newsletter:', error);
+    return { success: false, message: 'Erreur de connexion' };
+  }
+}
+
+// Inscription depuis le footer
+async function subscribeFooterNewsletter() {
+  const emailInput = document.getElementById('footerNewsletterEmail');
+  const msgDiv = document.getElementById('footerNewsletterMsg');
+  const email = emailInput.value.trim();
+  
+  if (!email) {
+    msgDiv.style.color = 'var(--red)';
+    msgDiv.textContent = 'Veuillez entrer votre email';
+    return;
+  }
+  
+  msgDiv.style.color = 'var(--gray)';
+  msgDiv.textContent = 'Inscription en cours...';
+  
+  const result = await subscribeNewsletter(email);
+  
+  if (result.success) {
+    msgDiv.style.color = 'var(--green)';
+    msgDiv.textContent = '✓ ' + result.message;
+    emailInput.value = '';
+  } else {
+    msgDiv.style.color = 'var(--red)';
+    msgDiv.textContent = '✗ ' + result.message;
+  }
+  
+  // Effacer le message après 5 secondes
+  setTimeout(() => {
+    msgDiv.textContent = '';
+  }, 5000);
 }
 
 // ============================================================

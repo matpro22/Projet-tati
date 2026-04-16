@@ -2063,6 +2063,403 @@ app.post('/api/settings', authenticateToken, async (req, res) => {
 });
 
 // ============================================================
+// ROUTES NEWSLETTER
+// ============================================================
+
+// Inscription à la newsletter
+app.post('/api/newsletter/subscribe', async (req, res) => {
+  try {
+    const { email, name } = req.body;
+    
+    // Validation
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Email invalide' });
+    }
+    
+    console.log('📧 Inscription newsletter:', email);
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    // Enregistrer dans MongoDB
+    if (USE_MONGODB && db) {
+      try {
+        // Vérifier si l'email existe déjà
+        const existing = await db.collection('newsletter').findOne({ email: email.toLowerCase() });
+        
+        if (existing) {
+          if (existing.unsubscribed) {
+            // Réabonner
+            await db.collection('newsletter').updateOne(
+              { email: email.toLowerCase() },
+              { 
+                $set: { 
+                  unsubscribed: false,
+                  resubscribedAt: new Date(),
+                  updatedAt: new Date()
+                }
+              }
+            );
+            console.log('✓ Email réabonné à la newsletter');
+            return res.json({ 
+              success: true, 
+              message: 'Vous êtes de nouveau inscrit à notre newsletter !' 
+            });
+          } else {
+            return res.status(400).json({ error: 'Cet email est déjà inscrit' });
+          }
+        }
+        
+        // Créer un nouvel abonné
+        const subscriber = {
+          email: email.toLowerCase(),
+          name: name || '',
+          subscribedAt: new Date(),
+          unsubscribed: false,
+          source: 'website',
+          updatedAt: new Date()
+        };
+        
+        await db.collection('newsletter').insertOne(subscriber);
+        
+        console.log('✓ Email ajouté à la newsletter');
+        
+        // Envoyer un email de bienvenue si configuré
+        if (emailTransporter) {
+          try {
+            await emailTransporter.sendMail({
+              from: process.env.EMAIL_FROM || 'team@backzo.eu',
+              to: email,
+              subject: '✅ Bienvenue dans la newsletter BackZo !',
+              html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+                  <div style="background: #000; color: #b8ff57; padding: 20px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 32px; letter-spacing: 2px;">BACK<span style="color: #fff;">ZO</span></h1>
+                    <p style="margin: 10px 0 0; font-size: 14px; color: #999;">Newsletter</p>
+                  </div>
+                  
+                  <div style="background: #fff; padding: 30px; margin-top: 20px; border-radius: 8px;">
+                    <h2 style="color: #000; margin-top: 0;">Bienvenue ${name || 'cher abonné'} !</h2>
+                    <p style="color: #333; line-height: 1.6;">Merci de vous être inscrit à notre newsletter. Vous recevrez désormais nos dernières actualités, offres exclusives et nouveautés en avant-première.</p>
+                    
+                    <div style="background: #e6ffe6; border-left: 4px solid #00cc00; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                      <p style="margin: 0; color: #006600; font-weight: bold;">
+                        🎉 Votre inscription est confirmée !
+                      </p>
+                    </div>
+                    
+                    <p style="color: #333; line-height: 1.6; margin-top: 20px;">
+                      À très bientôt,<br/>
+                      <strong>L'équipe BackZo</strong>
+                    </p>
+                  </div>
+                  
+                  <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+                    <p style="margin: 0;">BackZo — Your Name Your Story</p>
+                    <p style="margin: 5px 0 0;">www.backzo.eu</p>
+                  </div>
+                </div>
+              `
+            });
+            console.log('✓ Email de bienvenue envoyé');
+          } catch (emailError) {
+            console.warn('⚠️  Erreur envoi email de bienvenue:', emailError.message);
+          }
+        }
+        
+        return res.json({ 
+          success: true, 
+          message: 'Merci ! Vous êtes maintenant inscrit à notre newsletter.' 
+        });
+        
+      } catch (error) {
+        console.error('❌ Erreur MongoDB newsletter:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.status(500).json({ error: 'Erreur lors de l\'inscription' });
+        }
+      }
+    }
+    
+    // Sur Vercel sans MongoDB
+    if (process.env.VERCEL) {
+      return res.status(500).json({ error: 'Service newsletter non disponible' });
+    }
+    
+    // Mode local sans MongoDB
+    res.json({ 
+      success: true, 
+      message: 'Inscription enregistrée (mode local)' 
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur inscription newsletter:', error.message);
+    res.status(500).json({ error: 'Erreur lors de l\'inscription' });
+  }
+});
+
+// Désinscription de la newsletter
+app.post('/api/newsletter/unsubscribe', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email requis' });
+    }
+    
+    console.log('📧 Désinscription newsletter:', email);
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        const result = await db.collection('newsletter').updateOne(
+          { email: email.toLowerCase() },
+          { 
+            $set: { 
+              unsubscribed: true,
+              unsubscribedAt: new Date(),
+              updatedAt: new Date()
+            }
+          }
+        );
+        
+        if (result.matchedCount === 0) {
+          return res.status(404).json({ error: 'Email non trouvé' });
+        }
+        
+        console.log('✓ Email désinscrit de la newsletter');
+        return res.json({ 
+          success: true, 
+          message: 'Vous avez été désinscrit de notre newsletter.' 
+        });
+        
+      } catch (error) {
+        console.error('❌ Erreur MongoDB désinscription:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.status(500).json({ error: 'Erreur lors de la désinscription' });
+        }
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Désinscription enregistrée' 
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur désinscription newsletter:', error.message);
+    res.status(500).json({ error: 'Erreur lors de la désinscription' });
+  }
+});
+
+// Récupérer tous les abonnés (admin)
+app.get('/api/newsletter/subscribers', authenticateToken, async (req, res) => {
+  try {
+    console.log('📧 Récupération des abonnés newsletter');
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        const subscribers = await db.collection('newsletter')
+          .find({ unsubscribed: { $ne: true } })
+          .sort({ subscribedAt: -1 })
+          .toArray();
+        
+        console.log(`✓ ${subscribers.length} abonnés trouvés`);
+        return res.json(subscribers);
+        
+      } catch (error) {
+        console.error('❌ Erreur MongoDB récupération abonnés:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.status(500).json({ error: 'Erreur lors de la récupération' });
+        }
+      }
+    }
+    
+    // Mode local sans MongoDB
+    res.json([]);
+    
+  } catch (error) {
+    console.error('❌ Erreur récupération abonnés:', error.message);
+    res.status(500).json({ error: 'Erreur lors de la récupération' });
+  }
+});
+
+// Envoyer un email groupé (admin)
+app.post('/api/newsletter/send', authenticateToken, async (req, res) => {
+  try {
+    const { subject, message, htmlMessage } = req.body;
+    
+    if (!subject || !message) {
+      return res.status(400).json({ error: 'Sujet et message requis' });
+    }
+    
+    if (!emailTransporter) {
+      return res.status(500).json({ error: 'Service email non configuré' });
+    }
+    
+    console.log('📧 Envoi newsletter groupé:', subject);
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        // Récupérer tous les abonnés actifs
+        const subscribers = await db.collection('newsletter')
+          .find({ unsubscribed: { $ne: true } })
+          .toArray();
+        
+        if (subscribers.length === 0) {
+          return res.status(400).json({ error: 'Aucun abonné trouvé' });
+        }
+        
+        console.log(`📧 Envoi à ${subscribers.length} abonnés...`);
+        
+        // Préparer le HTML du message
+        const emailHtml = htmlMessage || `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: #000; color: #b8ff57; padding: 20px; text-align: center;">
+              <h1 style="margin: 0; font-size: 32px; letter-spacing: 2px;">BACK<span style="color: #fff;">ZO</span></h1>
+              <p style="margin: 10px 0 0; font-size: 14px; color: #999;">Newsletter</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; margin-top: 20px; border-radius: 8px;">
+              <h2 style="color: #000; margin-top: 0;">${subject}</h2>
+              <div style="color: #333; line-height: 1.6; white-space: pre-wrap;">${message}</div>
+              
+              <p style="color: #333; line-height: 1.6; margin-top: 30px;">
+                Cordialement,<br/>
+                <strong>L'équipe BackZo</strong>
+              </p>
+            </div>
+            
+            <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+              <p style="margin: 0;">BackZo — Your Name Your Story</p>
+              <p style="margin: 5px 0 0;">www.backzo.eu</p>
+              <p style="margin: 10px 0 0;">
+                <a href="${process.env.FRONTEND_URL || 'https://backzo.eu'}/unsubscribe?email={{EMAIL}}" style="color: #999; text-decoration: underline;">Se désinscrire</a>
+              </p>
+            </div>
+          </div>
+        `;
+        
+        // Envoyer les emails (en batch pour éviter de surcharger)
+        let sent = 0;
+        let failed = 0;
+        
+        for (const subscriber of subscribers) {
+          try {
+            const personalizedHtml = emailHtml.replace('{{EMAIL}}', encodeURIComponent(subscriber.email));
+            
+            await emailTransporter.sendMail({
+              from: process.env.EMAIL_FROM || 'team@backzo.eu',
+              to: subscriber.email,
+              subject: subject,
+              html: personalizedHtml
+            });
+            
+            sent++;
+            
+            // Petit délai pour éviter de surcharger le serveur SMTP
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+          } catch (emailError) {
+            console.error(`❌ Erreur envoi à ${subscriber.email}:`, emailError.message);
+            failed++;
+          }
+        }
+        
+        console.log(`✓ Newsletter envoyée: ${sent} réussis, ${failed} échecs`);
+        
+        return res.json({ 
+          success: true, 
+          message: `Newsletter envoyée à ${sent} abonnés`,
+          sent: sent,
+          failed: failed,
+          total: subscribers.length
+        });
+        
+      } catch (error) {
+        console.error('❌ Erreur envoi newsletter:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.status(500).json({ error: 'Erreur lors de l\'envoi' });
+        }
+      }
+    }
+    
+    res.status(500).json({ error: 'Service newsletter non disponible' });
+    
+  } catch (error) {
+    console.error('❌ Erreur envoi newsletter:', error.message);
+    res.status(500).json({ error: 'Erreur lors de l\'envoi' });
+  }
+});
+
+// Supprimer un abonné (admin)
+app.delete('/api/newsletter/subscribers/:email', authenticateToken, async (req, res) => {
+  try {
+    const email = decodeURIComponent(req.params.email);
+    
+    console.log('🗑️ Suppression abonné:', email);
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        const result = await db.collection('newsletter').deleteOne({ 
+          email: email.toLowerCase() 
+        });
+        
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ error: 'Abonné non trouvé' });
+        }
+        
+        console.log('✓ Abonné supprimé');
+        return res.json({ 
+          success: true, 
+          message: 'Abonné supprimé avec succès' 
+        });
+        
+      } catch (error) {
+        console.error('❌ Erreur MongoDB suppression:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.status(500).json({ error: 'Erreur lors de la suppression' });
+        }
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Abonné supprimé' 
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur suppression abonné:', error.message);
+    res.status(500).json({ error: 'Erreur lors de la suppression' });
+  }
+});
+
+// ============================================================
 // ROUTES UTILITAIRES
 // ============================================================
 
