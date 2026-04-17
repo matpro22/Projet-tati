@@ -291,12 +291,14 @@
     </div>
 
     <script>
-        // Déterminer l'URL de l'API backend
-        const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000'
-            : 'https://projet-tati.vercel.app';
+        // Déterminer l'URL de l'API backend (utilise la variable globale API_URL si disponible)
+        const REVIEW_API_URL = typeof API_URL !== 'undefined' 
+            ? API_URL.replace('/api', '') // Enlever /api si présent
+            : (window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000'
+                : 'https://projet-tati.vercel.app');
         
-        console.log('🔗 API URL:', API_URL);
+        console.log('🔗 Review Form API URL:', REVIEW_API_URL);
         
         // Récupérer les paramètres URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -387,7 +389,7 @@
             document.getElementById('loading').classList.add('show');
 
             try {
-                const response = await fetch(`${API_URL}/api/reviews`, {
+                const response = await fetch(`${REVIEW_API_URL}/api/reviews`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
