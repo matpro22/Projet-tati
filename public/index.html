@@ -908,15 +908,6 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
       <div>
         <a href="#" class="foot-logo" onclick="showPage('accueil');return false">BACK<span>ZO</span></a>
         <div class="foot-tagline" data-i18n="footer.tagline">Flocage amovible · Clubs &amp; Particuliers</div>
-        <!-- Newsletter Signup -->
-        <div style="margin-top:1.5rem">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:.8rem">📧 Newsletter</div>
-          <div style="display:flex;gap:.5rem;max-width:350px">
-            <input type="email" id="footerNewsletterEmail" placeholder="Votre email" class="bz-inp" style="flex:1;padding:.6rem .8rem;font-size:.85rem"/>
-            <button onclick="subscribeFooterNewsletter()" class="nav-cta" style="padding:.6rem 1.2rem;font-size:.8rem;white-space:nowrap">S'inscrire</button>
-          </div>
-          <div id="footerNewsletterMsg" style="font-size:.75rem;margin-top:.5rem;min-height:1em"></div>
-        </div>
       </div>
       <ul class="foot-links">
         <li><button onclick="openModal('cgv')" data-i18n="footer.cgv">CGV</button></li>
@@ -1480,6 +1471,38 @@ footer{background:var(--black);border-top:1px solid var(--lg);padding:2.5rem 4re
             </div>
             <button class="contact-submit" onclick="sendContactForm()">Envoyer le message →</button>
             <div id="ctResult" style="margin-top:.8rem;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;min-height:1.2em" role="status"></div>
+          </div>
+          
+          <!-- Newsletter Signup -->
+          <div class="contact-form reveal" style="margin-top:2rem;background:linear-gradient(135deg,var(--card) 0%,rgba(184,255,87,.05) 100%);border:1px solid rgba(184,255,87,.2)">
+            <div class="contact-form-title" style="display:flex;align-items:center;gap:.8rem">
+              <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style="color:var(--green)">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              Newsletter BackZo
+            </div>
+            <p style="font-size:.9rem;color:var(--gray);line-height:1.6;margin-bottom:1.5rem">
+              Restez informé de nos nouveautés, offres exclusives et actualités. Recevez notre newsletter directement dans votre boîte mail.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:1rem">
+              <div>
+                <label class="bz-lbl" for="contactNewsletterEmail">Votre email *</label>
+                <input class="bz-inp" id="contactNewsletterEmail" type="email" placeholder="votre@email.fr" style="background:var(--deep)"/>
+              </div>
+              <div>
+                <label class="bz-lbl" for="contactNewsletterName">Votre nom (optionnel)</label>
+                <input class="bz-inp" id="contactNewsletterName" type="text" placeholder="Jean Dupont" style="background:var(--deep)"/>
+              </div>
+              <button class="contact-submit" onclick="subscribeContactNewsletter()" style="background:var(--green);color:var(--black)">
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle;margin-right:.5rem">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                S'inscrire à la newsletter
+              </button>
+              <div id="contactNewsletterMsg" style="font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;min-height:1.2em"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -5019,6 +5042,41 @@ async function subscribeFooterNewsletter() {
     msgDiv.style.color = 'var(--green)';
     msgDiv.textContent = '✓ ' + result.message;
     emailInput.value = '';
+  } else {
+    msgDiv.style.color = 'var(--red)';
+    msgDiv.textContent = '✗ ' + result.message;
+  }
+  
+  // Effacer le message après 5 secondes
+  setTimeout(() => {
+    msgDiv.textContent = '';
+  }, 5000);
+}
+
+// Inscription depuis la page contact
+async function subscribeContactNewsletter() {
+  const emailInput = document.getElementById('contactNewsletterEmail');
+  const nameInput = document.getElementById('contactNewsletterName');
+  const msgDiv = document.getElementById('contactNewsletterMsg');
+  const email = emailInput.value.trim();
+  const name = nameInput.value.trim();
+  
+  if (!email) {
+    msgDiv.style.color = 'var(--red)';
+    msgDiv.textContent = 'Veuillez entrer votre email';
+    return;
+  }
+  
+  msgDiv.style.color = 'var(--gray)';
+  msgDiv.textContent = 'Inscription en cours...';
+  
+  const result = await subscribeNewsletter(email, name);
+  
+  if (result.success) {
+    msgDiv.style.color = 'var(--green)';
+    msgDiv.textContent = '✓ ' + result.message;
+    emailInput.value = '';
+    nameInput.value = '';
   } else {
     msgDiv.style.color = 'var(--red)';
     msgDiv.textContent = '✗ ' + result.message;
