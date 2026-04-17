@@ -2380,7 +2380,7 @@ app.post('/api/newsletter/send', authenticateToken, async (req, res) => {
               <p style="margin: 0;">BackZo — Your Name Your Story</p>
               <p style="margin: 5px 0 0;">www.backzo.eu</p>
               <p style="margin: 10px 0 0;">
-                <a href="${process.env.FRONTEND_URL || 'https://backzo.eu'}/unsubscribe?email={{EMAIL}}" style="color: #999; text-decoration: underline;">Se désinscrire</a>
+                <a href="https://backzo.eu/unsubscribe.html?email={{EMAIL}}" style="color: #999; text-decoration: underline;">Se désinscrire</a>
               </p>
             </div>
           </div>

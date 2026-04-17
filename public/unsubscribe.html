@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Désinscription Newsletter - BackZo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            color: #000;
+        }
+
+        .logo span {
+            color: #b8ff57;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #000;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .email-display {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+            color: #000;
+            word-break: break-all;
+        }
+
+        .btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #000;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            box-shadow: none;
+        }
+
+        .success {
+            display: none;
+        }
+
+        .success.show {
+            display: block;
+        }
+
+        .success .icon {
+            color: #00cc00;
+        }
+
+        .error {
+            display: none;
+            background: #ffe6e6;
+            border-left: 4px solid #ff4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .error p {
+            color: #cc0000;
+            margin: 0;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #b8ff57;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .footer a {
+            color: #b8ff57;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">BACK<span>ZO</span></div>
+        <div class="subtitle">Désinscription Newsletter</div>
+
+        <!-- Formulaire de désinscription -->
+        <div id="unsubscribeForm">
+            <div class="icon">📧</div>
+            <h1>Se désinscrire de la newsletter</h1>
+            <p>Vous êtes sur le point de vous désinscrire de notre newsletter.</p>
+            
+            <div class="email-display" id="emailDisplay">
+                Chargement...
+            </div>
+
+            <p style="font-size: 14px; color: #999;">
+                Vous ne recevrez plus d'emails promotionnels de notre part.
+            </p>
+
+            <button class="btn" id="unsubscribeBtn" onclick="unsubscribe()">
+                Confirmer la désinscription
+            </button>
+
+            <button class="btn btn-secondary" onclick="window.location.href='/'">
+                Annuler et retourner au site
+            </button>
+        </div>
+
+        <!-- Message de chargement -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #666;">Traitement en cours...</p>
+        </div>
+
+        <!-- Message d'erreur -->
+        <div class="error" id="error">
+            <p id="errorMessage"></p>
+        </div>
+
+        <!-- Message de succès -->
+        <div class="success" id="success">
+            <div class="icon">✅</div>
+            <h1>Désinscription confirmée</h1>
+            <p>Vous avez été désinscrit avec succès de notre newsletter.</p>
+            <p style="font-size: 14px; color: #999;">
+                Nous sommes désolés de vous voir partir. Vous pouvez vous réinscrire à tout moment depuis notre site.
+            </p>
+            <button class="btn btn-secondary" onclick="window.location.href='/'">
+                Retourner au site
+            </button>
+        </div>
+
+        <div class="footer">
+            <p>BackZo — Flocage amovible premium</p>
+            <p><a href="/">www.backzo.eu</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Récupérer l'email depuis l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get('email');
+
+        // Afficher l'email ou un message d'erreur
+        if (email) {
+            document.getElementById('emailDisplay').textContent = email;
+        } else {
+            document.getElementById('emailDisplay').textContent = 'Email non spécifié';
+            document.getElementById('unsubscribeBtn').disabled = true;
+            showError('Aucun email spécifié dans le lien. Veuillez utiliser le lien reçu par email.');
+        }
+
+        // Fonction pour afficher une erreur
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('error').classList.add('show');
+        }
+
+        // Fonction pour cacher une erreur
+        function hideError() {
+            document.getElementById('error').classList.remove('show');
+        }
+
+        // Fonction de désinscription
+        async function unsubscribe() {
+            if (!email) {
+                showError('Email manquant');
+                return;
+            }
+
+            hideError();
+
+            // Afficher le chargement
+            document.getElementById('unsubscribeForm').style.display = 'none';
+            document.getElementById('loading').classList.add('show');
+
+            try {
+                const response = await fetch('/api/newsletter/unsubscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const data = await response.json();
+
+                // Cacher le chargement
+                document.getElementById('loading').classList.remove('show');
+
+                if (response.ok && data.success) {
+                    // Afficher le succès
+                    document.getElementById('success').classList.add('show');
+                } else {
+                    // Afficher l'erreur
+                    document.getElementById('unsubscribeForm').style.display = 'block';
+                    showError(data.error || 'Une erreur est survenue lors de la désinscription');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('unsubscribeForm').style.display = 'block';
+                showError('Erreur de connexion au serveur. Veuillez réessayer.');
+            }
+        }
+    </script>
+</body>
+</html>

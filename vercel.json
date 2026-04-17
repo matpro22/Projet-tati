@@ -21,6 +21,10 @@
       "dest": "/public/$1"
     },
     {
+      "src": "/unsubscribe",
+      "dest": "/public/unsubscribe.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/public/index.html"
     }
