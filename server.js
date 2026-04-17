@@ -499,7 +499,7 @@ async function sendOrderStatusUpdateEmail(order, newStatus, oldStatus) {
               Nous espérons que vous êtes satisfait de votre commande. Partagez votre expérience avec nous !
             </p>
             <div style="text-align: center;">
-              <a href="${process.env.FRONTEND_URL || 'https://backzo.eu'}/review.html?orderId=${order.id}&email=${encodeURIComponent(order.customer.email)}" 
+              <a href="https://backzo.eu/review.html?orderId=${order.id}&email=${encodeURIComponent(order.customer.email)}" 
                  style="display: inline-block; background: #b8ff57; color: #000; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px;">
                 ⭐ Donner mon avis
               </a>
