@@ -2,6 +2,13 @@
 (function() {
     'use strict';
 
+    // Déterminer l'URL de l'API backend
+    const API_URL = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3000'
+        : 'https://projet-tati.vercel.app';
+    
+    console.log('🔗 Reviews API URL:', API_URL);
+
     // Créer la section des avis
     function createReviewsSection() {
         const reviewsHTML = `
@@ -87,7 +94,7 @@
         if (!container) return;
         
         try {
-            const response = await fetch('/api/reviews');
+            const response = await fetch(`${API_URL}/api/reviews`);
             
             if (!response.ok) {
                 throw new Error('Erreur lors du chargement des avis');

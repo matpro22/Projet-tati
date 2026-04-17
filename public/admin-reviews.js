@@ -2,6 +2,13 @@
 // GESTION DES AVIS CLIENTS - ADMIN
 // ============================================================
 
+// Déterminer l'URL de l'API backend
+const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000'
+    : 'https://projet-tati.vercel.app';
+
+console.log('🔗 Admin Reviews API URL:', API_URL);
+
 // Charger les avis
 async function refreshReviews() {
     showToast('🔄 Chargement des avis...');
@@ -14,7 +21,7 @@ async function refreshReviews() {
             return;
         }
         
-        const response = await fetch('/api/admin/reviews', {
+        const response = await fetch(`${API_URL}/api/admin/reviews`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -123,7 +130,7 @@ async function approveReview(reviewId) {
             return;
         }
         
-        const response = await fetch(`/api/admin/reviews/${reviewId}/approve`, {
+        const response = await fetch(`${API_URL}/api/admin/reviews/${reviewId}/approve`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -158,7 +165,7 @@ async function deleteReview(reviewId) {
             return;
         }
         
-        const response = await fetch(`/api/admin/reviews/${reviewId}`, {
+        const response = await fetch(`${API_URL}/api/admin/reviews/${reviewId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -184,7 +191,7 @@ async function loadReviewSettings() {
         const token = localStorage.getItem('adminToken');
         if (!token) return;
         
-        const response = await fetch('/api/admin/reviews/settings', {
+        const response = await fetch(`${API_URL}/api/admin/reviews/settings`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -226,7 +233,7 @@ async function saveReviewSettings() {
             maxReviews: parseInt(document.getElementById('reviewMaxReviews').value)
         };
         
-        const response = await fetch('/api/admin/reviews/settings', {
+        const response = await fetch(`${API_URL}/api/admin/reviews/settings`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,

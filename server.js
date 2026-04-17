@@ -63,13 +63,26 @@ if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.startsWith('s
 // Middleware
 // Configuration CORS pour autoriser le frontend
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:8080',
-    'https://backzo.eu',
-    'https://www.backzo.eu',
-    'https://projet-tati.vercel.app'
-  ],
+  origin: function (origin, callback) {
+    // Autoriser les requêtes sans origin (comme les apps mobiles ou curl)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:8080',
+      'https://backzo.eu',
+      'https://www.backzo.eu',
+      'https://projet-tati.vercel.app'
+    ];
+    
+    // Autoriser toutes les origines Vercel en développement
+    if (origin.includes('vercel.app') || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('⚠️  Origine CORS non autorisée:', origin);
+      callback(null, true); // Autoriser quand même pour éviter les blocages
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200
 };

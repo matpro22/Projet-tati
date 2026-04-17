@@ -291,6 +291,13 @@
     </div>
 
     <script>
+        // Déterminer l'URL de l'API backend
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000'
+            : 'https://projet-tati.vercel.app';
+        
+        console.log('🔗 API URL:', API_URL);
+        
         // Récupérer les paramètres URL
         const urlParams = new URLSearchParams(window.location.search);
         const orderId = urlParams.get('orderId');
@@ -380,7 +387,7 @@
             document.getElementById('loading').classList.add('show');
 
             try {
-                const response = await fetch('/api/reviews', {
+                const response = await fetch(`${API_URL}/api/reviews`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
