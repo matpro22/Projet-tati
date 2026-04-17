@@ -482,9 +482,15 @@ async function sendOrderStatusUpdateEmail(order, newStatus, oldStatus) {
             <p style="margin: 0 0 10px; color: #006600; font-size: 14px;">
               ⭐ <strong>Votre avis compte !</strong>
             </p>
-            <p style="margin: 0; color: #333; font-size: 13px;">
-              Nous espérons que vous êtes satisfait de votre commande. N'hésitez pas à nous faire part de vos retours !
+            <p style="margin: 0 0 15px; color: #333; font-size: 13px;">
+              Nous espérons que vous êtes satisfait de votre commande. Partagez votre expérience avec nous !
             </p>
+            <div style="text-align: center;">
+              <a href="${process.env.FRONTEND_URL || 'https://backzo.eu'}/review.html?orderId=${order.id}&email=${encodeURIComponent(order.customer.email)}" 
+                 style="display: inline-block; background: #b8ff57; color: #000; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px;">
+                ⭐ Donner mon avis
+              </a>
+            </div>
           </div>
           ` : ''}
           
@@ -527,6 +533,7 @@ const DB_PATH = path.join(__dirname, 'data');
 const ORDERS_FILE = path.join(DB_PATH, 'orders.json');
 const PRODUCTS_FILE = path.join(DB_PATH, 'products.json');
 const SETTINGS_FILE = path.join(DB_PATH, 'settings.json');
+const REVIEWS_FILE = path.join(DB_PATH, 'reviews.json');
 
 // Connexion MongoDB avec cache
 async function connectMongoDB() {
@@ -699,6 +706,14 @@ async function initDB() {
         };
         await db.collection('presentations').insertOne(defaultParticuliersPresentation);
         console.log('✓ Présentation Particuliers créée dans MongoDB');
+      }
+      
+      // Créer le fichier reviews.json s'il n'existe pas (pour le fallback)
+      try {
+        await fs.access(REVIEWS_FILE);
+      } catch {
+        await fs.writeFile(REVIEWS_FILE, JSON.stringify([]));
+        console.log('✓ Fichier reviews.json créé');
       }
       
       console.log('✓ MongoDB initialisé');
@@ -2456,6 +2471,469 @@ app.delete('/api/newsletter/subscribers/:email', authenticateToken, async (req, 
   } catch (error) {
     console.error('❌ Erreur suppression abonné:', error.message);
     res.status(500).json({ error: 'Erreur lors de la suppression' });
+  }
+});
+
+// ============================================================
+// ROUTES AVIS CLIENTS
+// ============================================================
+
+// Récupérer tous les avis (publics approuvés)
+app.get('/api/reviews', async (req, res) => {
+  try {
+    console.log('📝 Récupération des avis publics');
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        const reviews = await db.collection('reviews')
+          .find({ approved: true })
+          .sort({ createdAt: -1 })
+          .toArray();
+        
+        console.log(`✓ ${reviews.length} avis trouvés`);
+        return res.json(reviews);
+        
+      } catch (error) {
+        console.error('❌ Erreur MongoDB récupération avis:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.json([]);
+        }
+      }
+    }
+    
+    // Mode fichier JSON
+    if (process.env.VERCEL) {
+      return res.json([]);
+    }
+    
+    try {
+      const data = await fs.readFile(REVIEWS_FILE, 'utf8');
+      const reviews = JSON.parse(data);
+      const approvedReviews = reviews.filter(r => r.approved === true);
+      return res.json(approvedReviews);
+    } catch (error) {
+      console.error('Erreur lecture fichier avis:', error.message);
+      return res.json([]);
+    }
+    
+  } catch (error) {
+    console.error('❌ Erreur récupération avis:', error.message);
+    res.status(500).json({ error: 'Erreur lors de la récupération des avis' });
+  }
+});
+
+// Récupérer tous les avis (admin - incluant non approuvés)
+app.get('/api/admin/reviews', authenticateToken, async (req, res) => {
+  try {
+    console.log('📝 Récupération de tous les avis (admin)');
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        const reviews = await db.collection('reviews')
+          .find({})
+          .sort({ createdAt: -1 })
+          .toArray();
+        
+        console.log(`✓ ${reviews.length} avis trouvés`);
+        return res.json(reviews);
+        
+      } catch (error) {
+        console.error('❌ Erreur MongoDB récupération avis:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.json([]);
+        }
+      }
+    }
+    
+    // Mode fichier JSON
+    if (process.env.VERCEL) {
+      return res.json([]);
+    }
+    
+    try {
+      const data = await fs.readFile(REVIEWS_FILE, 'utf8');
+      const reviews = JSON.parse(data);
+      return res.json(reviews);
+    } catch (error) {
+      console.error('Erreur lecture fichier avis:', error.message);
+      return res.json([]);
+    }
+    
+  } catch (error) {
+    console.error('❌ Erreur récupération avis:', error.message);
+    res.status(500).json({ error: 'Erreur lors de la récupération des avis' });
+  }
+});
+
+// Soumettre un nouvel avis
+app.post('/api/reviews', async (req, res) => {
+  try {
+    const { orderId, email, rating, comment, customerName } = req.body;
+    
+    // Validation
+    if (!orderId || !email || !rating) {
+      return res.status(400).json({ error: 'Données manquantes' });
+    }
+    
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Note invalide (1-5)' });
+    }
+    
+    console.log('📝 Soumission nouvel avis:', { orderId, email, rating });
+    
+    // Vérifier que la commande existe et appartient à cet email
+    let order = null;
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        order = await db.collection('orders').findOne({ 
+          id: orderId,
+          'customer.email': email
+        });
+      } catch (error) {
+        console.error('❌ Erreur MongoDB recherche commande:', error.message);
+      }
+    } else if (!process.env.VERCEL) {
+      // Mode fichier JSON
+      try {
+        const ordersData = await fs.readFile(ORDERS_FILE, 'utf8');
+        const orders = JSON.parse(ordersData);
+        order = orders.find(o => o.id === orderId && o.customer.email === email);
+      } catch (error) {
+        console.error('Erreur lecture fichier commandes:', error.message);
+      }
+    }
+    
+    if (!order) {
+      return res.status(404).json({ error: 'Commande non trouvée ou email incorrect' });
+    }
+    
+    // Vérifier si un avis existe déjà pour cette commande
+    let existingReview = null;
+    
+    if (USE_MONGODB && db) {
+      try {
+        existingReview = await db.collection('reviews').findOne({ orderId: orderId });
+      } catch (error) {
+        console.error('❌ Erreur MongoDB recherche avis existant:', error.message);
+      }
+    } else if (!process.env.VERCEL) {
+      try {
+        const reviewsData = await fs.readFile(REVIEWS_FILE, 'utf8');
+        const reviews = JSON.parse(reviewsData);
+        existingReview = reviews.find(r => r.orderId === orderId);
+      } catch (error) {
+        console.error('Erreur lecture fichier avis:', error.message);
+      }
+    }
+    
+    if (existingReview) {
+      return res.status(400).json({ error: 'Un avis a déjà été soumis pour cette commande' });
+    }
+    
+    // Créer le nouvel avis
+    const review = {
+      id: 'REV-' + Date.now(),
+      orderId: orderId,
+      customerName: customerName || order.customer.firstName + ' ' + order.customer.lastName.charAt(0) + '.',
+      customerEmail: email,
+      rating: parseInt(rating),
+      comment: comment || '',
+      approved: false, // Par défaut, les avis doivent être approuvés
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    // Sauvegarder l'avis
+    if (USE_MONGODB && db) {
+      try {
+        await db.collection('reviews').insertOne(review);
+        console.log('✓ Avis sauvegardé dans MongoDB');
+      } catch (error) {
+        console.error('❌ Erreur MongoDB sauvegarde avis:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.status(500).json({ error: 'Erreur lors de la sauvegarde de l\'avis' });
+        }
+      }
+    }
+    
+    if (!USE_MONGODB || !db) {
+      if (process.env.VERCEL) {
+        return res.status(500).json({ error: 'Service non disponible' });
+      }
+      
+      // Mode fichier JSON
+      try {
+        const reviewsData = await fs.readFile(REVIEWS_FILE, 'utf8');
+        const reviews = JSON.parse(reviewsData);
+        reviews.push(review);
+        await fs.writeFile(REVIEWS_FILE, JSON.stringify(reviews, null, 2));
+        console.log('✓ Avis sauvegardé dans fichier JSON');
+      } catch (error) {
+        console.error('Erreur sauvegarde fichier avis:', error.message);
+        return res.status(500).json({ error: 'Erreur lors de la sauvegarde de l\'avis' });
+      }
+    }
+    
+    // Envoyer une notification à l'admin
+    if (emailTransporter) {
+      try {
+        await emailTransporter.sendMail({
+          from: process.env.EMAIL_FROM || 'team@backzo.eu',
+          to: process.env.EMAIL_TO || 'team@backzo.eu',
+          subject: `⭐ Nouvel avis client - ${rating}/5 étoiles`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+              <div style="background: #000; color: #b8ff57; padding: 20px; text-align: center;">
+                <h1 style="margin: 0; font-size: 32px; letter-spacing: 2px;">BACK<span style="color: #fff;">ZO</span></h1>
+                <p style="margin: 10px 0 0; font-size: 14px; color: #999;">Nouvel avis client</p>
+              </div>
+              
+              <div style="background: #fff; padding: 30px; margin-top: 20px; border-radius: 8px;">
+                <h2 style="color: #000; margin-top: 0;">⭐ Nouvel avis reçu</h2>
+                
+                <div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-left: 4px solid #b8ff57;">
+                  <p style="margin: 0 0 10px;"><strong>Client :</strong> ${review.customerName}</p>
+                  <p style="margin: 0 0 10px;"><strong>Commande :</strong> ${orderId}</p>
+                  <p style="margin: 0 0 10px;"><strong>Note :</strong> ${'⭐'.repeat(rating)} (${rating}/5)</p>
+                  ${comment ? `<p style="margin: 15px 0 0;"><strong>Commentaire :</strong><br/>${comment}</p>` : ''}
+                </div>
+                
+                <div style="background: #fff9e6; padding: 15px; margin: 20px 0; border-left: 4px solid #ffcc00;">
+                  <p style="margin: 0; color: #666; font-size: 14px;">
+                    ⚡ <strong>Action requise :</strong> Connectez-vous au panel admin pour approuver ou rejeter cet avis.
+                  </p>
+                </div>
+              </div>
+            </div>
+          `
+        });
+        console.log('✓ Notification admin envoyée');
+      } catch (emailError) {
+        console.warn('⚠️  Erreur envoi notification admin:', emailError.message);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Merci pour votre avis ! Il sera publié après validation.',
+      review: review
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur soumission avis:', error.message);
+    res.status(500).json({ error: 'Erreur lors de la soumission de l\'avis' });
+  }
+});
+
+// Approuver un avis (admin)
+app.put('/api/admin/reviews/:id/approve', authenticateToken, async (req, res) => {
+  try {
+    const reviewId = req.params.id;
+    
+    console.log('✅ Approbation avis:', reviewId);
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        const result = await db.collection('reviews').updateOne(
+          { id: reviewId },
+          { 
+            $set: { 
+              approved: true,
+              updatedAt: new Date()
+            }
+          }
+        );
+        
+        if (result.matchedCount === 0) {
+          return res.status(404).json({ error: 'Avis non trouvé' });
+        }
+        
+        console.log('✓ Avis approuvé dans MongoDB');
+        return res.json({ success: true, message: 'Avis approuvé avec succès' });
+        
+      } catch (error) {
+        console.error('❌ Erreur MongoDB approbation avis:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.status(500).json({ error: 'Erreur lors de l\'approbation' });
+        }
+      }
+    }
+    
+    // Mode fichier JSON
+    if (process.env.VERCEL) {
+      return res.status(500).json({ error: 'Service non disponible' });
+    }
+    
+    try {
+      const reviewsData = await fs.readFile(REVIEWS_FILE, 'utf8');
+      const reviews = JSON.parse(reviewsData);
+      const review = reviews.find(r => r.id === reviewId);
+      
+      if (!review) {
+        return res.status(404).json({ error: 'Avis non trouvé' });
+      }
+      
+      review.approved = true;
+      review.updatedAt = new Date();
+      
+      await fs.writeFile(REVIEWS_FILE, JSON.stringify(reviews, null, 2));
+      console.log('✓ Avis approuvé dans fichier JSON');
+      
+      return res.json({ success: true, message: 'Avis approuvé avec succès' });
+      
+    } catch (error) {
+      console.error('Erreur approbation fichier avis:', error.message);
+      return res.status(500).json({ error: 'Erreur lors de l\'approbation' });
+    }
+    
+  } catch (error) {
+    console.error('❌ Erreur approbation avis:', error.message);
+    res.status(500).json({ error: 'Erreur lors de l\'approbation' });
+  }
+});
+
+// Rejeter/supprimer un avis (admin)
+app.delete('/api/admin/reviews/:id', authenticateToken, async (req, res) => {
+  try {
+    const reviewId = req.params.id;
+    
+    console.log('🗑️ Suppression avis:', reviewId);
+    
+    // Essayer de se connecter à MongoDB si pas encore fait
+    if (USE_MONGODB && !db) {
+      await connectMongoDB();
+    }
+    
+    if (USE_MONGODB && db) {
+      try {
+        const result = await db.collection('reviews').deleteOne({ id: reviewId });
+        
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ error: 'Avis non trouvé' });
+        }
+        
+        console.log('✓ Avis supprimé de MongoDB');
+        return res.json({ success: true, message: 'Avis supprimé avec succès' });
+        
+      } catch (error) {
+        console.error('❌ Erreur MongoDB suppression avis:', error.message);
+        
+        if (process.env.VERCEL) {
+          return res.status(500).json({ error: 'Erreur lors de la suppression' });
+        }
+      }
+    }
+    
+    // Mode fichier JSON
+    if (process.env.VERCEL) {
+      return res.status(500).json({ error: 'Service non disponible' });
+    }
+    
+    try {
+      const reviewsData = await fs.readFile(REVIEWS_FILE, 'utf8');
+      const reviews = JSON.parse(reviewsData);
+      const index = reviews.findIndex(r => r.id === reviewId);
+      
+      if (index === -1) {
+        return res.status(404).json({ error: 'Avis non trouvé' });
+      }
+      
+      reviews.splice(index, 1);
+      await fs.writeFile(REVIEWS_FILE, JSON.stringify(reviews, null, 2));
+      console.log('✓ Avis supprimé du fichier JSON');
+      
+      return res.json({ success: true, message: 'Avis supprimé avec succès' });
+      
+    } catch (error) {
+      console.error('Erreur suppression fichier avis:', error.message);
+      return res.status(500).json({ error: 'Erreur lors de la suppression' });
+    }
+    
+  } catch (error) {
+    console.error('❌ Erreur suppression avis:', error.message);
+    res.status(500).json({ error: 'Erreur lors de la suppression' });
+  }
+});
+
+// Récupérer les paramètres des avis (admin)
+app.get('/api/admin/reviews/settings', authenticateToken, async (req, res) => {
+  try {
+    const settings = await getSettings();
+    
+    const reviewSettings = {
+      autoApprove: settings.reviewAutoApprove || false,
+      requireOrder: settings.reviewRequireOrder !== false, // true par défaut
+      minRating: settings.reviewMinRating || 1,
+      maxReviews: settings.reviewMaxReviews || 50,
+      showOnHomepage: settings.reviewShowOnHomepage !== false // true par défaut
+    };
+    
+    res.json(reviewSettings);
+    
+  } catch (error) {
+    console.error('❌ Erreur récupération paramètres avis:', error.message);
+    res.status(500).json({ error: 'Erreur lors de la récupération des paramètres' });
+  }
+});
+
+// Mettre à jour les paramètres des avis (admin)
+app.put('/api/admin/reviews/settings', authenticateToken, async (req, res) => {
+  try {
+    const { autoApprove, requireOrder, minRating, maxReviews, showOnHomepage } = req.body;
+    
+    const settings = await getSettings();
+    
+    settings.reviewAutoApprove = autoApprove;
+    settings.reviewRequireOrder = requireOrder;
+    settings.reviewMinRating = minRating;
+    settings.reviewMaxReviews = maxReviews;
+    settings.reviewShowOnHomepage = showOnHomepage;
+    settings.updatedAt = new Date().toISOString();
+    
+    await saveSettings(settings);
+    
+    console.log('✓ Paramètres avis mis à jour');
+    
+    res.json({ 
+      success: true, 
+      message: 'Paramètres mis à jour avec succès',
+      settings: {
+        autoApprove,
+        requireOrder,
+        minRating,
+        maxReviews,
+        showOnHomepage
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur mise à jour paramètres avis:', error.message);
+    res.status(500).json({ error: 'Erreur lors de la mise à jour des paramètres' });
   }
 });
 

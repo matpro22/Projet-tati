@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donner votre avis - BackZo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #000;
+            color: #b8ff57;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 span {
+            color: #fff;
+        }
+
+        .header p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .order-info {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #b8ff57;
+        }
+
+        .order-info p {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .order-info strong {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .rating-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .star {
+            font-size: 48px;
+            cursor: pointer;
+            color: #ddd;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #ffd700;
+            transform: scale(1.1);
+        }
+
+        .rating-label {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+            margin-top: 10px;
+            min-height: 30px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 15px;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #b8ff57;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #b8ff57;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #b8ff57;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #a3e64a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(184, 255, 87, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #e6ffe6;
+            border-left: 4px solid #00cc00;
+            color: #006600;
+        }
+
+        .message.error {
+            background: #ffe6e6;
+            border-left: 4px solid #cc0000;
+            color: #660000;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+            background: #f5f5f5;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #b8ff57;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .char-count {
+            text-align: right;
+            color: #999;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>BACK<span>ZO</span></h1>
+            <p>Partagez votre expérience</p>
+        </div>
+
+        <div class="content">
+            <div class="message" id="message"></div>
+
+            <div class="order-info" id="orderInfo" style="display: none;">
+                <p><strong>Commande :</strong> <span id="orderIdDisplay"></span></p>
+            </div>
+
+            <form id="reviewForm">
+                <div class="form-group">
+                    <label>Votre nom (optionnel)</label>
+                    <input type="text" id="customerName" placeholder="Ex: Jean D.">
+                </div>
+
+                <div class="form-group">
+                    <label>Votre note <span style="color: #cc0000;">*</span></label>
+                    <div class="rating-container" id="ratingContainer">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                    </div>
+                    <div class="rating-label" id="ratingLabel">Cliquez sur les étoiles</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Votre commentaire (optionnel)</label>
+                    <textarea id="comment" placeholder="Partagez votre expérience avec BackZo..." maxlength="500"></textarea>
+                    <div class="char-count"><span id="charCount">0</span>/500</div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    ⭐ Envoyer mon avis
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #666;">Envoi en cours...</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>BackZo — Your Name Your Story</p>
+            <p style="margin-top: 5px;">www.backzo.eu</p>
+        </div>
+    </div>
+
+    <script>
+        // Récupérer les paramètres URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+        const email = urlParams.get('email');
+
+        let selectedRating = 0;
+
+        const ratingLabels = {
+            1: '⭐ Décevant',
+            2: '⭐⭐ Moyen',
+            3: '⭐⭐⭐ Bien',
+            4: '⭐⭐⭐⭐ Très bien',
+            5: '⭐⭐⭐⭐⭐ Excellent'
+        };
+
+        // Vérifier les paramètres
+        if (!orderId || !email) {
+            showMessage('Lien invalide. Veuillez utiliser le lien reçu par email.', 'error');
+            document.getElementById('reviewForm').style.display = 'none';
+        } else {
+            document.getElementById('orderInfo').style.display = 'block';
+            document.getElementById('orderIdDisplay').textContent = orderId;
+        }
+
+        // Gestion des étoiles
+        const stars = document.querySelectorAll('.star');
+        const ratingLabel = document.getElementById('ratingLabel');
+
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                selectedRating = parseInt(this.dataset.rating);
+                updateStars();
+                ratingLabel.textContent = ratingLabels[selectedRating];
+            });
+
+            star.addEventListener('mouseenter', function() {
+                const rating = parseInt(this.dataset.rating);
+                highlightStars(rating);
+            });
+        });
+
+        document.getElementById('ratingContainer').addEventListener('mouseleave', function() {
+            updateStars();
+        });
+
+        function highlightStars(rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function updateStars() {
+            highlightStars(selectedRating);
+            if (selectedRating > 0) {
+                ratingLabel.textContent = ratingLabels[selectedRating];
+            } else {
+                ratingLabel.textContent = 'Cliquez sur les étoiles';
+            }
+        }
+
+        // Compteur de caractères
+        const commentTextarea = document.getElementById('comment');
+        const charCount = document.getElementById('charCount');
+
+        commentTextarea.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+
+        // Soumission du formulaire
+        document.getElementById('reviewForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (selectedRating === 0) {
+                showMessage('Veuillez sélectionner une note.', 'error');
+                return;
+            }
+
+            const customerName = document.getElementById('customerName').value.trim();
+            const comment = document.getElementById('comment').value.trim();
+
+            // Afficher le loading
+            document.getElementById('reviewForm').style.display = 'none';
+            document.getElementById('loading').classList.add('show');
+
+            try {
+                const response = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        email: email,
+                        rating: selectedRating,
+                        comment: comment,
+                        customerName: customerName
+                    })
+                });
+
+                const data = await response.json();
+
+                document.getElementById('loading').classList.remove('show');
+
+                if (response.ok) {
+                    showMessage('✅ ' + data.message, 'success');
+                    document.getElementById('reviewForm').remove();
+                    
+                    // Rediriger vers la page d'accueil après 3 secondes
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
+                } else {
+                    showMessage('❌ ' + (data.error || 'Erreur lors de l\'envoi de l\'avis'), 'error');
+                    document.getElementById('reviewForm').style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('loading').classList.remove('show');
+                showMessage('❌ Erreur de connexion. Veuillez réessayer.', 'error');
+                document.getElementById('reviewForm').style.display = 'block';
+            }
+        });
+
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = 'message ' + type + ' show';
+        }
+    </script>
+</body>
+</html>
