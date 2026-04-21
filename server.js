@@ -417,7 +417,7 @@ async function sendOrderConfirmationEmail(order) {
 }
 
 // Fonction pour envoyer un email de mise à jour de statut
-async function sendOrderStatusUpdateEmail(order, newStatus, oldStatus) {
+async function sendOrderStatusUpdateEmail(order, newStatus, oldStatus, trackingNumber = null) {
   if (!emailTransporter) {
     throw new Error('Email non configuré');
   }
@@ -486,6 +486,17 @@ async function sendOrderStatusUpdateEmail(order, newStatus, oldStatus) {
           <div style="background: #e6f7ff; border-left: 4px solid #3399ff; padding: 15px; margin: 20px 0; border-radius: 4px;">
             <p style="margin: 0; color: #0066cc; font-size: 14px;">
               📍 <strong>Suivi de livraison :</strong> Votre colis devrait arriver sous 2-3 jours ouvrés.
+            </p>
+          </div>
+          ` : ''}
+          
+          ${newStatus === 'delivered' && trackingNumber ? `
+          <div style="background: #e6f7ff; border-left: 4px solid #3399ff; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0 0 10px; color: #0066cc; font-size: 14px;">
+              📦 <strong>Numéro de suivi :</strong>
+            </p>
+            <p style="margin: 0; color: #000; font-size: 18px; font-weight: bold; font-family: 'Courier New', monospace; background: #fff; padding: 10px; border-radius: 4px; text-align: center;">
+              ${trackingNumber}
             </p>
           </div>
           ` : ''}
@@ -1789,10 +1800,10 @@ app.get('/api/orders/:id', async (req, res) => {
 // Mettre à jour le statut d'une commande (admin)
 app.put('/api/orders/:id/status', authenticateToken, async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, trackingNumber } = req.body;
     const orderId = req.params.id;
     
-    console.log('📝 Mise à jour statut commande:', orderId, '→', status);
+    console.log('📝 Mise à jour statut commande:', orderId, '→', status, trackingNumber ? `(Suivi: ${trackingNumber})` : '');
     
     let order = null;
     let oldStatus = null;
@@ -1806,14 +1817,19 @@ app.put('/api/orders/:id/status', authenticateToken, async (req, res) => {
           oldStatus = oldOrder.status;
         }
         
+        const updateData = { 
+          status: status,
+          updatedAt: new Date().toISOString()
+        };
+        
+        // Ajouter le numéro de suivi si fourni
+        if (trackingNumber) {
+          updateData.trackingNumber = trackingNumber;
+        }
+        
         const result = await db.collection('orders').findOneAndUpdate(
           { id: orderId },
-          { 
-            $set: { 
-              status: status,
-              updatedAt: new Date().toISOString()
-            }
-          },
+          { $set: updateData },
           { returnDocument: 'after' }
         );
         
@@ -1847,6 +1863,11 @@ app.put('/api/orders/:id/status', authenticateToken, async (req, res) => {
       orders[index].status = status;
       orders[index].updatedAt = new Date().toISOString();
       
+      // Ajouter le numéro de suivi si fourni
+      if (trackingNumber) {
+        orders[index].trackingNumber = trackingNumber;
+      }
+      
       await writeData('orders', ORDERS_FILE, orders);
       order = orders[index];
       
@@ -1862,7 +1883,7 @@ app.put('/api/orders/:id/status', authenticateToken, async (req, res) => {
           newStatus: status,
           customerEmail: order.customer.email
         });
-        await sendOrderStatusUpdateEmail(order, status, oldStatus);
+        await sendOrderStatusUpdateEmail(order, status, oldStatus, trackingNumber);
         console.log('✓ Email de mise à jour envoyé au client:', order.customer.email);
       } catch (emailError) {
         console.warn('⚠️  Erreur envoi email de mise à jour:', emailError.message);

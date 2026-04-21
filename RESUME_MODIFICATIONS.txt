@@ -1,0 +1,114 @@
+╔════════════════════════════════════════════════════════════════╗
+║  SYSTÈME DE SUIVI DE LIVRAISON - BACKZO                       ║
+║  Version 1.1.0 - 21 Avril 2026                                ║
+╚════════════════════════════════════════════════════════════════╝
+
+📦 FONCTIONNALITÉ AJOUTÉE
+─────────────────────────────────────────────────────────────────
+Lorsqu'une commande est marquée "Livrée" dans le panel admin,
+une fenêtre demande le numéro de suivi qui est ensuite envoyé
+automatiquement au client par email.
+
+✅ FICHIERS MODIFIÉS
+─────────────────────────────────────────────────────────────────
+1. server.js
+   - Route /api/orders/:id/status accepte trackingNumber
+   - Fonction sendOrderStatusUpdateEmail mise à jour
+   - Email client inclut le numéro de suivi
+
+2. public/index.html
+   - Nouvelle modal showTrackingNumberModal()
+   - Fonction updateOrderStatus() détecte "delivered"
+   - Fonction updateOrderStatusOnBackend() envoie le numéro
+   - Affichage du numéro dans showOrderDetails()
+
+3. package.json
+   - Nouveau script: npm run test-tracking
+
+📄 FICHIERS CRÉÉS
+─────────────────────────────────────────────────────────────────
+1. SUIVI_LIVRAISON.md
+   → Documentation complète de la fonctionnalité
+
+2. GUIDE_SUIVI_RAPIDE.md
+   → Guide visuel rapide pour les utilisateurs
+
+3. CHANGELOG_SUIVI.md
+   → Historique détaillé des changements
+
+4. README_SUIVI.md
+   → Résumé et utilisation rapide
+
+5. DEPLOIEMENT_SUIVI.md
+   → Guide de déploiement et checklist
+
+6. test-tracking.js
+   → Script de test automatisé
+
+7. RESUME_MODIFICATIONS.txt
+   → Ce fichier
+
+🎯 UTILISATION
+─────────────────────────────────────────────────────────────────
+1. Panel Admin → Commandes
+2. Sélectionner "Livré" dans le menu déroulant
+3. Saisir le numéro de suivi (optionnel)
+4. Confirmer → Email envoyé automatiquement
+
+🧪 TEST
+─────────────────────────────────────────────────────────────────
+npm start                  # Démarrer le serveur
+npm run test-tracking      # Tester la fonctionnalité
+
+📧 EMAIL CLIENT
+─────────────────────────────────────────────────────────────────
+Le client reçoit :
+✓ Confirmation de livraison
+✓ Numéro de suivi (si fourni)
+✓ Lien pour laisser un avis
+
+💾 BASE DE DONNÉES
+─────────────────────────────────────────────────────────────────
+Nouveau champ ajouté automatiquement :
+{
+  "trackingNumber": "1Z999AA10123456784"
+}
+
+✨ CARACTÉRISTIQUES
+─────────────────────────────────────────────────────────────────
+✓ Numéro de suivi optionnel
+✓ Interface élégante et intuitive
+✓ Compatible MongoDB et JSON
+✓ Email automatique
+✓ Validation avec Entrée
+✓ Aucune migration nécessaire
+
+🚀 DÉPLOIEMENT
+─────────────────────────────────────────────────────────────────
+1. git add .
+2. git commit -m "feat: Ajout système de suivi"
+3. git push origin main
+4. Vercel déploie automatiquement
+
+📚 DOCUMENTATION
+─────────────────────────────────────────────────────────────────
+Guide Rapide    : GUIDE_SUIVI_RAPIDE.md
+Documentation   : SUIVI_LIVRAISON.md
+Changelog       : CHANGELOG_SUIVI.md
+Déploiement     : DEPLOIEMENT_SUIVI.md
+
+🔮 AMÉLIORATIONS FUTURES
+─────────────────────────────────────────────────────────────────
+□ Intégration API transporteurs
+□ Suivi en temps réel
+□ Notifications push
+□ Historique des statuts
+□ Lien vers site transporteur
+
+📞 SUPPORT
+─────────────────────────────────────────────────────────────────
+Email : team@backzo.eu
+
+═══════════════════════════════════════════════════════════════
+Développé avec ❤️ par Kiro AI Assistant
+═══════════════════════════════════════════════════════════════

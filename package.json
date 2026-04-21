@@ -11,7 +11,8 @@
     "test-email": "node test-email-config.js",
     "generate-secret": "node generate-jwt-secret.js",
     "test-auth": "node \"Fichier de test/test-auth-system.js\"",
-    "setup-auth": "node setup-admin-auth.js"
+    "setup-auth": "node setup-admin-auth.js",
+    "test-tracking": "node test-tracking.js"
   },
   "keywords": [
     "stripe",

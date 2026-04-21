@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="favico.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Désinscription Newsletter - BackZo</title>
     <style>
@@ -233,18 +234,27 @@
             <p style="font-size: 14px; color: #999;">
                 Nous sommes désolés de vous voir partir. Vous pouvez vous réinscrire à tout moment depuis notre site.
             </p>
-            <button class="btn btn-secondary" onclick="window.location.href='/'">
+            <button class="btn btn-secondary" onclick="location.href='https://backzo.eu'">
                 Retourner au site
             </button>
         </div>
 
         <div class="footer">
-            <p>BackZo — Flocage amovible premium</p>
+            <p>BackZo — Your Name Your Story</p>
             <p><a href="/">www.backzo.eu</a></p>
         </div>
     </div>
 
     <script>
+        // Déterminer l'URL de l'API backend (même logique que review.html)
+        const UNSUBSCRIBE_API_URL = typeof API_URL !== 'undefined' 
+            ? API_URL.replace('/api', '') // Enlever /api si présent
+            : (window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000'
+                : 'https://projet-tati.vercel.app');
+        
+        console.log('🔗 Unsubscribe API URL:', UNSUBSCRIBE_API_URL);
+        
         // Récupérer l'email depuis l'URL
         const urlParams = new URLSearchParams(window.location.search);
         const email = urlParams.get('email');
@@ -283,7 +293,7 @@
             document.getElementById('loading').classList.add('show');
 
             try {
-                const response = await fetch('/api/newsletter/unsubscribe', {
+                const response = await fetch(`${UNSUBSCRIBE_API_URL}/api/newsletter/unsubscribe`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

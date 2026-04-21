@@ -1,0 +1,61 @@
+=========================================
+SYSTÈME DE DÉSINSCRIPTION NEWSLETTER
+=========================================
+
+✅ CONFIGURATION TERMINÉE
+
+ARCHITECTURE
+------------
+Frontend : backzo.eu (héberge unsubscribe.html)
+Backend  : projet-tati.vercel.app (API Vercel)
+
+FICHIERS MODIFIÉS
+-----------------
+1. public/unsubscribe.html
+   → Page de désinscription avec détection auto du backend
+   → Même logique que review.html
+
+2. vercel.json
+   → Route ajoutée pour /unsubscribe
+
+3. NEWSLETTER_UNSUBSCRIBE.md
+   → Documentation complète mise à jour
+
+CONFIGURATION AUTOMATIQUE
+--------------------------
+La page détecte automatiquement l'URL du backend :
+- En local      : http://localhost:3000
+- En production : https://projet-tati.vercel.app
+
+FLUX DE DÉSINSCRIPTION
+----------------------
+1. Email newsletter contient : https://backzo.eu/unsubscribe?email=xxx
+2. Utilisateur clique sur le lien
+3. Page backzo.eu/unsubscribe.html se charge
+4. JavaScript détecte l'URL du backend
+5. Utilisateur confirme la désinscription
+6. AJAX POST vers projet-tati.vercel.app/api/newsletter/unsubscribe
+7. Backend met à jour MongoDB (unsubscribed: true)
+8. Message de succès affiché à l'utilisateur
+
+TESTS
+-----
+Local :
+  node test-unsubscribe.js
+  http://localhost:3000/unsubscribe?email=test@example.com
+
+Production :
+  https://backzo.eu/unsubscribe?email=test@example.com
+
+DÉPLOIEMENT
+-----------
+1. Déployer public/unsubscribe.html sur backzo.eu
+2. Le backend sur Vercel est déjà configuré
+3. Tester le lien de désinscription
+
+AUCUNE MODIFICATION DU RESTE DU CODE
+-------------------------------------
+Seul le système de désinscription a été ajouté/modifié.
+Le reste de l'application n'a pas été touché.
+
+=========================================
